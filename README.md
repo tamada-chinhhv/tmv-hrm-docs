@@ -12,6 +12,7 @@
 > 対象: HRM システム利用者・管理者  
 > 対象範囲: FE `tmv-hrm`, BE `tmv-hrm-be`
 > Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)
+> 問題報告: [https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new](https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new)
 
 ---
 

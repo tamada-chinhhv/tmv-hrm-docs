@@ -12,6 +12,7 @@
 > Audience: HRM customers and end users  
 > Scope: FE `tmv-hrm`, BE `tmv-hrm-be`
 > Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)
+> Report issues when needed: [https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new](https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new)
 
 ---
 

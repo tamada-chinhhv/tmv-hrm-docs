@@ -12,6 +12,7 @@
 > Đối tượng: Khách hàng sử dụng hệ thống HRM  
 > Phạm vi: FE `tmv-hrm`, BE `tmv-hrm-be`
 > Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)
+> Báo lỗi khi cần: [https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new](https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new)
 
 ---
 
