@@ -8,10 +8,10 @@
 
 # Web HRM User Guide
 
-> Version: 1.0  
-> Audience: HRM customers and end users  
-> Scope: FE `tmv-hrm`, BE `tmv-hrm-be`
-> Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)
+> Version: 1.0<br/>
+> Audience: HRM customers and end users<br/>
+> Scope: FE `tmv-hrm`, BE `tmv-hrm-be`<br/>
+> Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)<br/>
 > Report issues when needed: [https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new](https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new)
 
 ---

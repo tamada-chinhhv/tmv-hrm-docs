@@ -8,10 +8,10 @@
 
 # Tài liệu Hướng dẫn Sử dụng Hệ thống Web HRM
 
-> Phiên bản: 1.0  
-> Đối tượng: Khách hàng sử dụng hệ thống HRM  
-> Phạm vi: FE `tmv-hrm`, BE `tmv-hrm-be`
-> Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)
+> Phiên bản: 1.0<br/>
+> Đối tượng: Khách hàng sử dụng hệ thống HRM<br/>
+> Phạm vi: FE `tmv-hrm`, BE `tmv-hrm-be`<br/>
+> Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)<br/>
 > Báo lỗi khi cần: [https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new](https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new)
 
 ---
