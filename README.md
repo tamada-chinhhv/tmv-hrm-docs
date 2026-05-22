@@ -8,32 +8,85 @@
 
 # Web HRM 利用ガイド
 
-> バージョン: 1.0<br/>
-> 対象: HRM システム利用者・管理者<br/>
-> 対象範囲: FE `tmv-hrm`, BE `tmv-hrm-be`<br/>
-> Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)<br/>
+> バージョン: 2.0  
+> 対象: HRM システム利用者・管理者  
+> 対象範囲: FE `tmv-hrm`, BE `tmv-hrm-be`  
+> Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)  
 > 問題報告: [https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new](https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new)
 
 ---
 
-## 1. 本ドキュメントの目的
+## クイックスタート（Quick Start）
 
-本ドキュメントは、Web HRM システムを実運用するための手順を説明します。主な対象は以下です。
+HRM を初めて使う場合は、次の 5 ステップを順に実行してください。
 
-- 組織管理（従業員、部署、役職）
-- 勤怠、休暇申請、承認
-- 給与管理と個人所得税（PIT）設定
-- システム設定（ロール、権限、休日、拠点位置）
+1. **ブラウザを開き** [https://hrm.tamada.vn/login](https://hrm.tamada.vn/login) にアクセスする。
+2. **ログイン** — HR から渡された Username と Password（初期パスワードは多くの場合 Username と同じ）。
+3. **パスワード変更**（推奨）— 画面上部の自分の名前 → **Change password**。
+4. **勤怠打刻** — メニュー **Attendance & Time** → **Attendance** → **Check in** / **Check out**（ブラウザの位置情報を許可）。
+5. **個人カレンダー** — メニュー **Calendar** → 自分の列を選択 → 空き時間をクリックして会議を作成（必要な場合）。
 
-## 2. 利用ロール
+**期待される結果:** ログインでき、権限に応じたメニューが表示され、打刻とカレンダーの基本操作ができる。
 
-| ロール | 主な利用内容 |
-|---|---|
-| Admin/HR | システム設定、人事マスタ管理、休暇承認、給与運用 |
-| Manager | 休暇承認、勤怠モニタリング（付与権限に応じる） |
-| Employee | 打刻、休暇申請、自身の勤怠・給与確認 |
+---
 
-## 3. 業務フロー概要（図）
+## 目次
+
+1. [HRM システムの概要](#1-hrm-システムの概要)
+2. [利用前の要件](#2-利用前の要件)
+3. [アカウントとログイン](#3-アカウントとログイン)
+4. [従業員管理](#4-従業員管理)
+5. [カレンダーとスケジュール](#5-カレンダーとスケジュール)
+6. [ロールと権限](#6-ロールと権限)
+7. [機能別ガイド](#7-機能別ガイド)
+8. [勤怠](#8-勤怠)
+9. [休暇申請](#9-休暇申請)
+10. [勤怠・休暇レポート](#10-勤怠休暇レポート)
+11. [推奨運用手順](#11-推奨運用手順)
+12. [よくある質問（FAQ）](#12-よくある質問faq)
+13. [引き渡しチェックリスト](#13-引き渡しチェックリスト)
+
+---
+
+## 1. HRM システムの概要
+
+### 1.1 HRM とは
+
+**HRM**（Human Resource Management＝人事管理）は、従業員情報・勤怠・休暇・給与・会議スケジュール・システム設定を一つの Web システムで扱うためのツールです。
+
+主な用途:
+
+- 出退勤の記録（Check in / Check out）
+- 休暇申請の作成と承認
+- 従業員・部署・役職の管理
+- 会議の予定作成と参加者招待
+- 給与明細の参照・計算（権限による）
+- 休日・打刻拠点・ロールの設定（管理者向け）
+
+### 1.2 利用者
+
+| 利用者 | システム上の位置づけ | 主な作業 |
+|--------|---------------------|----------|
+| **管理者 / HR** | `ADMIN` または十分な管理権限 | 従業員作成、権限付与、休日・拠点設定、給与運用 |
+| **マネージャー** | `EMPLOYEE_VIEW` があり部下（`manager`）がいる | チーム勤怠の確認、休暇承認（`LEAVE_APPROVE` がある場合） |
+| **一般従業員** | `EMPLOYEE` ロール（割り当て時） | 打刻、休暇申請、自分の給与確認、会議参加 |
+
+> **補足:** 各従業員には **1 つのロール** が紐づきます。メニューや操作可否は、そのロールに付与された **permission（権限コード）** で決まります。
+
+### 1.3 主なモジュール
+
+| メニュー | 機能 | URL |
+|----------|------|-----|
+| **Overview** | ダッシュボード | `/dashboard` |
+| **Calendar** | 複数従業員の会議カレンダー | `/calendar` |
+| **Organization** | Employees, Departments, Positions | `/employees`, `/departments`, `/positions` |
+| **Attendance & Time** | Attendance, Attendance Tracking, Leave Requests, Leave Approvals | `/attendance`, `/attendance-tracking`, `/leave`, `/leave-approvals` |
+| **Payroll** | 給与明細・税設定 | `/payroll` |
+| **System Settings** | Holiday Configuration, Office Locations, Roles, Permission Assignment | `/attendance/holidays`, `/attendance/locations`, `/roles`, `/roles/assign` |
+
+メニューは **権限に応じて表示** されます。項目が見えない場合は [セクション 6](#6-ロールと権限) を参照してください。
+
+### 1.4 業務フロー概要
 
 ```mermaid
 flowchart LR
@@ -44,162 +97,446 @@ flowchart LR
   D --> E
   E --> F[勤怠締め]
   F --> G[給与計算]
-  G --> H[給与明細確認]
+  G --> H[給与明細]
+  A --> I[会議]
 ```
 
-## 4. ログインとセキュリティ
+---
 
-### 4.1 ログイン
-1. HRM の URL にアクセスします。
-2. `Username` と `Password` を入力します。
-3. `Login` をクリックします。
+## 2. 利用前の要件
 
-### 4.2 パスワード変更
-1. `Change password` を開きます。
-2. 現在のパスワード、新しいパスワード、確認用パスワードを入力します。
-3. `Update password` をクリックします。
+### 2.1 対応ブラウザ
 
-### 4.3 ログアウト
-- 画面の `Logout` をクリックします。
+**最新版に近い** ブラウザを使用してください（PC・スマートフォン）。
 
-## 5. メニュー構成
+| ブラウザ | 推奨 |
+|----------|:----:|
+| Google Chrome | ○ |
+| Microsoft Edge | ○ |
+| Mozilla Firefox | ○ |
+| Safari | ○ |
 
-- **Overview**
-- **Organization**
-  - Employees
-  - Departments
-  - Positions
-- **Attendance & Time**
-  - Attendance
-  - Attendance Tracking
-  - Leave Requests
-  - Leave Approvals
-- **Payroll**
-- **System Settings**
-  - Holiday Configuration
-  - Office Locations
-  - Roles
-  - Permission Assignment
+**位置情報による打刻:** ブラウザの **Location（位置情報）** 許可が必要です。拒否するとオフィス範囲内の打刻ができません。
 
-## 6. 機能別利用ガイド
+### 2.2 必要なアクセス
 
-### 6.1 Overview
-- 勤怠状況、人員指標、休暇状況をダッシュボードで確認します。
+| 要件 | 説明 |
+|------|------|
+| **HRM アカウント** | HR/Admin が従業員登録時に作成 |
+| **Username / Password** | 初回は HR/IT から配布 |
+| **ロールと権限** | メニューと操作範囲を決定 |
+| **ネットワーク** | 下記 URL に到達できること |
 
-### 6.2 Employees
-- 従業員一覧、追加/更新/削除（権限ベース）。
-- パスワードリセット。
-- `My Profile` 更新。
+新規従業員は **自己登録不可** — 事前に HR がプロフィールを作成する必要があります。
 
-### 6.3 Departments
-- 部署ツリー（親子構造）管理。
-- 部署の追加/更新/削除。
+### 2.3 ログイン URL
 
-### 6.4 Positions
-- 部署ごとの役職管理。
-- `Level` は値が小さいほど上位（`1` が最上位）。
+| 環境 | URL |
+|------|-----|
+| **本番** | [https://hrm.tamada.vn/](https://hrm.tamada.vn/) |
+| **ログイン画面** | [https://hrm.tamada.vn/login](https://hrm.tamada.vn/login) |
 
-### 6.5 Attendance
-- 位置情報（ジオフェンス）による打刻。
-- 月次勤怠サマリー。
-- 手動時刻修正（権限がある場合）。
+ログイン成功後は **Attendance**（`/attendance`）または、ログイン前に開こうとしていたページへ遷移します。
 
-```mermaid
-flowchart TD
-  A[チェックイン/チェックアウトを押下] --> B{位置情報権限あり?}
-  B -- いいえ --> C[位置情報の許可を案内]
-  B -- はい --> D{拠点半径内か?}
-  D -- いいえ --> E[打刻拒否]
-  D -- はい --> F[打刻記録成功]
-```
+---
 
-### 6.6 Attendance Tracking
-- 従業員検索、月次詳細確認、Excel 出力。
+## 3. アカウントとログイン
 
-| 記号 | 意味 |
-|---|---|
-| `1 / 8h` | 出勤 |
-| `W` | 週末 |
-| `H` | 祝日 |
-| `A` | 欠勤 |
-| `PL, SL, UL...` | 休暇種別 |
-| `F` | 打刻漏れ |
-| `-` | 未来日/未計算 |
+### 3.1 ログイン手順
 
-### 6.7 Leave Requests
-- 休暇申請の作成。
-- 承認前は編集/削除可能。
-- ステータス: `PENDING` / `APPROVED` / `REJECTED`。
+1. ブラウザを開く。
+2. **https://hrm.tamada.vn/login** にアクセス。
+3. フォームに入力:
+   - **Username** — メールや従業員コード（`EMP001` 等）ではありません。
+   - **Password** — 目のアイコンで表示/非表示を切り替え可能。
+4. **Login** をクリック。
+5. 成功するとメイン画面（多くは Attendance）へ。失敗時はフォーム上にエラー表示。
 
-### 6.8 Leave Approvals
-- 承認者が申請を確認し、承認/却下を実施。
+**ログインフォームの項目:**
 
-```mermaid
-flowchart LR
-  A[従業員が申請作成] --> B[状態: PENDING]
-  B --> C{承認者の判断}
-  C -->|承認| D[状態: APPROVED]
-  C -->|却下| E[状態: REJECTED]
-```
+| 項目 | 説明 |
+|------|------|
+| **Username** | 必須 |
+| **Password** | 必須（ログイン時は最低 6 文字） |
+| **Login** | 送信 |
+| 言語切替 | 画面上部 |
 
-### 6.9 Payroll
-- Admin/HR: 給与項目管理、PIT 設定、明細作成/再計算、Excel 入出力。
-- Employee: 自身の給与明細確認。
+**フォームにないもの:** メール欄、「Forgot password」、ログイン状態の保持。
 
-```mermaid
-flowchart TD
-  A[勤怠データ締め] --> B[休暇データ確認]
-  B --> C[従業員データ更新]
-  C --> D[給与明細作成/再計算]
-  D --> E[BHXH/BHYT/BHTN/PIT 確認]
-  E --> F[給与締め]
-```
+### 3.2 Username の自動生成ルール
 
-### 6.10 Office Locations
-- 打刻拠点の追加/更新/削除。
-- 緯度・経度・許容半径を設定。
+従業員 **新規作成** 時、**氏名（Full name）** から Username を提案します（メール・従業員コードは使用しません）。
 
-### 6.11 Holiday Configuration
-- 週次固定休日の設定。
-- 期間指定の祝日設定。
+**処理手順:**
 
-### 6.12 Roles and Permissions
-- ロール管理（`ADMIN`, `HR_MANAGER`, `EMPLOYEE` など）。
-- 権限付与により表示メニューと操作可能範囲を制御。
+1. 前後の空白を除去
+2. **小文字** に変換（大文字小文字は区別しません）
+3. ベトナム語などの **発音記号を除去**（**đ** → **d**）
+4. `a–z`, `0–9` 以外を削除
 
-## 7. 推奨運用手順
+**例:**
 
-### 7.1 初期設定
-1. 部署、役職、拠点、休日を設定。
-2. ロールと権限を設定。
-3. 従業員アカウントを作成し所属を設定。
+| 氏名 | 提案 Username |
+|------|---------------|
+| Nguyễn Văn An | `nguyenvanan` |
+| Trần Thị Lan | `tranthilan` |
+| Lê Văn Đức | `levanduc` |
 
-### 7.2 日次運用
-1. 打刻。
-2. 休暇申請/承認。
-3. 例外データの確認・対応。
+**従業員コード**（`EMP001` …）は保存時に自動採番 — ログインには使用しません。
 
-### 7.3 月次運用
-1. 勤怠期間締め。
-2. 給与/税パラメータ更新（必要時）。
-3. 給与計算と照合。
+#### Username が既に存在する場合
 
-## 8. よくある問題
+**自動で末尾に数字は付きません**（`nguyenvanan1` 等は生成されない）。
 
-| 問題 | 対応 |
-|---|---|
-| ログインできない | 資格情報確認、必要時パスワードリセット |
-| 打刻できない | 位置情報権限とジオフェンス範囲を確認 |
-| メニューが表示されない | ロール/権限を確認 |
-| 申請/承認できない | `LEAVE_VIEW` / `LEAVE_APPROVE` 権限を確認 |
-| 給与データが不正 | 勤怠・休暇・扶養人数・PIT 設定を確認 |
+- 保存時に重複 → **Username "…" already exists**
+- HR が手動で Username を変更してから保存（例: `nguyenvanan2`）
 
-## 9. 引き渡しチェックリスト
+#### 制限
 
-- [ ] 初期アカウント一覧の引き渡し
-- [ ] 権限運用フローの引き渡し
-- [ ] バックアップ手順の引き渡し
-- [ ] サポート窓口と SLA の引き渡し
-- [ ] デフォルトパスワード変更の確認
+| ルール | 内容 |
+|--------|------|
+| 長さ | 1〜50 文字 |
+| 使用可能文字 | 正規化後は `a–z`, `0–9` のみ |
+| 大文字小文字 | 区別しない（小文字で保存） |
+| 作成後の変更 | **不可** |
 
-> 推奨: 本番稼働前にすべてのデフォルトパスワードを変更してください。
+### 3.3 初期パスワード
+
+| 質問 | 回答 |
+|------|------|
+| 初期パスワードは？ | **Username と同じ** |
+| 生成ルール | 作成時に別パスワードを入力しなければ Username を使用 |
+| 初回ログイン時の強制変更 | **なし** |
+| 開発用 seed | `admin` / `admin123` — 本番では直ちに変更 |
+
+### 3.4 パスワード変更
+
+1. 画面上部の自分の名前 → **Change password**
+2. 現在のパスワード、新しいパスワード、確認を入力
+3. **Update password**
+
+**新パスワード条件:** 8 文字以上、大文字・小文字・数字・記号を各 1 文字以上（例: `Abcdef1!`）。
+
+### 3.5 パスワードを忘れた場合
+
+ログイン画面に **Forgot password** はありません。
+
+| 担当 | 対応 |
+|------|------|
+| HR/Admin（`EMPLOYEE_UPDATE`） | 従業員詳細 → **Reset password** → Username と同じ値に戻る |
+| 従業員 | HR/IT に連絡 |
+
+### 3.6 ログアウト
+
+名前メニュー → **Logout** → 確認。
+
+---
+
+## 4. 従業員管理
+
+> `EMPLOYEE_CREATE` / `UPDATE` / `DELETE` を持つ HR/Admin 向け。
+
+### 4.1 新規従業員作成手順
+
+1. 作成権限のあるアカウントでログイン
+2. **Organization** → **Employees**
+3. **Add employee**
+4. フォーム入力（下表）
+5. **Username** を確認（氏名から自動 — 保存前に編集可）
+6. **Role** を選択（未選択の場合はロール未割当）
+7. **Save** / **Create**
+8. 一覧に戻る — 従業員コード `EMP…` が自動採番
+
+#### フォーム項目
+
+| 項目 | 必須 | 備考 |
+|------|:----:|------|
+| Full name | ○ | 最大 100 文字 |
+| Email | — | 重複不可 |
+| Hire date | ○ | 既定は当日、**YYYY-MM-DD** |
+| Username | ○ | 氏名から自動、保存前のみ編集可 |
+| Role | — | `ADMIN`, `EMPLOYEE` 等 |
+| Employment status | — | 既定 **ACTIVE** |
+
+> **注意:** 日付は DatePicker で選択し、DB には **YYYY-MM-DD** で保存されます。
+
+> **注意:** Username は作成後 **変更できません**。
+
+### 4.2 作成時の自動処理
+
+| 項目 | 動作 |
+|------|------|
+| 従業員コード | `EMP001`, `EMP002`, … |
+| Username | [3.2](#32-username-の自動生成ルール) 参照 |
+| Password | Username と同じ（ハッシュ保存） |
+| メール通知 | **送信しない** |
+| 既定ロール | 未選択時は **未割当** — 一般社員には `EMPLOYEE` を推奨 |
+
+### 4.3 よくあるエラー
+
+| エラー | 対処 |
+|--------|------|
+| Username already exists | Username を手動変更 |
+| Email already exists | 別メールまたは空欄 |
+| Insufficient permissions | Admin に権限付与を依頼 |
+
+### 4.4 作成後の編集
+
+**Organization** → **Employees** → 対象者 → **Edit**（Username はロック）。
+
+**My Profile:** 個人情報の一部のみ編集可。
+
+**Reset password:** 詳細画面 → **Reset password** → Username と同じ値に戻る。
+
+### 4.5 退職時
+
+**TERMINATED** / **INACTIVE** に変更することを推奨。**Delete** は DB から完全削除されます。
+
+---
+
+## 5. カレンダーとスケジュール
+
+### 5.1 概要
+
+**Calendar** は従業員間の **会議・イベント** 予定用です。忙しい時間の確認、会議作成、参加者招待、変更通知ができます。
+
+**混同しないもの:** Attendance Tracking の月次グリッド、Holiday Configuration。
+
+**表示:** 時間グリッド上は主に **会議** のみ（凡例の Leave/Holiday は参考表示）。
+
+### 5.2 カレンダーの見方
+
+1. **Calendar** → `/calendar`
+2. 表示する従業員を選択（既定は自分）
+3. 従業員ごとに **列** — 主催者または参加者の列にイベント表示
+
+| 表示 | 説明 |
+|------|------|
+| **Week** | 既定 |
+| **Day** | 1 日表示 |
+| **Month** | **未実装** |
+
+**色:** 列ごとに色分け。イベント枠は **主催者** の色。
+
+### 5.3 会議の作成
+
+- **自分の列** の空きスロットのみクリックして作成可能
+- **Title** 必須、**Participants** に自分を含める
+- **Organizer** は常に **自分**
+
+### 5.4 繰り返し
+
+| モード | 内容 |
+|--------|------|
+| Working days | 稼働日（会社休日設定を除く） |
+| Weekly weekdays | 指定曜日 |
+| Selected dates | 日付を個別選択 |
+
+約 **12 週間** 分の occurrence を生成（終了日なしの場合は拡張あり）。
+
+### 5.5 権限
+
+| 役割 | 編集/削除 | Leave meeting |
+|------|-----------|---------------|
+| **Organizer（主催者）** | 可 | 不可（削除でキャンセル） |
+| **Participant（参加者）** | 不可 | 可（理由必須） |
+| **Admin** | 他人の会議は **不可**（organizer ルールは Admin でも例外なし） |
+
+**設計理由:** 会議の内容は作成者のみが変更すべき。参加者は「参加辞退」で対応。全員が他人のカレンダーを **閲覧** できるのは、会議調整のため。
+
+### 5.6 通知
+
+| タイミング | 通知先 |
+|------------|--------|
+| 招待 | 参加者 |
+| 参加者削除 | 削除された人 |
+| Leave meeting | 主催者 |
+| 削除（1件/シリーズ） | 残りの参加者 |
+
+画面上部の **ベル** アイコン。Web Push はサーバー設定次第。
+
+**リマインダー（15 分前など）:** **未対応**。
+
+### 5.7 操作まとめ
+
+| 操作 | 方法 |
+|------|------|
+| 詳細 | イベントをクリック |
+| 編集 | 詳細 → **Edit**（主催者のみ） |
+| 削除 | 詳細 → **Delete**（1件 or シリーズ） |
+| 辞退 | 詳細 → **Leave meeting** → 理由入力 |
+
+---
+
+## 6. ロールと権限
+
+### 6.1 組み込みロール
+
+| コード | 名称 | 用途 |
+|--------|------|------|
+| `ADMIN` | Administrator | 全権限 |
+| `HR_MANAGER` | HR Manager | seed では権限未割当 — Admin が Assignment で付与 |
+| `EMPLOYEE` | Employee | 打刻・休暇閲覧・自分の給与 |
+
+1 従業員につき **1 ロール** のみ。
+
+### 6.2 権限マトリクス（参考）
+
+| 機能 | Admin | HR* | Manager | Employee |
+|------|:-----:|:---:|:-------:|:--------:|
+| 従業員作成 | ○ | ○* | × | × |
+| 全社員閲覧 | ○ | ○* | × | × |
+| チーム閲覧 | ○ | ○* | ○*** | × |
+| 他人の会議編集 | ×**** | ×**** | ×**** | ×**** |
+| 自分の会議編集 | ○ | ○ | ○ | ○ |
+| 他人のカレンダー閲覧 | ○ | ○ | ○ | ○ |
+| 休暇承認 | ○ | ○* | ○***** | × |
+
+\* 該当 permission が必要。  
+\*** `EMPLOYEE_VIEW` + 部下ツリー。  
+\**** organizer のみ編集可。  
+\***** `LEAVE_APPROVE` が必要。
+
+### 6.3 スコープ
+
+- **Admin:** 全従業員
+- **Manager:** `managerId` の部下ツリーのみ
+- **一般:** 一覧 API は自分のみ。Calendar の directory は会議招待用に全員検索可
+
+### 6.4 ロール割当
+
+**Organization** → **Employees** → Role フィールド。  
+権限の細かい設定は **System Settings** → **Permission Assignment**（`/roles/assign`）。
+
+### 6.5 権限コード一覧
+
+`EMPLOYEE_VIEW`, `EMPLOYEE_CREATE`, `EMPLOYEE_UPDATE`, `EMPLOYEE_DELETE`, `ATTENDANCE_VIEW`, `ATTENDANCE_MANAGE`, `ATTENDANCE_MANUAL_UPDATE`, `LOCATION_VIEW`, `LEAVE_VIEW`, `LEAVE_APPROVE`, `PAYROLL_VIEW`, `PAYROLL_MANAGE`, `DEPARTMENT_VIEW`, `DEPARTMENT_MANAGE`, `POSITION_VIEW`, `POSITION_MANAGE`, `ROLE_VIEW`, `ROLE_MANAGE`, `HOLIDAY_CONFIG_VIEW`, `HOLIDAY_CONFIG_EDIT`
+
+---
+
+## 7. 機能別ガイド
+
+### 7.1 Overview
+
+ダッシュボード指標（一部は `EMPLOYEE_VIEW` / `LEAVE_VIEW` が必要）。
+
+### 7.2 Departments / Positions
+
+部署は親子ツリー。Position の **Level** は数値が小さいほど上位。
+
+### 7.3 Attendance
+
+GPS ジオフェンス内での Check in/out。位置情報許可が必要。
+
+### 7.4 Attendance Tracking
+
+記号: `1/8h` 出勤, `W` 週末, `H` 祝日, `A` 欠勤, `F` 打刻漏れ, 等。
+
+### 7.5 Leave / Approvals
+
+`LEAVE_VIEW` で申請、`LEAVE_APPROVE` で承認。
+
+### 7.6 Payroll
+
+`PAYROLL_VIEW` 閲覧、`PAYROLL_MANAGE` 管理・再計算。
+
+### 7.7 System Settings
+
+Holiday Configuration, Office Locations, Roles, Permission Assignment。
+
+---
+
+## 8. 勤怠
+
+- **Web のみ**（Check in/out + GPS）。ハードウェア連携なし。
+- タイムゾーン: **`Asia/Ho_Chi_Minh`**
+- 状態: check-in〜check-out が **9時間以上** → **WORK**、未満 → **LATE_EARLY**（8:00遅刻15分ではなく **総労働時間**）
+- **シフト/ロスター機能なし**（[VI 版 8.7](README.vi.md#87-ca-làm-việc--lịch-làm-việc-task-09) 参照）
+- 手動修正: `ATTENDANCE_MANUAL_UPDATE`、監査ログなし
+- エクスポート: **Excel .xlsx** のみ（Attendance Tracking）
+
+## 9. 休暇申請
+
+- 種別: `PAID_LEAVE`（残日数減算）、`SICK_LEAVE`、`UNPAID_LEAVE`、`LATE_ARRIVAL`、`EARLY_DEPARTURE`、`REMOTE_WORK`、`ATTENDANCE_CORRECTION`、`HIEU_HI`
+- 承認: **1名の Approver** のみ（連鎖承認・代理承認なし）
+- 添付ファイル・半日0.5減算・年次繰越: **未実装**
+- 状態: `PENDING` → `APPROVED` / `REJECTED`（`CANCELLED` なし）
+
+## 10. 勤怠・休暇レポート
+
+- Attendance Tracking + Excel 出力
+- 月次ロック/フリーズ: **未実装**（運用で締め）
+
+---
+
+## 11. 推奨運用手順
+
+### 11.1 初期設定
+
+部署・役職・拠点・休日 → ロール/権限 → 従業員作成 → 認証情報の配布 → パスワード変更の依頼。
+
+### 11.2 日次
+
+打刻、休暇申請/承認、Calendar で会議調整。
+
+### 11.3 月次
+
+勤怠締め、給与パラメータ更新、給与計算と照合。
+
+---
+
+## 12. よくある質問（FAQ）
+
+### 9.1 アカウント
+
+**パスワードを忘れた** → ログイン画面からは復旧不可。HR/IT に **Reset password** を依頼（Username と同じ値に戻る）。
+
+**アカウントロック** → 専用機能なし。Username の確認、HR による reset、IT への連絡。連絡先: HR _[メール/電話]_, IT _[メール/電話]_（要記入）。
+
+**Username の変更** → **不可**（作成後）。
+
+### 9.2 従業員
+
+**作成後にメールが来ない** → 仕様（自動送信なし）。HR が手動で連絡。
+
+**削除するとデータは？** → DB から削除。退職時はステータス変更を推奨。
+
+### 9.3 カレンダー
+
+**参加者に見えない** → 参加者リスト、列・週の選択、Leave 済みかを確認。ベル通知も確認。
+
+**削除時の通知** → 参加者に通知あり。
+
+**招待を断る** → **Leave meeting** + 理由。
+
+### 9.4 エラー
+
+| エラー | 対処 |
+|--------|------|
+| Username already exists | 保存前に Username 変更 |
+| Insufficient permissions | セクション 6、Admin に連絡 |
+| Only the event organizer can modify | 主催者に依頼、または Leave meeting |
+
+### 9.5 サポート
+
+| 種別 | 連絡先（社内で記入） |
+|------|---------------------|
+| HR | _[メール/電話]_ |
+| IT | _[メール/電話]_ |
+| 不具合報告 | [GitHub Issues](https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new) |
+
+---
+
+## 13. 引き渡しチェックリスト
+
+- [ ] 初期アカウント一覧（Username, ロール）
+- [ ] 権限付与フロー
+- [ ] 打刻・GPS ガイド
+- [ ] パスワード reset 手順
+- [ ] 退職時手順（削除よりステータス変更）
+- [ ] HR/IT 窓口と SLA
+- [ ] **既定パスワード（= Username）の一括変更**
+
+---
+
+*ドキュメント バージョン 2.0 — `tmv-hrm` / `tmv-hrm-be` と同期。最終更新: 2026。*

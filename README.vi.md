@@ -8,32 +8,85 @@
 
 # Tài liệu Hướng dẫn Sử dụng Hệ thống Web HRM
 
-> Phiên bản: 1.0<br/>
-> Đối tượng: Khách hàng sử dụng hệ thống HRM<br/>
-> Phạm vi: FE `tmv-hrm`, BE `tmv-hrm-be`<br/>
-> Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)<br/>
+> Phiên bản: 1.0.1  
+> Đối tượng: Người dùng cuối và quản trị viên HRM  
+> Phạm vi: FE `tmv-hrm`, BE `tmv-hrm-be`  
+> Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)  
 > Báo lỗi khi cần: [https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new](https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new)
 
 ---
 
-## 1. Mục tiêu tài liệu
+## Bắt đầu nhanh (Quick Start)
 
-Tài liệu này hướng dẫn người dùng cuối và quản trị viên vận hành hệ thống Web HRM theo quy trình chuẩn, bao gồm:
+Nếu bạn lần đầu dùng HRM, làm lần lượt 5 bước sau:
 
-- Quản lý nhân sự (Nhân viên, Phòng ban, Chức vụ)
-- Chấm công, nghỉ phép, duyệt đơn
-- Quản lý lương và cấu hình thuế
-- Cấu hình hệ thống (Vai trò, phân quyền, ngày nghỉ, vị trí chấm công)
+1. **Mở trình duyệt** và truy cập [https://hrm.tamada.vn/login](https://hrm.tamada.vn/login).
+2. **Đăng nhập** bằng tên đăng nhập và mật khẩu do HR cấp (mật khẩu mặc định thường trùng với tên đăng nhập).
+3. **Đổi mật khẩu** (khuyến nghị): bấm tên của bạn ở góc trên → **Đổi mật khẩu**.
+4. **Chấm công**: menu **Chấm công & Thời gian** → **Chấm công** → bấm **Chấm công vào** / **Chấm công ra** (cần bật quyền vị trí trên trình duyệt).
+5. **Xem lịch cá nhân**: menu **Lịch** → chọn cột của bạn → bấm khung giờ trống để tạo cuộc họp (nếu cần).
 
-## 2. Đối tượng sử dụng
+**Kết quả mong đợi:** Bạn đăng nhập được, thấy menu phù hợp với quyền của mình, chấm công và xem lịch cơ bản.
 
-| Vai trò | Mục đích sử dụng chính |
-|---|---|
-| Admin/HR | Cấu hình hệ thống, quản trị dữ liệu nhân sự, duyệt đơn, quản lý lương |
-| Quản lý | Duyệt đơn nghỉ phép, theo dõi chấm công theo phạm vi được cấp quyền |
-| Nhân viên | Chấm công, tạo đơn nghỉ phép, xem chấm công và bảng lương cá nhân |
+---
 
-## 3. Sơ đồ tổng quan nghiệp vụ (minh họa)
+## Mục lục
+
+1. [Giới thiệu hệ thống HRM](#1-giới-thiệu-hệ-thống-hrm)
+2. [Yêu cầu trước khi sử dụng](#2-yêu-cầu-trước-khi-sử-dụng)
+3. [Tài khoản & Đăng nhập](#3-tài-khoản--đăng-nhập)
+4. [Quản lý nhân viên](#4-quản-lý-nhân-viên)
+5. [Lịch & Lịch trình](#5-lịch--lịch-trình)
+6. [Phân quyền & Vai trò](#6-phân-quyền--vai-trò)
+7. [Hướng dẫn theo từng phân hệ](#7-hướng-dẫn-theo-từng-phân-hệ)
+8. [Chấm công](#8-chấm-công)
+9. [Đơn xin phép](#9-đơn-xin-phép)
+10. [Báo cáo chấm công & nghỉ phép](#10-báo-cáo-chấm-công--nghỉ-phép)
+11. [Quy trình vận hành đề xuất](#11-quy-trình-vận-hành-đề-xuất)
+12. [Câu hỏi thường gặp (FAQ)](#12-câu-hỏi-thường-gặp-faq)
+13. [Checklist bàn giao](#13-checklist-bàn-giao)
+
+---
+
+## 1. Giới thiệu hệ thống HRM
+
+### 1.1 HRM là gì?
+
+**HRM** (Human Resource Management — Quản lý nhân sự) là hệ thống web giúp công ty quản lý nhân sự và các công việc liên quan trên một nền tảng thống nhất: hồ sơ nhân viên, chấm công, nghỉ phép, lương, lịch họp và cấu hình hệ thống.
+
+Bạn dùng HRM để:
+
+- Ghi nhận giờ làm việc (chấm công vào/ra).
+- Tạo và duyệt đơn xin nghỉ phép.
+- Xem và quản lý thông tin nhân viên, phòng ban, chức vụ.
+- Lên lịch cuộc họp, mời đồng nghiệp tham gia.
+- Tính và xem phiếu lương (theo quyền).
+- Cấu hình ngày nghỉ, vị trí chấm công, nhóm quyền (dành cho quản trị).
+
+### 1.2 Ai sẽ dùng hệ thống?
+
+| Đối tượng | Vai trò trong hệ thống | Việc thường làm |
+|-----------|------------------------|-----------------|
+| **Quản trị / HR** | Vai trò `ADMIN` hoặc được gán đủ quyền quản trị | Tạo nhân viên, phân quyền, cấu hình ngày nghỉ, vị trí chấm công, quản lý lương |
+| **Quản lý (Manager)** | Nhân viên có quyền `EMPLOYEE_VIEW` và có cấp dưới (`manager`) | Xem chấm công team, duyệt đơn nghỉ (nếu có `LEAVE_APPROVE`), theo dõi nhân viên trong team |
+| **Nhân viên** | Vai trò `EMPLOYEE` (mặc định khi gán) | Chấm công, tạo đơn nghỉ, xem lương cá nhân, tham gia lịch họp |
+
+> **Lưu ý:** Trong hệ thống, mỗi nhân viên có **một vai trò (role)** gắn với tài khoản. Quyền chi tiết (xem menu, tạo/sửa dữ liệu) phụ thuộc vào **phân quyền (permission)** của vai trò đó.
+
+### 1.3 Các module chính
+
+| Nhóm menu | Chức năng | Đường dẫn (URL) |
+|-----------|-----------|-----------------|
+| **Tổng quan** | Bảng điều khiển, chỉ số nhanh | `/dashboard` |
+| **Lịch** | Lịch họp nhiều nhân viên | `/calendar` |
+| **Tổ chức** | Nhân viên, Phòng ban, Chức vụ | `/employees`, `/departments`, `/positions` |
+| **Chấm công & Thời gian** | Chấm công, Theo dõi chấm công, Đơn xin phép, Duyệt đơn | `/attendance`, `/attendance-tracking`, `/leave`, `/leave-approvals` |
+| **Lương** | Phiếu lương, cấu hình thuế | `/payroll` |
+| **Cấu hình hệ thống** | Ngày nghỉ, Vị trí chi nhánh, Nhóm quyền, Phân quyền | `/attendance/holidays`, `/attendance/locations`, `/roles`, `/roles/assign` |
+
+Menu hiển thị **theo quyền** — nếu bạn không thấy mục nào, có thể tài khoản chưa được gán quyền tương ứng (xem [mục 6](#6-phân-quyền--vai-trò)).
+
+### 1.4 Sơ đồ luồng nghiệp vụ chính
 
 ```mermaid
 flowchart LR
@@ -45,161 +98,1255 @@ flowchart LR
   E --> F[Chốt dữ liệu công]
   F --> G[Tính lương]
   G --> H[Xem phiếu lương]
+  A --> I[Lịch họp]
 ```
 
-## 4. Đăng nhập và bảo mật tài khoản
+---
 
-### 4.1 Đăng nhập
-1. Truy cập URL hệ thống HRM.
-2. Nhập `Tên đăng nhập` và `Mật khẩu`.
-3. Nhấn `Đăng nhập`.
+## 2. Yêu cầu trước khi sử dụng
 
-### 4.2 Đổi mật khẩu
-1. Chọn chức năng `Đổi mật khẩu`.
-2. Nhập mật khẩu hiện tại, mật khẩu mới và xác nhận.
-3. Nhấn `Cập nhật mật khẩu`.
+### 2.1 Trình duyệt hỗ trợ
 
-### 4.3 Đăng xuất
-- Nhấn `Đăng xuất` ở thanh điều hướng.
+Dùng trình duyệt **phiên bản mới** trên máy tính hoặc điện thoại:
 
-## 5. Cấu trúc menu hệ thống
+| Trình duyệt | Khuyến nghị |
+|-------------|-------------|
+| Google Chrome | Có |
+| Microsoft Edge | Có |
+| Mozilla Firefox | Có |
+| Safari (macOS / iOS) | Có |
 
-Menu hiển thị theo quyền của tài khoản:
+**Chấm công theo vị trí:** Trình duyệt cần cho phép **quyền truy cập vị trí (Location)** khi hệ thống hỏi — nếu không bật, bạn không chấm công được trong phạm vi văn phòng.
 
-- **Tổng quan**
-- **Tổ chức**
-  - Nhân viên
-  - Phòng ban
-  - Chức vụ
-- **Chấm công & Thời gian**
-  - Chấm công
-  - Theo dõi chấm công
-  - Đơn xin phép
-  - Duyệt đơn xin phép
-- **Lương**
-- **Cấu hình hệ thống**
-  - Cấu hình ngày nghỉ
-  - Vị trí chi nhánh
-  - Nhóm quyền
-  - Phân quyền
+**Kết quả mong đợi:** Trang HRM mở bình thường, form đăng nhập hiển thị đầy đủ.
 
-## 6. Hướng dẫn sử dụng theo phân hệ
+### 2.2 Quyền truy cập cần có
 
-### 6.1 Tổng quan
-- Theo dõi chỉ số nhanh về nhân sự, chấm công, nghỉ phép.
+| Yêu cầu | Giải thích |
+|---------|------------|
+| **Tài khoản HRM** | HR hoặc Admin tạo hồ sơ nhân viên — khi đó hệ thống tự tạo tên đăng nhập |
+| **Tên đăng nhập & mật khẩu** | Do bộ phận HR/IT cấp lần đầu |
+| **Vai trò & phân quyền** | Quyết định menu và thao tác bạn được phép (ví dụ: chỉ xem lương của mình hay quản lý toàn bộ) |
+| **Mạng nội bộ / Internet** | Truy cập được máy chủ HRM (URL bên dưới) |
 
-### 6.2 Nhân viên
-- Xem danh sách, thêm/sửa/xóa, reset mật khẩu (theo quyền).
-- Cập nhật hồ sơ cá nhân tại `Hồ sơ của tôi`.
+Nhân viên mới **không tự đăng ký** — cần HR tạo hồ sơ trước.
 
-### 6.3 Phòng ban
-- Quản lý phòng ban theo cây cha/con.
-- Thêm/sửa/xóa phòng ban và cập nhật trạng thái hoạt động.
+### 2.3 URL đăng nhập
 
-### 6.4 Chức vụ
-- Quản lý danh sách chức vụ theo phòng ban.
-- `Level` càng nhỏ thì cấp bậc càng cao.
+| Môi trường | URL |
+|------------|-----|
+| **Hệ thống chính (production)** | [https://hrm.tamada.vn/](https://hrm.tamada.vn/) |
+| **Trang đăng nhập** | [https://hrm.tamada.vn/login](https://hrm.tamada.vn/login) |
 
-### 6.5 Chấm công
-- Chấm công vào/ra theo vị trí văn phòng (geofence).
-- Xem dữ liệu công theo tháng.
-- Cập nhật thủ công nếu có quyền.
+Sau khi đăng nhập thành công, hệ thống chuyển bạn tới trang **Chấm công** (`/attendance`) hoặc trang bạn đang cố mở trước đó (nếu bị chuyển về login giữa chừng).
 
-```mermaid
-flowchart TD
-  A[Nhân viên bấm Chấm công vào/ra] --> B{Đã cấp quyền vị trí?}
-  B -- Không --> C[Thông báo yêu cầu bật quyền vị trí]
-  B -- Có --> D{Trong bán kính văn phòng?}
-  D -- Không --> E[Từ chối chấm công]
-  D -- Có --> F[Ghi nhận check-in/check-out thành công]
+---
+
+## 3. Tài khoản & Đăng nhập
+
+### 3.1 Hướng dẫn đăng nhập từng bước
+
+1. Mở trình duyệt (Chrome, Edge, …).
+2. Vào địa chỉ: **https://hrm.tamada.vn/login**
+3. Trên form đăng nhập, điền:
+   - **Tên đăng nhập** (`username`) — không phải email, không phải mã nhân viên.
+   - **Mật khẩu** (`password`) — có nút hiện/ẩn mật khẩu (biểu tượng mắt).
+4. Bấm nút **Đăng nhập**.
+5. Nếu đúng, bạn vào trang chính (thường là Chấm công). Nếu sai, thông báo lỗi hiện trên form.
+
+**Giao diện form đăng nhập gồm:**
+
+| Thành phần | Mô tả |
+|------------|--------|
+| Logo / tiêu đề HRM | Nhận diện hệ thống |
+| Ô **Tên đăng nhập** | Bắt buộc |
+| Ô **Mật khẩu** | Bắt buộc, tối thiểu 6 ký tự khi đăng nhập |
+| Nút **Đăng nhập** | Gửi thông tin lên server |
+| Chuyển ngôn ngữ | Góc trên (Tiếng Việt / English / 日本語) |
+
+**Không có** trên form: ô email, liên kết “Quên mật khẩu”, ghi nhớ đăng nhập.
+
+**Kết quả mong đợi:** Vào được hệ thống, thấy menu bên trái và tên bạn ở thanh trên.
+
+### 3.2 Quy tắc tạo tên đăng nhập tự động
+
+Khi HR **tạo nhân viên mới**, hệ thống gợi ý tên đăng nhập từ **Họ và tên** — **không** lấy từ email hay mã nhân viên (`EMP001`, …).
+
+**Các bước xử lý tên:**
+
+1. Bỏ khoảng trắng thừa đầu/cuối.
+2. Chuyển thành **chữ thường** (không phân biệt hoa/thường khi đăng nhập — tên lưu dạng chữ thường).
+3. Bỏ dấu tiếng Việt (ă → a, ê → e, …; **đ** → **d**).
+4. Xóa mọi ký tự **không phải** chữ cái `a–z` hoặc số `0–9` (dấu cách, gạch ngang, @, … đều bị xóa).
+
+**Ví dụ:**
+
+| Họ và tên | Tên đăng nhập gợi ý |
+|-----------|---------------------|
+| Nguyễn Văn An | `nguyenvanan` |
+| Trần Thị Lan | `tranthilan` |
+| Lê Văn Đức | `levanduc` |
+| Nguyễn Văn A | `nguyenvana` |
+
+**Mã nhân viên** (`EMP001`, `EMP002`, …) do hệ thống tự sinh khi lưu — dùng trong hồ sơ, **không** dùng để đăng nhập.
+
+#### Trường hợp tên đăng nhập đã tồn tại
+
+Hệ thống **không** tự thêm số đuôi (`nguyenvanan1`, `nguyenvanan2`, …).
+
+- Khi lưu, nếu trùng → báo lỗi: **Username "…" already exists** (Tên đăng nhập đã tồn tại).
+- HR cần **sửa tay** ô Tên đăng nhập trước khi lưu (ví dụ: `nguyenvanan2`, `nguyenvananhr`).
+
+**Ví dụ xử lý trùng:**
+
+| Tình huống | Cách xử lý |
+|------------|------------|
+| Đã có `nguyenvanan`, tạo thêm Nguyễn Văn An | Đổi username thành `nguyenvanan2` hoặc thêm họ đệm viết tắt |
+| Hai người cùng tên chuẩn hóa giống nhau | Bắt buộc khác username thủ công |
+
+#### Giới hạn ký tự
+
+| Quy tắc | Chi tiết |
+|---------|----------|
+| Độ dài | 1–50 ký tự (theo cấu hình hệ thống) |
+| Ký tự cho phép | Chỉ `a–z`, `0–9` sau khi chuẩn hóa |
+| Phân biệt hoa/thường | **Không** — luôn lưu chữ thường |
+| Đổi sau khi tạo | **Không được** — username khóa vĩnh viễn sau khi tạo nhân viên |
+
+### 3.3 Mật khẩu mặc định
+
+| Câu hỏi | Trả lời |
+|---------|---------|
+| Mật khẩu mặc định là gì? | **Trùng với tên đăng nhập** (ví dụ: user `nguyenvanan` → mật khẩu `nguyenvanan`) |
+| Quy tắc sinh mật khẩu | Cố định theo username khi HR **không** nhập mật khẩu riêng lúc tạo |
+| Bắt buộc đổi lần đầu? | **Không** — hệ thống không ép đổi khi đăng nhập lần đầu |
+| Tài khoản Admin mẫu (môi trường dev) | `admin` / `admin123` — chỉ dùng khi IT cấu hình seed; production nên đổi ngay |
+
+**Ví dụ:** Nhân viên **Nguyễn Văn An** → đăng nhập: `nguyenvanan` / `nguyenvanan`.
+
+> **Khuyến nghị bảo mật:** Sau khi cấp tài khoản, nhân viên nên **Đổi mật khẩu** ngay (mục 3.4). HR nên nhắc đổi toàn bộ mật khẩu mặc định sau bàn giao hệ thống.
+
+### 3.4 Hướng dẫn đổi mật khẩu
+
+**Nhân viên tự đổi (khi đã đăng nhập):**
+
+1. Bấm **tên / avatar** của bạn ở góc trên phải.
+2. Chọn **Đổi mật khẩu**.
+3. Điền:
+   - Mật khẩu hiện tại
+   - Mật khẩu mới
+   - Xác nhận mật khẩu mới
+4. Bấm **Cập nhật mật khẩu**.
+
+**Quy tắc mật khẩu mới:**
+
+| Yêu cầu | Ví dụ hợp lệ |
+|---------|----------------|
+| Tối thiểu 8 ký tự | `Abcdef1!` |
+| Ít nhất 1 chữ thường | `a` |
+| Ít nhất 1 chữ hoa | `A` |
+| Ít nhất 1 chữ số | `1` |
+| Ít nhất 1 ký tự đặc biệt | `!` `@` `#` … |
+| Mật khẩu mới = xác nhận | Phải giống nhau |
+
+**Kết quả mong đợi:** Đăng nhập lần sau bằng mật khẩu mới.
+
+### 3.5 Quên mật khẩu & reset bởi Admin
+
+Hệ thống **không có** chức năng “Quên mật khẩu” qua email.
+
+| Ai xử lý | Cách làm |
+|----------|----------|
+| **HR / Admin** (có quyền `EMPLOYEE_UPDATE`) | Mở hồ sơ nhân viên → **Reset mật khẩu** → mật khẩu trở lại **bằng tên đăng nhập** |
+| **Nhân viên** | Liên hệ HR/IT — không tự khôi phục trên màn hình login |
+
+### 3.6 Đăng xuất
+
+1. Bấm tên bạn ở góc trên → **Đăng xuất**.
+2. Xác nhận nếu hệ thống hỏi.
+
+**Kết quả mong đợi:** Quay về trang đăng nhập, phiên làm việc kết thúc.
+
+---
+
+## 4. Quản lý nhân viên
+
+> Dành cho HR/Admin có quyền `EMPLOYEE_CREATE`, `EMPLOYEE_UPDATE`, `EMPLOYEE_DELETE`.
+
+### 4.1 Tạo nhân viên mới — từng bước
+
+1. Đăng nhập bằng tài khoản có quyền tạo nhân viên.
+2. Menu **Tổ chức** → **Nhân viên** (`/employees`).
+3. Bấm **Thêm nhân viên** (hoặc tương đương trên danh sách).
+4. Điền form (bảng bên dưới).
+5. Kiểm tra **Tên đăng nhập** (tự điền từ họ tên — có thể sửa trước khi lưu).
+6. Chọn **Vai trò (role)** nếu cần (không chọn = chưa gán vai trò).
+7. Bấm **Lưu** / **Tạo**.
+8. Hệ thống quay về danh sách nhân viên; mã nhân viên (`EMP…`) đã được tạo tự động.
+
+**Kết quả mong đợi:** Nhân viên mới xuất hiện trên danh sách; có thể đăng nhập bằng username và mật khẩu mặc định (= username).
+
+#### Bảng trường thông tin
+
+| Trường | Bắt buộc | Định dạng / Ghi chú |
+|--------|:--------:|---------------------|
+| **Họ và tên** | Có (*) | Tối đa 100 ký tự; đổi họ tên sẽ gợi ý lại username khi đang tạo mới |
+| **Email** | Không | Đúng định dạng email; không trùng email đã có |
+| **Số điện thoại** | Không | |
+| **CCCD / CMND** | Không | |
+| **Phòng ban** | Không | Chọn trước khi chọn chức vụ |
+| **Chức vụ** | Không | Chỉ bật sau khi chọn phòng ban |
+| **Ngày sinh** | Không | Chọn trên lịch — lưu dạng **YYYY-MM-DD** (ví dụ: 1990-05-15) |
+| **Giới tính** | Không | Nam / Nữ / Khác |
+| **Địa chỉ** | Không | |
+| **Số người phụ thuộc** | Không | Số nguyên 0–99 |
+| **Tổng ngày phép** | Không | Số ≥ 0 |
+| **Ngày phép còn lại** | Không | Số ≥ 0 |
+| **Ngày vào làm** | Có (*) | Mặc định = hôm nay; định dạng **YYYY-MM-DD** |
+| **Loại hợp đồng** | Không | Toàn thời gian, Thử việc, … |
+| **Trạng thái làm việc** | Không | Mặc định **Đang làm** (`ACTIVE`); có **Ngừng** / **Nghỉ việc** |
+| **Tên đăng nhập** | Có (*) | Tự sinh từ họ tên; có thể sửa **trước** khi lưu |
+| **Vai trò** | Không | Gán `ADMIN`, `EMPLOYEE`, `HR_MANAGER`, … |
+| **Quản lý trực tiếp** | Không | Chọn nhân viên đang hoạt động |
+| **Ảnh đại diện** | Không | Tải file ảnh |
+
+> **Warning — Ngày sinh / ngày vào làm:** Trên màn hình bạn chọn ngày bằng lịch (DatePicker); hệ thống lưu **năm-tháng-ngày** (YYYY-MM-DD), không phải DD/MM/YYYY trong cơ sở dữ liệu.
+
+> **Warning — Username:** Sau khi tạo xong, **không đổi được** tên đăng nhập. Kiểm tra kỹ trước khi bấm Lưu.
+
+### 4.2 Tự động hóa khi tạo nhân viên
+
+| Hạng mục | Hành vi hệ thống |
+|----------|------------------|
+| **Mã nhân viên** | Tự tăng: `EMP001`, `EMP002`, … |
+| **Tên đăng nhập** | Gợi ý từ họ tên — xem [mục 3.2](#32-quy-tắc-tạo-tên-đăng-nhập-tự-động) |
+| **Mật khẩu** | = tên đăng nhập (mã hóa lưu trong DB) |
+| **Email thông báo** | **Không gửi** — HR cần thông báo username/password cho nhân viên bằng kênh nội bộ |
+| **Vai trò mặc định** | **Không gán** nếu HR không chọn — nên chọn `EMPLOYEE` cho nhân viên thường |
+| **Trạng thái** | Mặc định **ACTIVE** (đang làm việc) |
+
+**Kết quả mong đợi:** Nhân viên có tài khoản đăng nhập; HR chuyển thông tin đăng nhập cho người đó.
+
+### 4.3 Lỗi thường gặp khi tạo nhân viên
+
+| Lỗi / Triệu chứng | Nguyên nhân | Cách xử lý |
+|-------------------|-------------|------------|
+| **Tên đăng nhập đã tồn tại** | Username trùng người khác | Sửa username (thêm số/hậu tố) rồi lưu lại |
+| **Thiếu thông tin bắt buộc** | Chưa điền họ tên, ngày vào làm, username | Điền đủ các trường có dấu (*) |
+| **Email đã tồn tại** | Email trùng hồ sơ cũ | Dùng email khác hoặc để trống nếu không bắt buộc |
+| **Position must belong to department** | Chức vụ không thuộc phòng đã chọn | Chọn lại phòng ban hoặc chức vụ phù hợp |
+| **Không có quyền** | Tài khoản thiếu `EMPLOYEE_CREATE` | Nhờ Admin gán quyền qua **Phân quyền** |
+
+### 4.4 Chỉnh sửa thông tin sau khi tạo
+
+1. **Tổ chức** → **Nhân viên** → bấm vào tên nhân viên.
+2. Bấm **Chỉnh sửa** (hoặc vào `/employees/{id}/edit`).
+3. Cập nhật các trường (trừ **Tên đăng nhập** — ô bị khóa).
+4. Bấm **Lưu**.
+
+**Nhân viên tự sửa hồ sơ cá nhân:** Menu nhân viên → tab **Hồ sơ của tôi** — chỉ sửa được một phần thông tin cá nhân (không đổi phòng ban, vai trò, username).
+
+**Reset mật khẩu (Admin):** Trên trang xem chi tiết nhân viên → **Reset mật khẩu** → xác nhận → mật khẩu = username.
+
+**Kết quả mong đợi:** Thông tin mới hiển thị trên danh sách và hồ sơ.
+
+### 4.5 Nhân viên nghỉ việc
+
+Không cần xóa hồ sơ ngay:
+
+1. Mở chỉnh sửa nhân viên.
+2. Đổi **Trạng thái làm việc** → **Nghỉ việc** (`TERMINATED`) hoặc **Ngừng** (`INACTIVE`).
+3. Lưu.
+
+**Xóa nhân viên** (`EMPLOYEE_DELETE`): Xóa **vĩnh viễn** bản ghi — chỉ dùng khi chắc chắn; có thể ảnh hưởng dữ liệu liên quan. Ưu tiên đổi trạng thái thay vì xóa.
+
+---
+
+## 5. Lịch & Lịch trình
+
+### 5.1 Giới thiệu tính năng Lịch
+
+**Lịch** trong HRM dùng để **lên lịch cuộc họp / sự kiện** giữa các nhân viên: xem khung giờ bận, tạo cuộc họp, mời người tham gia, nhận thông báo khi có thay đổi.
+
+**Không nhầm với:**
+
+- Lịch chấm công theo tháng (trong **Theo dõi chấm công**).
+- Cấu hình ngày nghỉ lễ (trong **Cấu hình ngày nghỉ**).
+
+**Loại sự kiện trên lịch lịch trình:**
+
+| Loại | Mô tả |
+|------|--------|
+| **Cuộc họp / sự kiện** | Bản ghi chính trên lịch — có tiêu đề, giờ, địa điểm, người tổ chức, người tham gia |
+| **Lặp lại** | Chuỗi cuộc họp theo ngày làm việc, theo thứ trong tuần, hoặc danh sách ngày chọn |
+
+> Chú thích màu trên trang Lịch (Họp / Nghỉ phép / Ngày lễ) là **chú thích minh họa** — trên lưới giờ hiện chỉ hiển thị **cuộc họp**; nghỉ phép và ngày lễ xem ở module Chấm công / Cấu hình ngày nghỉ.
+
+### 5.2 Hướng dẫn xem lịch
+
+1. Menu **Lịch** → `/calendar`.
+2. **Chọn nhân viên** cần xem (mặc định là bạn; có thể chọn nhiều người, chọn theo phòng ban).
+3. Mỗi nhân viên một **cột** — sự kiện hiện trên cột người **tổ chức** hoặc cột người **tham gia**.
+
+**Chế độ xem:**
+
+| Chế độ | Mô tả |
+|--------|--------|
+| **Tuần** | Mặc định — lưới theo tuần |
+| **Ngày** | Một ngày chi tiết theo giờ |
+| **Tháng** | **Chưa có** trên phiên bản hiện tại |
+
+**Điều hướng:**
+
+| Nút / Thao tác | Tác dụng |
+|----------------|----------|
+| **Trước / Sau** | Tuần hoặc ngày trước/sau |
+| **Hôm nay** | Về ngày hiện tại |
+| **DatePicker** | Nhảy tới ngày bất kỳ |
+
+**Màu sắc:**
+
+- Mỗi **nhân viên (cột)** có màu riêng (tự động theo danh sách).
+- **Viền thẻ sự kiện** dùng màu của **người tổ chức** cuộc họp.
+
+**Kết quả mong đợi:** Bạn thấy khung giờ và các cuộc họp của người đã chọn trong khoảng thời gian đang xem.
+
+### 5.3 Tạo cuộc họp mới
+
+**Cách 1 — Bấm khung giờ trống**
+
+1. Chỉ bấm được trên **cột của chính bạn** (không tạo họp trên cột người khác).
+2. Chọn khung giờ → form tạo sự kiện mở sẵn ngày/giờ.
+
+**Cách 2 — Nút thêm (nếu có trên giao diện)**
+
+Mở form và điền thủ công.
+
+**Các bước trong form:**
+
+1. **Tiêu đề** — bắt buộc.
+2. **Người tham gia** — bắt buộc có **bạn** trong danh sách; thêm đồng nghiệp bằng tìm theo tên (danh sách toàn công ty đang hoạt động).
+3. **Ngày**, **Giờ bắt đầu**, **Giờ kết thúc** — kết thúc phải sau bắt đầu.
+4. **Địa điểm** — tùy chọn.
+5. **Lặp lại** (tùy chọn) — xem mục 5.4.
+6. Bấm **Lưu**.
+
+**Người tổ chức (organizer):** Luôn là **bạn** — không chọn người khác làm chủ cuộc họp trên form.
+
+**Kết quả mong đợi:** Cuộc họp xuất hiện trên lịch; người được mời nhận **thông báo trong hệ thống** (chuông thông báo).
+
+### 5.4 Sự kiện lặp lại
+
+Bật **Lặp lại** khi tạo mới (không chỉnh sửa chuỗi lặp trên form — sửa/xóa từng buổi hoặc cả chuỗi sau khi tạo).
+
+| Kiểu lặp | Ý nghĩa |
+|----------|---------|
+| **Ngày làm việc** | Lặp các ngày đi làm, **trừ** ngày nghỉ theo cấu hình ngày nghỉ công ty |
+| **Theo thứ trong tuần** | Chọn thứ (T2–CN) lặp hàng tuần |
+| **Ngày đã chọn** | Chọn từng ngày cụ thể trên lịch |
+
+Hệ thống sinh các buổi trong tầm **12 tuần** tính từ tuần đang xem (có thể mở rộng thêm phía sau nếu chuỗi chưa có ngày kết thúc).
+
+**Kết quả mong đợi:** Nhiều ô sự kiện cùng tiêu đề trên các ngày theo quy tắc lặp.
+
+### 5.5 Quyền hạn trên lịch
+
+Thiết kế theo nguyên tắc: **ai tạo thì người đó quản lý**; **người được mời chỉ phản hồi bằng cách tham gia hoặc rút lui**; **mọi người đăng nhập đều có thể xem** lịch người khác (để sắp lịch họp).
+
+#### Người tạo / tổ chức (Organizer)
+
+| Quyền | Được? | Vì sao thiết kế vậy? |
+|-------|:-----:|----------------------|
+| Xem chi tiết sự kiện mình tạo | Có | Chủ cuộc họp cần nắm thông tin |
+| Sửa tiêu đề, giờ, địa điểm, người tham gia | Có | Chỉ chủ cuộc họp mới nên thay đổi nội dung — tránh người khác sửa nhầm lịch của bạn |
+| Kéo thả đổi giờ trên lưới | Có (cột của mình) | Tiện điều chỉnh nhanh |
+| Xóa một buổi hoặc cả chuỗi lặp | Có | Hủy cuộc họp do mình chủ trì |
+| **Rút lui** khỏi cuộc họp | **Không** | Người tổ chức không “rút lui” — muốn hủy thì **xóa** sự kiện |
+
+#### Người được mời (Participant)
+
+| Quyền | Được? | Vì sao? |
+|-------|:-----:|---------|
+| Xem chi tiết cuộc họp | Có | Cần biết giờ, địa điểm, chủ trì |
+| Sửa / xóa sự kiện | **Không** | Tránh thay đổi lịch của người khác |
+| **Rút lui** (Leave meeting) | Có | Bạn từ chối tham gia nhưng không xóa cuộc họp của người khác — cần nhập **lý do** (gửi cho organizer) |
+| Mời thêm người | **Không** | Chỉ organizer thêm/bớt danh sách |
+| Chấp nhận/Từ chối nút RSVP kiểu Outlook | **Không** (phiên bản hiện tại) | Thay bằng thao tác **Rút lui** + thông báo |
+
+#### Admin / HR
+
+| Quyền | Được? | Ghi chú |
+|-------|:-----:|---------|
+| Xem lịch mọi nhân viên | Có | Giống mọi user đã đăng nhập |
+| Sửa/xóa lịch của người khác | **Không** (trên API lịch) | Quyền `ADMIN` trên hệ thống **không** override quyền organizer trên lịch họp |
+| Cấu hình “xem tất cả” đặc biệt | Chưa áp dụng | Có mã cấu hình phía giao diện nhưng chưa gắn vào menu thực tế |
+
+> **Tóm lại:** Admin quản lý nhân sự, phân quyền, lương — **không** can thiệp trực tiếp cuộc họp trên lịch của nhân viên khác; việc đó thuộc người tổ chức.
+
+### 5.6 Thông báo và nhắc nhở
+
+| Sự kiện | Ai nhận thông báo |
+|---------|-------------------|
+| Được mời tham gia cuộc họp mới | Người tham gia (trừ organizer) |
+| Bị gỡ khỏi danh sách tham gia | Người bị gỡ |
+| Người tham gia **rút lui** | Organizer |
+| Organizer **xóa** một buổi | Người tham gia còn lại |
+| Organizer **xóa cả chuỗi** lặp | Người tham gia còn lại |
+
+**Cách nhận:** Biểu tượng **chuông** trên thanh trên → danh sách thông báo; có thể hỗ trợ **Web Push** nếu IT bật cấu hình máy chủ.
+
+**Nhắc nhở trước giờ họp (reminder):** **Chưa có** — hệ thống không gửi “nhắc trước 15 phút” tự động. Người dùng cần tự theo dõi lịch hoặc thêm lịch vào ứng dụng ngoài (Outlook, Google Calendar) nếu công ty tích hợp riêng.
+
+**Kết quả mong đợi:** Khi có thay đổi liên quan đến bạn, thông báo xuất hiện trong HRM (và có thể push trình duyệt).
+
+### 5.7 Xem, sửa, xóa, rút lui — tóm tắt thao tác
+
+| Thao tác | Cách làm |
+|----------|----------|
+| Xem chi tiết | Bấm vào ô sự kiện trên lịch |
+| Sửa | Chi tiết → **Chỉnh sửa** (chỉ khi bạn là organizer) |
+| Xóa | Chi tiết → **Xóa** → chọn **một buổi** hoặc **cả chuỗi** |
+| Rút lui | Chi tiết → **Rút lui** → nhập lý do → xác nhận |
+
+---
+
+## 6. Phân quyền & Vai trò
+
+### 6.1 Các vai trò (roles) trong hệ thống
+
+| Mã vai trò | Tên hiển thị | Ai nên dùng | Mô tả ngắn |
+|------------|--------------|-------------|------------|
+| `ADMIN` | Administrator | IT / HR trưởng | Toàn quyền — gán tất cả permission có trong hệ thống |
+| `HR_MANAGER` | HR Manager | Quản lý nhân sự | Vai trò có sẵn; **cần Admin gán permission** qua Phân quyền (mặc định seed không gán sẵn) |
+| `EMPLOYEE` | Employee | Nhân viên thường | Quyền cơ bản: xem chấm công, đơn nghỉ, phiếu lương của mình |
+
+Mỗi nhân viên chỉ gắn **một** `roleId` tại một thời điểm.
+
+### 6.2 Bảng quyền theo module (tham khảo)
+
+Chú thích cột:
+
+- **Admin** = vai trò `ADMIN` (đủ quyền seed).
+- **HR** = tài khoản được gán tương đương HR (thường custom từ `HR_MANAGER` + permission đầy đủ — do Admin cấu hình).
+- **Manager** = có `EMPLOYEE_VIEW` + có nhân viên cấp dưới (`managerId`).
+- **Employee** = vai trò `EMPLOYEE` mặc định.
+
+| Tính năng | Admin | HR (đủ quyền) | Manager | Employee |
+|-----------|:-----:|:--------------:|:-------:|:--------:|
+| Tạo nhân viên | Có | Có* | Không** | Không |
+| Sửa nhân viên | Có | Có* | Không** | Hồ sơ của tôi (giới hạn) |
+| Xóa nhân viên | Có | Có* | Không | Không |
+| Xem nhân viên — toàn công ty | Có | Có* | Không | Không |
+| Xem nhân viên — team | Có | Có* | Có*** | Không |
+| Xem nhân viên — chỉ mình | Có | Có | Có | Có |
+| Reset mật khẩu người khác | Có | Có* | Không | Không |
+| Tạo/sửa/xóa lịch họp của người khác | Không**** | Không**** | Không**** | Không**** |
+| Tạo/sửa/xóa lịch họp của mình | Có | Có | Có | Có |
+| Xem lịch người khác | Có | Có | Có | Có |
+| Chấm công (bản thân) | Có | Có | Có | Có |
+| Theo dõi chấm công team | Có | Có* | Có*** | Không |
+| Duyệt đơn nghỉ | Có | Có* | Có***** | Không |
+| Xem / quản lý lương | Có | Có* | Theo quyền | Xem của mình |
+| Cấu hình phòng ban, chức vụ | Có | Có* | Không | Không |
+| Cấu hình ngày nghỉ, vị trí chấm công | Có | Có* | Không | Không |
+| Nhóm quyền & Phân quyền | Có | Có* | Không | Không |
+
+\* Cần permission tương ứng (`EMPLOYEE_CREATE`, …) — HR thường được Admin gán.  
+\** Trừ khi Admin gán thêm permission cho cá nhân đó.  
+\*** Manager = nhân viên có quyền `EMPLOYEE_VIEW` và có cấp dưới trong cây `managerId`.  
+\**** Lịch họp: chỉ **organizer** sửa/xóa sự kiện của mình — không phụ thuộc Admin.  
+\***** Cần `LEAVE_APPROVE`.
+
+### 6.3 Phạm vi (scope) theo cấp bậc
+
+**Admin (`roleCode = ADMIN`):**
+
+- Xem và quản lý **toàn bộ** nhân viên.
+- Không bị giới hạn theo phòng ban trên API danh sách nhân viên.
+
+**Manager (có `EMPLOYEE_VIEW`, không phải Admin):**
+
+- Chỉ xem nhân viên thuộc **cây cấp dưới** của mình: nhân viên có `Quản lý trực tiếp` = bạn, và các cấp dưới của họ (đệ quy theo `managerId`).
+- **Ví dụ:** Bạn là trưởng phòng A → xem được A1, A2 và nhân viên do A1 quản lý; **không** xem được phòng B.
+
+**Nhân viên thường (không có `EMPLOYEE_VIEW`):**
+
+- API danh sách nhân viên chỉ trả về **chính bạn**.
+- Vẫn có thể **tìm tên** đồng nghiệp trong **danh bạ lịch** (`/employees/directory`) để mời họp — đây là danh sách riêng cho lịch, không đồng nghĩa xem full hồ sơ nhân sự.
+
+**Kết quả mong đợi:** Mỗi vai trò chỉ thấy dữ liệu nhân sự đúng phạm vi; tránh lộ lương/thông tin nhạy cảm ngoài team.
+
+### 6.4 Cách gán vai trò cho nhân viên
+
+| Câu hỏi | Trả lời |
+|---------|---------|
+| Ai gán được? | Nhân viên có `EMPLOYEE_UPDATE` (thường Admin/HR) |
+| Gán ở đâu? | **Tổ chức → Nhân viên** → Tạo mới hoặc **Chỉnh sửa** → trường **Vai trò** |
+| Nhiều vai trò cùng lúc? | **Không** — chỉ một vai trò / một nhân viên |
+| Gán permission chi tiết? | **Cấu hình hệ thống → Phân quyền** (`/roles/assign`) — cần `ROLE_MANAGE` hoặc `ROLE_VIEW` tùy thao tác |
+
+**Các bước gán permission cho nhóm quyền:**
+
+1. **Cấu hình hệ thống → Nhóm quyền** — xem/ tạo vai trò (`ROLE_VIEW` / `ROLE_MANAGE`).
+2. **Cấu hình hệ thống → Phân quyền** — chọn vai trò → tick các quyền → Lưu.
+3. Gán **vai trò** đó cho từng nhân viên trong form nhân viên.
+
+**Kết quả mong đợi:** Nhân viên đăng nhập lại (hoặc chờ token hết hạn) sẽ thấy menu đúng quyền mới.
+
+### 6.5 Danh sách permission (mã quyền)
+
+| Mã | Ý nghĩa ngắn |
+|----|----------------|
+| `EMPLOYEE_VIEW` | Xem nhân viên (theo scope) |
+| `EMPLOYEE_CREATE` | Tạo nhân viên |
+| `EMPLOYEE_UPDATE` | Sửa nhân viên, reset mật khẩu |
+| `EMPLOYEE_DELETE` | Xóa nhân viên |
+| `ATTENDANCE_VIEW` | Xem/chấm công |
+| `ATTENDANCE_MANAGE` | Quản lý chấm công nâng cao |
+| `ATTENDANCE_MANUAL_UPDATE` | Sửa giờ chấm công thủ công |
+| `LOCATION_VIEW` | Xem/cấu hình vị trí chi nhánh |
+| `LEAVE_VIEW` | Xem/tạo đơn nghỉ |
+| `LEAVE_APPROVE` | Duyệt đơn nghỉ |
+| `PAYROLL_VIEW` | Xem phiếu lương |
+| `PAYROLL_MANAGE` | Quản lý/tính lương |
+| `DEPARTMENT_VIEW` / `DEPARTMENT_MANAGE` | Xem / quản lý phòng ban |
+| `POSITION_VIEW` / `POSITION_MANAGE` | Xem / quản lý chức vụ |
+| `ROLE_VIEW` / `ROLE_MANAGE` | Xem / quản lý vai trò & phân quyền |
+| `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` | Xem / sửa cấu hình ngày nghỉ |
+
+---
+
+## 7. Hướng dẫn theo từng phân hệ
+
+### 7.1 Tổng quan (`/dashboard`)
+
+- Theo dõi chỉ số nhanh: nhân sự, chấm công, nghỉ phép (cần quyền `EMPLOYEE_VIEW` / `LEAVE_VIEW` cho một số widget).
+
+**Kết quả mong đợi:** Nắm tình hình tổng thể trong ngày/tuần.
+
+### 7.2 Phòng ban & Chức vụ
+
+- **Phòng ban:** cây cha/con; cần `DEPARTMENT_VIEW` / `DEPARTMENT_MANAGE`.
+- **Chức vụ:** theo phòng ban; `Level` **nhỏ hơn** = cấp **cao hơn** (ví dụ level `1` là cao nhất).
+
+### 7.3 Chấm công, đơn phép, báo cáo
+
+Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phép), [mục 10](#10-báo-cáo-chấm-công--nghỉ-phép).
+
+### 7.4 Lương
+
+- `PAYROLL_VIEW`: xem phiếu lương (cá nhân hoặc rộng hơn tùy cấu hình).
+- `PAYROLL_MANAGE`: tạo, tính lại, cấu hình thuế.
+
+### 7.5 Cấu hình hệ thống
+
+- **Ngày nghỉ:** `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT`.
+- **Vị trí chi nhánh:** `LOCATION_VIEW`.
+- **Nhóm quyền / Phân quyền:** `ROLE_VIEW` / `ROLE_MANAGE`.
+
+---
+
+## 8. Chấm công
+
+> Nội dung Task 08–09. Căn cứ codebase `tmv-hrm` / `tmv-hrm-be` (phiên bản hiện tại).
+
+### 8.1 Cơ chế chấm công của hệ thống
+
+#### Phương thức chấm công
+
+| Phương thức | Có trong HRM? | Mô tả |
+|-------------|:-------------:|--------|
+| **Tự chấm trên web** (Check in / Check out + GPS) | **Có** | Nhân viên bấm trên trang **Attendance** (`/attendance`) hoặc từ **Overview** |
+| **Máy chấm công vật lý** (vân tay, thẻ, ZKTeco, …) | **Không** | Không có API/tích hợp thiết bị phần cứng trong codebase |
+| **Cả hai** | — | Chỉ có kênh web; nếu công ty dùng máy vật lý, dữ liệu phải xử lý **ngoài** HRM hoặc qua sửa công thủ công / đơn **ATTENDANCE_CORRECTION** |
+
+#### Đơn vị tính công
+
+| Đơn vị | Dùng ở đâu | Quy tắc |
+|--------|------------|---------|
+| **Phút** | Lưu DB, tính trạng thái | `checkOutTime − checkInTime` (phút làm việc trong ngày) |
+| **Ngày công (9 giờ)** | Phân loại WORK / LATE_EARLY | Đủ **≥ 9 giờ** (540 phút) giữa check-in và check-out → **WORK**; ít hơn → **LATE_EARLY** |
+| **Ngày (8 giờ)** | Tổng hợp nghỉ phép trên dashboard | 8 giờ nghỉ có lương ≈ 1 ngày (`paidLeave += giờ / 8`) |
+| **Ca làm việc (shift)** | **Không có** module ca | Xem [8.6](#86-ca-làm-việc--lịch-làm-việc-task-09) |
+
+> **Warning — Không phải “đi muộn 15 phút so với 8:00”:** Hệ thống **không** so giờ check-in với giờ vào ca (vì **không có ca**). **LATE_EARLY** nghĩa là **tổng thời gian làm trong ngày dưới 9 giờ**, không phải trễ 15 phút so với 8:00.
+
+**Ví dụ cụ thể (cùng một ngày):**
+
+| Check-in | Check-out | Tổng phút | Trạng thái DB | Hiển thị lưới (chế độ ngày) |
+|----------|-----------|-----------|---------------|------------------------------|
+| 08:00 | 17:00 | 540 | **WORK** | `1` (xanh) |
+| 08:15 | 17:15 | 540 | **WORK** | `1` |
+| 08:00 | 16:30 | 510 | **LATE_EARLY** | `1` (vàng — vẫn có đi làm nhưng thiếu giờ) |
+| 09:00 | 17:00 | 480 | **LATE_EARLY** | `1` (vàng) |
+| 08:00 | *(chưa check-out)* | — | **FORGOT_CLOCK_IN** hoặc **WORK** (tùy trường hợp) | `F` hoặc chỉ có giờ vào |
+| *(không chấm)* | *(không chấm)* | — | Trên lưới team: **ABSENT** (`A`); lịch cá nhân quá khứ: **FORGOT_CLOCK_IN** (`F`) | `A` / `F` |
+
+#### Múi giờ
+
+| Mục | Giá trị |
+|-----|---------|
+| Múi giờ nghiệp vụ | **`Asia/Ho_Chi_Minh`** (Giờ Việt Nam, UTC+7) |
+| “Hôm nay” khi chấm công | Theo ngày VN |
+| Hiển thị giờ check-in/out | Giờ VN (lưu theo quy ước UTC slot trong DB) |
+
+**Kết quả mong đợi:** Bạn hiểu chấm công chỉ qua web + GPS, và trạng thái “Đi muộn, về sớm” = thiếu đủ 9 giờ làm việc trong ngày.
+
+---
+
+### 8.2 Hướng dẫn nhân viên tự chấm công
+
+**Quyền cần có:** `ATTENDANCE_VIEW` (role `EMPLOYEE` mặc định đã có).
+
+**Truy cập:**
+
+1. Menu **Attendance & Time** → **Attendance** (`/attendance`), hoặc
+2. **Overview** → tab nhân viên → nút Check in/out nhanh.
+
+**Chấm công vào (Check in):**
+
+1. Chọn **tháng hiện tại** trên bộ chọn tháng (nút chấm công **chỉ hiện khi đang xem tháng hiện tại**).
+2. Bấm **Check in** (Chấm công vào).
+3. Xác nhận trong hộp thoại.
+4. Trình duyệt hỏi **quyền vị trí** → chọn **Cho phép**.
+5. Hệ thống kiểm tra GPS có nằm trong **bán kính văn phòng** đã cấu hình (Office Locations) hay không.
+6. Thành công → thông báo xanh; ô lịch hôm nay có **giờ vào**.
+
+**Chấm công ra (Check out):**
+
+1. Sau khi đã có giờ vào trong ngày, nút đổi thành **Check out**.
+2. Lặp lại bước xác nhận + GPS.
+3. Sau khi check-out xong, nút chấm công **ẩn** (đã đủ một lượt trong ngày).
+
+**Ngoại lệ GPS:**
+
+- Có **đơn REMOTE_WORK** đã **duyệt** trong ngày → có thể chấm **không cần** nằm trong geofence.
+- **Chưa cấu hình** văn phòng nào → geofence bỏ qua, vẫn chấm được.
+
+#### Quên check-in hoặc check-out
+
+| Tình huống | Hệ thống ghi nhận | Cách xử lý |
+|------------|-------------------|------------|
+| Chỉ check-in, quên check-out | Trạng thái **FORGOT_CLOCK_IN** (hoặc WORK nếu chỉ thiếu giờ ra) | Check-out bổ sung trong ngày; hoặc đơn **EARLY_DEPARTURE** / **ATTENDANCE_CORRECTION**; hoặc HR sửa thủ công |
+| Chỉ check-out, quên check-in | **FORGOT_CLOCK_IN** | Check-in bổ sung; đơn **LATE_ARRIVAL** / **ATTENDANCE_CORRECTION**; sửa thủ công |
+| Không chấm cả hai (ngày làm việc đã qua) | Lưới team: **A** (Vắng); lịch cá nhân: **F** (Quên chấm công) | Tạo đơn nghỉ / sửa công / chấm bù theo quy trình công ty |
+
+#### Giới hạn khung giờ check-in
+
+**Không có** trên server (ví dụ: không khóa “chỉ được check-in trong 30 phút đầu ca”).
+
+- UI chỉ cho chấm khi **đang xem tháng hiện tại**.
+- API vẫn nhận tham số `date=YYYY-MM-DD` nếu gọi trực tiếp — vận hành nên theo quy trình nội bộ.
+
+**Kết quả mong đợi:** Nhân viên tự chấm đủ vào/ra trong ngày làm việc tại văn phòng (hoặc remote đã duyệt).
+
+---
+
+### 8.3 Hướng dẫn xem bảng chấm công
+
+#### Nhân viên — xem của bản thân
+
+| Cách | Đường dẫn | Nội dung |
+|------|-----------|----------|
+| Lịch tháng + tổng hợp | `/attendance` | Lịch từng ngày, giờ vào/ra, loại ngày (làm, lễ, nghỉ phép, …), thẻ tổng hợp tháng |
+| Chi tiết một ngày | Bấm ô ngày trên lịch | Popup: giờ vào, giờ ra, bản đồ vị trí chấm (nếu có), form sửa giờ (nếu được quyền) |
+
+**Cột / thông tin trên lịch cá nhân:**
+
+| Thông tin | Ý nghĩa |
+|-----------|---------|
+| **Giờ vào** (`checkInTime`) | Thời điểm Check in (HH:mm, giờ VN) |
+| **Giờ ra** (`checkOutTime`) | Thời điểm Check out |
+| **Số giờ thực tế** | Suy ra từ vào–ra; dùng để xét ≥ 9h |
+| **Màu / loại ngày** | WORK, LATE_EARLY, FORGOT_CLOCK_IN, nghỉ phép, lễ, cuối tuần, … |
+
+#### Manager — xem team
+
+1. Menu **Attendance & Time** → **Attendance Tracking** (`/attendance-tracking`).
+2. **Quyền:** `EMPLOYEE_VIEW` + có nhân viên cấp dưới (`Quản lý trực tiếp`).
+3. **Phạm vi:** Chỉ cây cấp dưới (đệ quy theo `managerId`), không xem phòng ban khác.
+4. Lọc: **tên**, **tháng**, **phòng ban** (chọn nhiều).
+5. Bấm **mắt** / xem chi tiết → `/attendance-tracking/{id}` — lịch tháng của từng người.
+
+#### HR / Admin — xem toàn công ty
+
+- Cùng trang **Attendance Tracking**.
+- Role **ADMIN** (`roleCode = ADMIN`): thấy **tất cả** nhân viên.
+- HR có `EMPLOYEE_VIEW` + được gán đủ quyền: tùy cấu hình (thường gần như toàn công ty nếu là Admin hoặc có quyền rộng).
+
+#### Bảng ký hiệu trên lưới (Attendance Tracking)
+
+| Ký hiệu | Chế độ ngày | Chế độ giờ | Ý nghĩa | Ví dụ phân loại |
+|--------|-------------|------------|---------|-----------------|
+| `1` | Có đi làm | `8h` | WORK hoặc LATE_EARLY (đã có chấm công) | Check-in 8:00, check-out 17:00 → WORK |
+| *(vàng)* | `1` | `8h` | **LATE_EARLY** — thiếu 9h tổng | Check-in 8:00, check-out 16:30 |
+| `W` | Cuối tuần | — | Ngày nghỉ cố định theo cấu hình | Thứ Bảy, CN |
+| `H` | Nghỉ lễ | — | Ngày lễ trong Holiday Configuration | 30/4 |
+| `PL`, `SL`, `UL`… | Mã loại phép | — | Đơn nghỉ **đã duyệt** (2 chữ đầu mã loại phép) | `PAID_LEAVE` → `PL` |
+| `F` | Quên chấm công | — | FORGOT_CLOCK_IN | Chỉ có một đầu vào/ra |
+| `A` | Vắng | — | Ngày làm việc đã qua, không có bản ghi chấm công | Không chấm, không đơn |
+| `-` | Chưa đến | — | Ngày tương lai | |
+
+**Hệ thống tự phân loại dựa trên:**
+
+1. **Cấu hình ngày nghỉ** (cuối tuần, lễ) → `W`, `H`.
+2. **Đơn nghỉ đã duyệt** (trừ REMOTE_WORK, ATTENDANCE_CORRECTION trên lưới) → mã phép.
+3. **Bản ghi chấm công** → so **tổng phút** với **9 giờ** → WORK hoặc LATE_EARLY.
+4. **Không có bản ghi** + ngày đã qua → ABSENT (team) / FORGOT_CLOCK_IN (một số view cá nhân).
+
+**Không dựa trên:** ca làm việc (shift) — vì không có module ca.
+
+**Kết quả mong đợi:** Đúng vai trò, mở đúng trang và đọc được từng ký hiệu ô ngày.
+
+---
+
+### 8.4 Chỉnh sửa / bổ sung chấm công
+
+#### Ai có quyền sửa?
+
+| Vai trò | Sửa giờ chấm công thủ công | Duyệt đơn ảnh hưởng công | Ghi chú |
+|---------|---------------------------|-------------------------|---------|
+| **Employee** | Chỉ **hồ sơ của mình** nếu được cấp `ATTENDANCE_MANUAL_UPDATE` (mặc định **không**) | Không duyệt | Thường tạo **đơn** thay vì sửa trực tiếp |
+| **Manager** | Nhân viên trong **team** (cây cấp dưới) nếu có `ATTENDANCE_MANUAL_UPDATE` | Có nếu có `LEAVE_APPROVE` và được chọn làm **Người duyệt** trên đơn | Không tự duyệt mọi đơn của team |
+| **HR / Admin** | Toàn bộ (Admin) hoặc theo quyền gán | Có nếu có `LEAVE_APPROVE` | Admin thường đủ quyền seed |
+
+**API sửa thủ công:** `PATCH /attendance/manual-time` — permission **`ATTENDANCE_MANUAL_UPDATE`**.
+
+**UI:** Trang chi tiết nhân viên (`/attendance-tracking/{id}`) → bấm ngày **LATE_EARLY**, **FORGOT_CLOCK_IN**, hoặc **WORK** (chỉ có giờ vào) → nhập **Giờ vào / Giờ ra** → Lưu.
+
+#### Quy trình sửa — có phê duyệt không?
+
+| Cách | Phê duyệt? | Mô tả |
+|------|:----------:|--------|
+| **Sửa thủ công** (manual-time) | **Không** quy trình duyệt trong hệ thống | Người có quyền sửa trực tiếp; **không** lưu người sửa / lý do trong DB |
+| **Đơn LATE_ARRIVAL / EARLY_DEPARTURE / ATTENDANCE_CORRECTION / REMOTE_WORK** | **Có** — một người duyệt được chọn khi tạo đơn | Sau **Approve**, hệ thống cập nhật giờ chấm công tự động |
+| **Đơn nghỉ phép thông thường** | Duyệt đơn nghỉ | Không sửa giờ vào/ra trừ các loại đặc biệt trên |
+
+**Chặn sửa:** Nếu ngày đó đã có **bất kỳ đơn nghỉ** nào → manual-time báo lỗi `LEAVE_REQUEST_EXISTS`.
+
+#### Lịch sử thay đổi
+
+**Không có** bảng lịch sử (audit log) cho chấm công. Giá trị mới **ghi đè** bản ghi cũ.
+
+> **Warning:** Mọi thay đổi nhạy cảm nên có quy trình ngoài hệ thống (email, biên bản) vì phần mềm không lưu vết.
+
+**Kết quả mong đợi:** HR/Manager biết dùng đơn hoặc sửa tay đúng quyền; nhân viên biết gửi đơn khi quên chấm.
+
+---
+
+### 8.5 Lọc & xuất dữ liệu
+
+| Tính năng | Có? | Chi tiết |
+|-----------|:---:|----------|
+| Lọc theo **tháng** | Có | MonthSelector trên Attendance và Attendance Tracking |
+| Lọc theo **tên** nhân viên | Có | Attendance Tracking |
+| Lọc theo **phòng ban** | Có | Chọn nhiều phòng ban |
+| Lọc theo **tuần** riêng | Không | Chỉ theo tháng |
+| Xuất **Excel** (.xlsx) | Có | Nút export trên Attendance Tracking — `GET /attendance/export-workingtime-detail` |
+| Xuất **CSV / PDF** | **Không** | — |
+
+**File Excel gồm:** mã NV, tên, từng ngày trong tháng (phút làm việc), mã chú thích (vắng, muộn, sớm), cột ngày phép còn lại, v.v.
+
+**Phạm vi export:** Giống lưới — Admin: cả công ty; Manager: team.
+
+---
+
+### 8.6 Bảng so sánh quyền chấm công
+
+| Tính năng | Employee | Manager | HR / Admin |
+|-----------|:--------:|:-------:|:----------:|
+| Tự Check in/out (GPS) | Có* | Có* | Có* |
+| Xem lịch chấm công **của mình** | Có* | Có* | Có* |
+| Xem lưới **Attendance Tracking** | Không | Có** | Có |
+| Xem chi tiết từng NV trong team | Không | Có** | Có |
+| Xuất Excel tháng | Không | Có** | Có |
+| Sửa giờ manual-time | Không*** | Có**** | Có***** |
+| Cấu hình vị trí văn phòng | Không | Không | Có (`LOCATION_VIEW`) |
+| Cấu hình ngày nghỉ | Không | Không | Có (`HOLIDAY_CONFIG_*`) |
+
+\* Cần `ATTENDANCE_VIEW`.  
+\** Cần `EMPLOYEE_VIEW` + (Manager) cấp dưới hoặc (Admin) toàn công ty.  
+\*** Trừ khi Admin gán thêm `ATTENDANCE_MANUAL_UPDATE`.  
+\**** Trong phạm vi team + có quyền.  
+\***** Admin / HR được gán quyền.
+
+---
+
+### 8.7 Ca làm việc & Lịch làm việc (Task 09)
+
+> **Quan trọng:** Phiên bản HRM hiện tại **không có** module **Ca làm việc (Shift)**, **Lịch ca (Roster)**, hay **Work schedule** trong database và giao diện.
+
+| Tính năng Task 09 mô tả | Trạng thái trong HRM |
+|-------------------------|----------------------|
+| Tạo ca (8:00–17:00, ca chiều, …) | **Chưa có** |
+| Gán ca cho nhân viên / phòng ban | **Chưa có** |
+| Lịch ca theo tuần/tháng | **Chưa có** |
+| Đổi ca một ngày + phê duyệt + lịch sử đổi ca | **Chưa có** |
+
+#### Thay thế bằng cơ chế hiện có
+
+| Khái niệm | Thực tế trong hệ thống |
+|-----------|------------------------|
+| “Giờ làm chuẩn” | **9 giờ tổng** giữa check-in và check-out → WORK / LATE_EARLY |
+| Khung 09:00–18:00 | Chỉ dùng cho: đơn **REMOTE_WORK** (tự điền công), đơn **LATE_ARRIVAL** / **EARLY_DEPARTURE** (tính phút), **không** dùng để chấm GPS |
+| Ngày nghỉ cố định | **Holiday Configuration** — cuối tuần, lễ |
+| Phụ cấp ca trên Excel | Chú thích **SS / NS** (Shift allowance) trong file export — **nhãn báo cáo**, không phải lịch ca |
+
+#### Mối liên hệ “Ca” ↔ “Chấm công” (khi triển khai ca trong tương lai)
+
+Hiện tại hệ thống **không** so check-in với ca. Nếu sau này bổ sung module ca, cần định nghĩa lại:
+
+- Muộn = check-in sau `giờ bắt đầu ca + grace period`
+- Về sớm = check-out trước `giờ kết thúc ca`
+- Thiếu giờ = so với `giờ ca − nghỉ giữa ca`
+
+**Kết quả mong đợi:** Không tìm menu “Ca làm việc”; vận hành theo **9 giờ/ngày** + **cấu hình ngày nghỉ** + **đơn nghỉ/đơn sửa công**.
+
+---
+
+## 9. Đơn xin phép
+
+> Task 10–11.
+
+### 9.1 Các loại phép trong hệ thống
+
+Loại phép nằm trong bảng **leave_types** (mã `code`). Có thể thêm loại mới trong DB; dưới đây là các mã **đang dùng trong code/seed**:
+
+| Mã (`code`) | Tên (VI) | Có lương? | Trừ ngày phép còn lại? | Ghi chú |
+|-------------|----------|:---------:|:----------------------:|---------|
+| `PAID_LEAVE` | Nghỉ phép có lương | Có | **Có** — chỉ loại này trừ `remainingLeaveDays` | Tính **cả ngày** mỗi ngày làm việc trong khoảng đơn |
+| `UNPAID_LEAVE` | Nghỉ phép không lương | Không | Không | |
+| `SICK_LEAVE` | Nghỉ ốm | Có (flag) | **Không** trừ số dư (không phải PAID_LEAVE) | **Không** có upload giấy tờ trong hệ thống |
+| `LATE_ARRIVAL` | Đến muộn | Không | Không | Đơn **phút**; duyệt xong cập nhật **giờ vào** |
+| `EARLY_DEPARTURE` | Về sớm | Không | Không | Cập nhật **giờ ra** |
+| `REMOTE_WORK` | Làm remote | Không | Không | Duyệt xong → công 09:00–18:00 các ngày trong khoảng; bỏ geofence |
+| `ATTENDANCE_CORRECTION` | Cập nhật công | Không | Không | Duyệt xong → ghi check-in/out theo đơn |
+| `HIEU_HI` | Hiếu hỉ | Có (flag) | **Không** trừ số dư | Cưới/tang — không hiện số dư trên form |
+
+**Chưa có trong hệ thống:**
+
+- Hạn mức **X ngày/năm theo từng loại phép** tự động
+- **Chuyển phép** sang năm sau (carryover)
+- **Đính kèm file** (giấy bác sĩ, …) trên đơn
+
+**Số ngày phép năm:** HR nhập thủ công trên hồ sơ nhân viên:
+
+- **Tổng ngày phép** (`totalLeaveDays`) — tham khảo
+- **Ngày phép còn lại** (`remainingLeaveDays`) — **chỉ `PAID_LEAVE` khi duyệt** mới trừ số này
+
+---
+
+### 9.2 Tạo đơn xin phép — từng bước (nhân viên)
+
+**Quyền:** `LEAVE_VIEW`.
+
+1. Menu **Attendance & Time** → **Leave Requests** (`/leave`), hoặc từ trang **Attendance** → tạo đơn nhanh.
+2. Bấm nút tạo đơn mới (Add / Tạo đơn).
+3. Trong form:
+   - **Loại phép** — chọn từ danh sách (bắt buộc).
+   - **Khoảng ngày** — ngày bắt đầu / kết thúc (DatePicker, `YYYY-MM-DD`).
+   - **Giờ bắt đầu / kết thúc** — với nghỉ nhiều ngày hoặc cùng ngày; mặc định gợi ý **09:00–18:00** (không phải ca làm việc — chỉ mặc định form).
+   - **Đến muộn / Về sớm** (`LATE_ARRIVAL`, `EARLY_DEPARTURE`): nhập **số phút**, có thể chọn nhiều ngày.
+   - **Lý do** — tùy chọn (text).
+   - **Người duyệt** — **bắt buộc**, chọn **một** người từ danh sách gợi ý.
+4. Nếu là phép có lương (trừ Hiếu hỉ): form hiển thị **Ngày phép còn lại** từ hồ sơ.
+5. Bấm **Gửi** / **Lưu** → đơn ở trạng thái **Chờ duyệt** (`PENDING`).
+
+**Sau khi gửi:**
+
+- Đơn lưu trong hệ thống, trạng thái **PENDING**.
+- **Người duyệt** đã chọn nhận **thông báo trong app** (chuông) — loại `LEAVE_REQUEST_CREATED`, link `/leave-approvals`.
+- **Không gửi email** tự động.
+
+> **Warning — Không có “nửa ngày” 0.5:** UI chọn **giờ** trong ngày, nhưng khi duyệt **PAID_LEAVE**, hệ thống trừ **1 ngày cho mỗi ngày làm việc** có overlap — không trừ 0.5 ngày.
+
+> **Warning — Vượt số dư:** Khi **duyệt** `PAID_LEAVE`, nếu `remainingLeaveDays` < số ngày tính phí → lỗi **Insufficient remaining leave days** (không duyệt được). Vẫn **cho gửi** đơn khi tạo.
+
+**Kết quả mong đợi:** Đơn nằm trong danh sách “Chờ duyệt”; người duyệt nhận thông báo.
+
+---
+
+### 9.3 Hạn ngạch & số dư ngày phép
+
+| Chỉ số | Nguồn | Ý nghĩa |
+|--------|-------|---------|
+| **Tổng ngày phép** | HR nhập trên hồ sơ nhân viên | Tham khảo; **không** tự trừ khi duyệt |
+| **Đã dùng** | Không có cột riêng “đang chờ” trên DB | Suy ra: Tổng − Còn lại (thủ công) |
+| **Còn lại** | `remainingLeaveDays` | Trừ khi duyệt **PAID_LEAVE**; cộng lại khi xóa đơn PAID_LEAVE đã duyệt (người có quyền xóa) |
+| **Đang chờ duyệt** | **Không** trừ trước | Chỉ trừ sau **Approve** |
+
+**Xem số còn lại:** Khi tạo đơn phép có lương (trừ Hiếu hỉ) — hiện trên form; hoặc xem hồ sơ nhân viên (HR).
+
+---
+
+### 9.4 Xem & quản lý đơn đã tạo
+
+**Danh sách:** `/leave` — lọc theo tháng, trạng thái.
+
+**Trạng thái:**
+
+| Trạng thái | Mã | Ý nghĩa |
+|------------|-----|---------|
+| Chờ duyệt | `PENDING` | Vừa gửi, chờ người duyệt |
+| Đã duyệt | `APPROVED` | Đã chấp thuận; có thể đã trừ phép / cập nhật công |
+| Từ chối | `REJECTED` | Bị từ chối — **không** có luồng gửi lại trong hệ thống |
+
+**Trạng thái KHÔNG có:** `CANCELLED`, `Đã hủy` riêng — nhân viên **xóa** đơn PENDING thay vì hủy.
+
+```
+  [Tạo đơn]
+      |
+      v
+  +-----------+
+  |  PENDING  |<---- Chỉnh sửa / Xóa (nhân viên)
+  +-----------+
+     |      |
+     |      +------------------+
+     v                         v
++-----------+            +-----------+
+| APPROVED  |            | REJECTED  |
++-----------+            +-----------+
+ (kết thúc)               (kết thúc)
 ```
 
-### 6.6 Theo dõi chấm công
-- Tìm kiếm nhân viên, xem chi tiết theo tháng, xuất Excel.
+**Nhân viên hủy / xóa đơn:**
 
-| Ký hiệu | Ý nghĩa |
-|---|---|
-| `1 / 8h` | Có đi làm |
-| `W` | Nghỉ cuối tuần |
-| `H` | Nghỉ lễ |
-| `A` | Vắng |
-| `PL, SL, UL...` | Nghỉ theo loại đơn |
-| `F` | Quên chấm công |
-| `-` | Ngày tương lai/chưa tính |
+- Chỉ được **sửa / xóa** khi trạng thái **PENDING**.
+- Sau khi duyệt/từ chối → nhân viên **không** xóa được (trừ Admin/HR có quyền đặc biệt).
 
-### 6.7 Đơn xin phép
-- Tạo đơn, chỉnh sửa/xóa khi chưa duyệt.
-- Theo dõi trạng thái: `Chờ duyệt`, `Đã duyệt`, `Từ chối`.
+**Đơn bị từ chối:**
 
-### 6.8 Duyệt đơn xin phép
-- Người duyệt xử lý đơn theo quyền.
+- Người xin nhận **thông báo trong app** (`LEAVE_REQUEST_REJECTED`).
+- Lý do từ chối: API **không** bắt buộc ghi chú riêng khi reject — chỉ thấy **lý do trong đơn gốc** (nếu người xin đã điền). Người duyệt không có trường “lý do từ chối” bắt buộc trên UI.
 
-```mermaid
-flowchart LR
-  A[Nhân viên tạo đơn] --> B[Trạng thái: Chờ duyệt]
-  B --> C{Người duyệt xử lý}
-  C -->|Duyệt| D[Trạng thái: Đã duyệt]
-  C -->|Từ chối| E[Trạng thái: Từ chối]
+**Kết quả mong đợi:** Nhân viên theo dõi được trạng thái và biết khi nào được sửa/xóa.
+
+---
+
+### 9.5 Quy trình duyệt đơn (Task 11)
+
+#### Chuỗi phê duyệt — thực tế trong HRM
+
+**Một bước, một người duyệt** — **không** có chuỗi Manager → HR tuần tự, **không** duyệt song song nhiều người.
+
+```
+Nhân viên tạo đơn + chọn Người duyệt (1 người)
+        |
+        v
+   [ PENDING ]
+        |
+        v
+ Người được chọn duyệt HOẶC từ chối
+        |
+   +----+----+
+   v         v
+APPROVED  REJECTED
 ```
 
-### 6.9 Lương
-- Admin/HR: quản lý danh mục lương, cấu hình Thuế TNCN, tạo/sửa/tính lại phiếu lương.
-- Nhân viên: xem phiếu lương cá nhân.
+**Ai là người duyệt?**
 
-```mermaid
-flowchart TD
-  A[Chốt dữ liệu chấm công] --> B[Kiểm tra đơn nghỉ phép]
-  B --> C[Cập nhật thông tin nhân sự]
-  C --> D[Tạo/Tính lại phiếu lương]
-  D --> E[Rà soát BHXH/BHYT/BHTN/TNCN]
-  E --> F[Chốt kỳ lương]
-```
+- Nhân viên **tự chọn** khi tạo đơn từ danh sách `GET /leave/approvers`.
+- Hệ thống gợi ý:
+  - **Quản lý trực tiếp** (`managerId`) — đưa lên đầu danh sách nếu đang hoạt động.
+  - Nhân viên **cùng phòng ban**, **cấp chức vụ cao hơn** (level nhỏ hơn = cao hơn).
+  - Nhân viên thuộc **phòng ban cha** trên cây tổ chức.
+- **Không** tự gán “luôn là Manager” — phải chọn đúng người trong list.
+- **Không** có ủy quyền duyệt thay khi Manager đi phép.
 
-### 6.10 Vị trí chi nhánh
-- Thêm/sửa/xóa vị trí chấm công.
-- Cấu hình tọa độ và bán kính.
+**WHY thiết kế một người:** Đơn giản hóa MVP — tránh chờ nhiều cấp; trách nhiệm rõ trên một `approverId`.
 
-### 6.11 Cấu hình ngày nghỉ
-- Cấu hình ngày nghỉ cố định theo tuần.
-- Cấu hình kỳ nghỉ lễ theo khoảng ngày.
+#### Hướng dẫn Manager / HR duyệt từng bước
 
-### 6.12 Nhóm quyền và Phân quyền
-- Tạo nhóm quyền (ví dụ: `ADMIN`, `HR_MANAGER`, `EMPLOYEE`).
-- Gán permission cho từng nhóm để kiểm soát menu và thao tác.
+**Quyền:** `LEAVE_APPROVE` + phải là **đúng người** được gán trên đơn.
 
-## 7. Quy trình vận hành đề xuất
+1. **Thông báo:** Chuông app — `LEAVE_REQUEST_CREATED` (không email).
+2. Vào **Attendance & Time** → **Leave Approvals** (`/leave-approvals`).
+3. Chọn **tháng**, lọc trạng thái (**PENDING** / All / …).
+4. Bảng danh sách: người xin, loại phép, thời gian, **lý do**, trạng thái.
+5. Bấm xem chi tiết → thấy đủ thông tin đơn (số dư phép **không** hiện riêng trên màn duyệt — HR xem hồ sơ NV nếu cần).
+6. **Approve:** xác nhận → trạng thái APPROVED; người xin nhận thông báo; nếu PAID_LEAVE → trừ `remainingLeaveDays`; nếu loại đặc biệt → cập nhật chấm công.
+7. **Reject:** xác nhận → REJECTED; người xin nhận thông báo. **Không bắt buộc** nhập lý do từ chối.
 
-### 7.1 Khởi tạo
-1. Cấu hình phòng ban, chức vụ, vị trí, ngày nghỉ.
-2. Tạo nhóm quyền, gán phân quyền.
-3. Tạo tài khoản nhân viên và gán tổ chức.
+#### Quyền theo role
 
-### 7.2 Hằng ngày
+| Câu hỏi | Trả lời |
+|---------|---------|
+| Manager duyệt đơn của ai? | Chỉ đơn mà **mình được chọn** làm Người duyệt — **không** phải mọi đơn của team |
+| HR Admin duyệt tất cả? | Chỉ nếu được **chọn** trên từng đơn, hoặc tự tạo đơn hộ — **không** có quyền duyệt mọi đơn tự động |
+| Manager vắng, ai duyệt thay? | **Không có** ủy quyền — cần chọn người duyệt khác lúc tạo đơn hoặc HR xử lý thủ công |
+| HR xóa đơn đã duyệt? | Có nếu có `EMPLOYEE_VIEW` hoặc `LEAVE_APPROVE` — có thể **hoàn lại** ngày phép PAID_LEAVE |
+
+#### Tình huống đặc biệt
+
+| Tình huống | Hệ thống xử lý |
+|------------|----------------|
+| Nhiều người cùng team xin phép một ngày | **Không** cảnh báo trùng / thiếu nhân sự |
+| Xin phép ngày lễ / cuối tuần | Vẫn tạo được; ngày **không tính** trừ phép nếu nằm trong **off dates** (holiday config) |
+| Đơn đã duyệt cần hủy | **Không** nút Cancel — HR xóa đơn (hoàn phép nếu PAID_LEAVE) hoặc tạo đơn bù / sửa công |
+| Nhắc duyệt khi PENDING quá lâu | **Không** có deadline / reminder tự động |
+
+#### Bảng thông báo
+
+| Sự kiện | Ai nhận | Kênh | Nội dung (tóm tắt) |
+|---------|---------|------|---------------------|
+| Nhân viên gửi đơn | **Người duyệt** đã chọn | App (+ Web Push nếu bật) | Có đơn mới — mở Leave Approvals |
+| Duyệt đơn | **Người xin** | App (+ Push) | Đơn đã được duyệt |
+| Từ chối đơn | **Người xin** | App (+ Push) | Đơn bị từ chối |
+| Sửa đơn PENDING | — | **Không** gửi thông báo | — |
+| Xóa đơn | — | **Không** gửi thông báo | — |
+| HR Admin “duyệt thay” không được chọn | — | Không duyệt được (403) | — |
+
+**Kết quả mong đợi:** Người duyệt biết chỉ duyệt đơn gán cho mình; nhân viên biết luồng một bước và nhận thông báo kết quả.
+
+---
+
+## 10. Báo cáo chấm công & nghỉ phép
+
+> Task 12 — dành HR / Manager.
+
+### 10.1 Các loại báo cáo / tổng hợp hiện có
+
+| Báo cáo / màn hình | Mô tả | Ai xem được | Lọc |
+|--------------------|--------|-------------|-----|
+| **Attendance** (dashboard cá nhân) | Lịch tháng, tổng ngày làm, phép có/không lương, lễ | Nhân viên (`ATTENDANCE_VIEW`) | Tháng |
+| **Attendance Tracking** | Lưới cả tháng theo nhân viên | `EMPLOYEE_VIEW` + scope team/Admin | Tháng, tên, phòng ban |
+| **Chi tiết 1 nhân viên** | `/attendance-tracking/{id}` | Self / team / Admin | Tháng |
+| **Overview — biểu đồ leave/OT** | Số đơn chờ, ngày phép đã duyệt (SQL đơn giản) | `LEAVE_VIEW` + dashboard | — |
+| **Today summary** | Tổng hợp chấm công hôm nay (muộn/vắng, …) | Nội bộ API | — |
+| **Export Working time detail** | File Excel chi tiết công tháng | `EMPLOYEE_VIEW` + scope | Tháng (query) |
+| **Báo cáo nghỉ phép riêng PDF/CSV** | **Không có** | — | — |
+
+> `ATTENDANCE_MANAGE` có trong seed nhưng **không** gắn API cụ thể — quyền dự phòng.
+
+---
+
+### 10.2 Xem báo cáo tổng hợp tháng
+
+1. **Manager / HR:** **Attendance Tracking** → chọn **tháng/năm**.
+2. Lọc **phòng ban** và/hoặc **tên**.
+3. Đọc lưới từng ngày + cột **tổng** cuối bảng.
+4. Chuyển **Đơn vị** Day/Hour (ngày: `1`, `F`, `A`…; giờ: `8h` cho ngày làm).
+
+**Chỉ số trên dashboard cá nhân** (`/attendance`):
+
+| Chỉ số | Ý nghĩa |
+|--------|---------|
+| Ngày làm việc kỳ vọng | Ngày làm trong tháng (trừ lễ/cuối tuần theo config) |
+| Ngày đã làm / worked | Ngày có công WORK / tương đương |
+| Nghỉ có lương / không lương | Quy đổi từ giờ đơn đã duyệt (÷ 8) |
+| Ngày lễ | Từ holiday config |
+
+**Lưu ý:** “Số ngày đi muộn” trên thống kê **hôm nay** = đếm bản ghi status **LATE_EARLY** (thiếu 9h), không phải “muộn so với 8:00”.
+
+---
+
+### 10.3 Xuất báo cáo
+
+| Định dạng | Có? |
+|-----------|:---:|
+| **Excel (.xlsx)** | Có |
+| PDF | Không |
+| CSV | Không |
+
+**Các bước xuất:**
+
+1. Vào **Attendance Tracking**.
+2. Chọn **tháng**, lọc phòng ban/tên (nếu cần).
+3. Bấm nút **Export** / xuất Excel.
+4. Tải file `.xlsx`.
+
+**Cột tiêu biểu trong file:** mã NV, họ tên, phòng ban, từng ngày (phút vào/ra hoặc mã), tổng phút, mã chú thích (7=vắng, 8=muộn, 9=sớm theo legend file), ngày phép còn lại, v.v.
+
+---
+
+### 10.4 Đối soát cuối tháng (HR)
+
+#### Dữ liệu “chưa chốt” vs “đã chốt”
+
+| Khái niệm | Trong HRM hiện tại |
+|-----------|-------------------|
+| **Chưa chốt** | Mọi tháng đều **sửa được** nếu có quyền: chấm công, manual-time, tạo/sửa/xóa đơn, duyệt đơn |
+| **Đã chốt (lock/freeze)** | **Không có** nút Lock tháng, **không** có bảng khóa kỳ trong DB |
+
+“Chốt” trong tài liệu vận hành ([mục 11](#11-quy-trình-vận-hành-đề-xuất)) là **quy trình nghiệp vụ ngoài hệ thống** — sau khi HR rà soát xong và chuyển sang **Payroll**.
+
+#### Checklist đối soát cuối tháng (HR)
+
+- [ ] Mở **Attendance Tracking** đúng **tháng** cần chốt
+- [ ] Lọc từng **phòng ban** hoặc xuất **Excel** toàn công ty
+- [ ] Rà **ô `F`** (quên chấm) → yêu cầu bổ sung chấm / đơn ATTENDANCE_CORRECTION / manual-time
+- [ ] Rà **ô `A`** (vắng) → xác nhận nghỉ không phép hay thiếu đơn
+- [ ] Rà **ô vàng / LATE_EARLY** → xác nhận đủ 9h hay cần xử lý
+- [ ] Kiểm tra đơn **PENDING** trên **Leave Approvals** — duyệt hoặc từ chối trước khi tính lương
+- [ ] Đối chiếu **remainingLeaveDays** với đơn **PAID_LEAVE** đã duyệt trong tháng
+- [ ] Xuất **Excel** lưu làm bằng chứng đối soát (file có timestamp tải về)
+- [ ] Chuyển sang module **Payroll** (ngoài phạm vi chấm công) khi dữ liệu đã nhất quán
+- [ ] Ghi nhận nội bộ “đã chốt tháng MM/YYYY” (email/biên bản) vì hệ thống **không** khóa tự động
+
+**Kết quả mong đợi:** HR không bỏ sót đơn chờ, thiếu công, hoặc sai phép trước khi tính lương.
+
+---
+
+## 11. Quy trình vận hành đề xuất
+
+### 11.1 Khởi tạo (lần đầu triển khai)
+
+1. Cấu hình phòng ban, chức vụ, vị trí chấm công, ngày nghỉ.
+2. Tạo nhóm quyền, gán phân quyền (`ADMIN`, `EMPLOYEE`, …).
+3. Tạo nhân viên, gán phòng ban, quản lý trực tiếp, **vai trò**.
+4. Gửi username / mật khẩu mặc định cho từng người; nhắc **đổi mật khẩu**.
+
+**Kết quả mong đợi:** Công ty vận hành được chu trình chấm công — nghỉ phép — lương.
+
+### 11.2 Hằng ngày
+
 1. Chấm công.
-2. Tạo/duyệt đơn nghỉ phép.
-3. Theo dõi xử lý bất thường.
+2. Tạo / duyệt đơn nghỉ.
+3. Sắp lịch họp trên **Lịch** (nếu cần).
+4. Xử lý bất thường (quên chấm công, v.v.).
 
-### 7.3 Hằng tháng
-1. Khóa dữ liệu công.
-2. Cập nhật thông số lương/thuế (nếu có).
+### 11.3 Hằng tháng
+
+1. Rà soát dữ liệu công — xem [checklist mục 10.4](#104-đối-soát-cuối-tháng-hr) (không có nút khóa tháng trong hệ thống).
+2. Cập nhật thông số lương, thuế (nếu có).
 3. Chạy bảng lương và đối soát.
 
-## 8. Xử lý sự cố thường gặp
+---
 
-| Vấn đề | Hướng xử lý |
-|---|---|
-| Không đăng nhập được | Kiểm tra tài khoản/mật khẩu, reset nếu cần |
-| Không chấm công được | Kiểm tra quyền vị trí và phạm vi văn phòng |
-| Không thấy menu/chức năng | Kiểm tra phân quyền |
-| Không tạo/duyệt được đơn | Kiểm tra quyền `LEAVE_VIEW`/`LEAVE_APPROVE` |
-| Dữ liệu lương chưa đúng | Kiểm tra dữ liệu công, đơn nghỉ, thông số thuế |
+## 12. Câu hỏi thường gặp (FAQ)
 
-## 9. Checklist bàn giao
+### 12.1 Về tài khoản
 
-- [ ] Danh sách tài khoản khởi tạo
-- [ ] Quy trình phân quyền nội bộ
-- [ ] Quy trình sao lưu dữ liệu
-- [ ] Đầu mối hỗ trợ kỹ thuật và SLA
-- [ ] Đổi toàn bộ mật khẩu mặc định
+**Tôi quên mật khẩu, phải làm gì?**
 
-> Khuyến nghị: Đổi toàn bộ mật khẩu mặc định ngay sau nghiệm thu bàn giao.
+Hệ thống không có “Quên mật khẩu” trên màn hình đăng nhập. Bạn liên hệ **HR hoặc IT** — họ mở hồ sơ của bạn và bấm **Reset mật khẩu**. Sau reset, mật khẩu lại **bằng tên đăng nhập** — hãy đổi mật khẩu mới ngay sau khi đăng nhập ([mục 3.4](#34-hướng-dẫn-đổi-mật-kẩu)).
+
+---
+
+**Tài khoản bị khóa, liên hệ ai?**
+
+Phiên bản hiện tại **không có** chức năng “khóa tài khoản” riêng. Nếu không đăng nhập được:
+
+1. Kiểm tra đúng **tên đăng nhập** (không phải email/mã EMP).
+2. Thử reset mật khẩu qua HR.
+3. Liên hệ IT nếu vẫn lỗi — có thể nhầm URL hoặc tài khoản chưa được tạo.
+
+| Kênh | Thông tin (placeholder) |
+|------|-------------------------|
+| HR nội bộ | _[điền email/số điện thoại phòng Nhân sự]_ |
+| IT hỗ trợ | _[điền email/số hotline IT]_ |
+
+---
+
+**Tôi muốn đổi tên đăng nhập có được không?**
+
+**Không.** Sau khi tạo nhân viên, tên đăng nhập **không đổi được**. Nếu bắt buộc phải đổi, cần quy trình nội bộ với IT (có thể tạo hồ sơ mới — tùy chính sách công ty).
+
+---
+
+### 12.2 Về nhân viên
+
+**Tạo nhân viên xong nhưng họ không nhận được email?**
+
+Đúng với hệ thống hiện tại — **không gửi email** tự động. HR cần gửi username/mật khẩu qua chat nội bộ, giấy bàn giao hoặc email **ngoài** HRM.
+
+---
+
+**Xóa nhân viên có mất dữ liệu không?**
+
+**Có** — thao tác xóa xóa bản ghi nhân viên khỏi database. Chấm công, lương, lịch liên quan có thể bị ảnh hưởng. Nên dùng trạng thái **Nghỉ việc** thay vì xóa.
+
+---
+
+**Nhân viên nghỉ việc thì xử lý tài khoản thế nào?**
+
+1. Đổi **Trạng thái làm việc** → `TERMINATED` hoặc `INACTIVE`.
+2. Thu hồi quyền nhạy cảm (đổi vai trò hoặc bỏ permission qua Admin).
+3. Không cần xóa username — nhân viên có thể không đăng nhập nữa; nếu vẫn đăng nhập được, nhờ IT kiểm tra thêm chính sách nghiệp vụ.
+
+---
+
+### 12.3 Về lịch
+
+**Tôi tạo lịch nhưng người tham gia không thấy?**
+
+Kiểm tra:
+
+1. Bạn đã **thêm họ** vào danh sách tham gia chưa?
+2. Họ có chọn **đúng cột tên** trên lịch không?
+3. Họ có đang xem **đúng tuần/ngày** không?
+4. Họ đã **rút lui** khỏi cuộc họp trước đó chưa?
+
+Họ vẫn nhận **thông báo trong app** khi được mời — nhắc kiểm tra biểu tượng chuông.
+
+---
+
+**Xóa lịch thì người tham gia có nhận thông báo không?**
+
+**Có** — khi organizer xóa một buổi hoặc cả chuỗi, hệ thống gửi thông báo hủy cho người tham gia còn lại.
+
+---
+
+**Tôi bị mời vào lịch nhưng muốn từ chối, làm thế nào?**
+
+1. Mở **Lịch** → bấm vào cuộc họp.
+2. Bấm **Rút lui**.
+3. Nhập **lý do** (bắt buộc) → xác nhận.
+
+Organizer nhận thông báo bạn đã rút lui. Bạn **không** cần (và không thể) xóa cả sự kiện.
+
+---
+
+### 12.4 Lỗi phổ biến và cách khắc phục
+
+| Lỗi | Nguyên nhân | Cách xử lý |
+|-----|-------------|------------|
+| **Tên đăng nhập đã tồn tại** | Username trùng | Đổi username khi tạo (ví dụ thêm `2`, `hn`, …) — xem [4.3](#43-lỗi-thường-gặp-khi-tạo-nhân-viên) |
+| **Không có quyền thực hiện** / **Insufficient permissions** | Tài khoản thiếu permission | Xem [mục 6](#6-phân-quyền--vai-trò); liên hệ Admin gán quyền |
+| **Invalid username or password** | Sai user/pass | Kiểm tra Caps Lock; nhờ HR reset |
+| **Trang không tải được** | Mạng, server, URL sai | Kiểm tra internet; thử `https://hrm.tamada.vn/login`; xóa cache; liên hệ IT |
+| **Only the event organizer can modify** | Sửa lịch của người khác | Nhờ **người tạo** cuộc họp sửa, hoặc bạn **rút lui** nếu không tham gia |
+| **Insufficient remaining leave days** | Duyệt PAID_LEAVE vượt số dư | Từ chối hoặc HR cập nhật **Ngày phép còn lại** trên hồ sơ |
+| **OUTSIDE_OFFICE_AREA** khi chấm công | GPS ngoài văn phòng | Di chuyển vào bán kính; hoặc đơn **REMOTE_WORK** đã duyệt |
+
+### 12.2b Về chấm công & phép (bổ sung)
+
+**Tôi check-in lúc 8:15 mà vẫn bị “Đi muộn, về sớm”?**
+
+Hệ thống **không** so với giờ vào ca 8:00. **LATE_EARLY** = tổng thời gian giữa check-in và check-out **dưới 9 giờ**. Ví dụ: 8:15–16:45 = 8h30 → LATE_EARLY. Cần check-out sau 17:15 (nếu vào 8:15) mới đủ 9h.
+
+**Có ca làm việc (ca sáng/chiều) trong menu không?**
+
+**Không** — xem [mục 8.7](#87-ca-làm-việc--lịch-làm-việc-task-09).
+
+**Tôi là Manager, sao không duyệt được đơn của nhân viên team?**
+
+Chỉ duyệt được nếu đơn **chọn bạn làm Người duyệt**. Không tự động theo team — xem [mục 9.5](#95-quy-trình-duyệt-đơn-task-11).
+
+---
+
+### 12.5 Liên hệ hỗ trợ
+
+| Loại hỗ trợ | Liên hệ (cập nhật bởi công ty) |
+|-------------|--------------------------------|
+| Nghiệp vụ HR (nhân sự, phép, hồ sơ) | _[Email / SĐT phòng HR]_ |
+| Kỹ thuật (đăng nhập, lỗi hệ thống) | _[Email / SĐT IT]_ |
+| Báo lỗi phần mềm | [Tạo issue GitHub](https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new) |
+
+---
+
+## 13. Checklist bàn giao
+
+- [ ] Danh sách tài khoản khởi tạo (username, vai trò)
+- [ ] Quy trình phân quyền nội bộ (ai gán role/permission)
+- [ ] Hướng dẫn chấm công & vị trí GPS cho nhân viên
+- [ ] Quy trình reset mật khẩu khi quên
+- [ ] Quy trình nghỉ việc (đổi trạng thái, không xóa bừa)
+- [ ] Đầu mối hỗ trợ HR/IT và SLA
+- [ ] **Đổi toàn bộ mật khẩu mặc định** (= username) sau nghiệm thu
+
+> **Khuyến nghị:** Sau bàn giao, yêu cầu mọi nhân viên đổi mật khẩu và không chia sẻ tài khoản.
+
+---
+
+*Tài liệu phiên bản 1.0.1 — đồng bộ với codebase `tmv-hrm` / `tmv-hrm-be`. Cập nhật lần cuối: 2026.*
