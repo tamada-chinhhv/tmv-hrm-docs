@@ -1,4 +1,4 @@
-<p>
+﻿<p>
   <a href="./README.md">JP</a>
   ·
   <a href="./README.en.md"><strong>EN</strong></a>
@@ -434,7 +434,7 @@ The system generates occurrences for about **12 weeks** from the viewed week (ma
 
 ### 5.5 Calendar permissions
 
-Principle: **creator manages**; **invitees can leave**; **any logged-in user can view** others’ calendars to plan meetings.
+Principle: **creator manages**; **invitees can leave**; users with **`CALENDAR_VIEW`** (default for `EMPLOYEE` after seed/migrate) may **view** others’ calendars to plan meetings. The **Calendar** menu (`/calendar`) requires `CALENDAR_VIEW`.
 
 #### Organizer
 
@@ -462,7 +462,7 @@ Principle: **creator manages**; **invitees can leave**; **any logged-in user can
 |--------|:--------:|-------|
 | View anyone’s calendar | Yes | Same as any authenticated user |
 | Edit/delete others’ meetings | **No** on calendar API | `ADMIN` does **not** override organizer rules |
-| Special “view all” setting | Not active | UI code exists but is not wired to the menu |
+| “View all employees” on calendar | Yes (optional) | Requires `CALENDAR_MANAGE` — switch on **Calendar** page |
 
 ### 5.6 Notifications and reminders
 
@@ -566,17 +566,25 @@ Each employee has **one** `roleId` at a time.
 | `EMPLOYEE_UPDATE` | Update employee, reset password |
 | `EMPLOYEE_DELETE` | Delete employee |
 | `ATTENDANCE_VIEW` | View / check-in attendance |
-| `ATTENDANCE_MANAGE` | Advanced attendance management |
+| `ATTENDANCE_EXPORT` | Export working-time detail Excel (Attendance Tracking) |
 | `ATTENDANCE_MANUAL_UPDATE` | Manual time correction |
-| `LOCATION_VIEW` | Office locations |
-| `LEAVE_VIEW` | View / create leave requests |
+| `LOCATION_VIEW` / `LOCATION_MANAGE` | View / manage office locations |
+| `LEAVE_VIEW` | View / create leave requests (including OT type) |
 | `LEAVE_APPROVE` | Approve leave |
+| `LEAVE_APPROVE_MANAGED` | Approve managed employees’ leave (child of `LEAVE_APPROVE` in assign UI) |
+| `CALENDAR_VIEW` | View calendar, create/edit own events |
+| `CALENDAR_MANAGE` | Company-wide calendar admin switch |
 | `PAYROLL_VIEW` | View payslips |
-| `PAYROLL_MANAGE` | Manage / calculate payroll |
+| `PAYROLL_MANAGE` | Manage / calculate payroll, tax settings |
+| `PAYROLL_PERIOD_LOCK` | Lock / unlock payroll periods |
 | `DEPARTMENT_VIEW` / `DEPARTMENT_MANAGE` | Departments |
 | `POSITION_VIEW` / `POSITION_MANAGE` | Positions |
 | `ROLE_VIEW` / `ROLE_MANAGE` | Roles & permissions |
 | `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` | Holiday configuration |
+| `APPEARANCE_VIEW` / `APPEARANCE_EDIT` | View / edit appearance (Settings) |
+| `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` | View / edit default work shift (Settings) |
+
+> `OVERTIME_*` and `ATTENDANCE_MANAGE` are **removed** — overtime uses `LEAVE_*` only; do not re-assign legacy codes.
 
 ---
 
@@ -596,14 +604,16 @@ Quick metrics for HR, attendance, and leave (some widgets need `EMPLOYEE_VIEW` /
 Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Section 10](#10-attendance--leave-reports).
 
 ### 7.4 Payroll
-
-- `PAYROLL_VIEW`: view payslips.
-- `PAYROLL_MANAGE`: create, recalculate, tax settings.
+- `PAYROLL_VIEW`: view payslips (own or broader per configuration); read payroll period status.
+- `PAYROLL_MANAGE`: create, recalculate, tax settings, manage payslips.
+- `PAYROLL_PERIOD_LOCK`: **lock/unlock payroll period** (or use `PAYROLL_MANAGE`, which includes period lock).
+- **Payroll period (`PayrollPeriod`):** default **Open**; HR clicks **Lock period** on **Payroll** (`PayrollPeriodControls`) → status **Locked**. When locked: cannot create/edit/import/copy payslips (API `PAYROLL_PERIOD_LOCKED`); view and Excel export still work. **Unlock** requires `PAYROLL_MANAGE` or `PAYROLL_PERIOD_LOCK` (note required on unlock). Period lock **only** blocks payroll actions—attendance and leave can still be edited (see [Section 10.4](#104-month-end-reconciliation-hr)).
 
 ### 7.5 System Settings
 
 - **Holiday Configuration:** `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT`.
-- **Office Locations:** `LOCATION_VIEW`.
+- **Office Locations:** `LOCATION_VIEW` / `LOCATION_MANAGE`.
+- **Appearance & work shift:** `APPEARANCE_VIEW` / `APPEARANCE_EDIT`, `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — **System Settings → Settings** (`/sysConfig/settings`).
 - **Roles / Permission Assignment:** `ROLE_VIEW` / `ROLE_MANAGE`.
 
 ---
@@ -619,7 +629,7 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 | Timezone | **`Asia/Ho_Chi_Minh`** |
 | Work shifts | **Not implemented** — see [8.5](#85-work-shifts-not-implemented) |
 
-> **Important:** **LATE_EARLY** means **under 9 total work hours**, not “15 minutes late vs 8:00 shift”. Example: 08:00–16:30 (8.5h) → LATE_EARLY; 08:00–17:00 (9h) → WORK.
+> **Important:** **LATE_EARLY** is evaluated from the configured **work shift** (start/end, grace minutes, lunch break) and **expected working minutes** (`workUnitLabel`), not a fixed 9h/540-minute rule. Late/early vs shift boundaries or insufficient net working time → LATE_EARLY; otherwise WORK.
 
 ### 8.2 Self check-in
 
@@ -707,12 +717,35 @@ Employee may edit/delete only while **PENDING**. No `CANCELLED` status. Reject n
 | Report | Access | Export |
 |--------|--------|--------|
 | Personal `/attendance` dashboard | `ATTENDANCE_VIEW` | — |
-| **Attendance Tracking** grid | `EMPLOYEE_VIEW` + scope | **Excel .xlsx** |
+| **Attendance Tracking** grid | `EMPLOYEE_VIEW` + scope | **Excel .xlsx** (`ATTENDANCE_EXPORT`) |
 | Dedicated leave PDF/CSV | **No** | — |
 
-**Month lock/freeze:** **Not implemented** — “close month” is an operational process before Payroll ([Section 11](#11-recommended-operations), checklist in VI doc §10.4).
+### 10.4 Month-end reconciliation (HR)
 
-**HR month-end checklist:** Review F/A cells, pending leave on Leave Approvals, export Excel, align `remainingLeaveDays`, then payroll.
+#### Data that is still open vs closed in HRM
+
+| Scope | Still open | Closed in HRM |
+|---------|------------|---------------|
+| **Attendance & leave** | Each month can still be **edited** with permission: punch, manual-time, create/edit requests, approve requests | **No** attendance month lock in the system (backlog Phase 2b) |
+| **Payroll period** | Period **Open** — create/edit/import/copy payslips | Period **Locked** — table `payroll_periods`, **Lock period** / **Unlock** on **Payroll**; API `POST /payroll/periods/:year/:month/lock` and `unlock` (`PAYROLL_MANAGE` or `PAYROLL_PERIOD_LOCK`) |
+
+HR should still **reconcile attendance** using the checklist below before locking the payroll period and running payroll ([Section 11.3](#113-monthly)).
+
+#### Month-end checklist (HR)
+
+- [ ] Open **Attendance Tracking** for the month to close
+- [ ] Filter by **department** or export company **Excel**
+- [ ] Review **`F`** (forgot punch) → require make-up punch / ATTENDANCE_CORRECTION / manual-time
+- [ ] Review **`A`** (absent) → confirm unpaid absence vs missing leave request
+- [ ] Review **yellow / LATE_EARLY** → confirm under work-unit threshold or needs action
+- [ ] Check **PENDING** on **Leave Approvals** — approve or reject before payroll
+- [ ] Align **`remainingLeaveDays`** with approved **`PAID_LEAVE`** in the month
+- [ ] Export **Excel** as reconciliation evidence (file timestamp on download)
+- [ ] Move to **Payroll** when attendance data is consistent
+- [ ] On **Payroll**, pick month/year → **Lock period** after payslips are final (or before release — per company process)
+- [ ] (Optional) Internal attendance reconciliation record (email/minutes) — does **not** replace payroll period lock in the system
+
+**Expected outcome:** HR does not miss pending requests, missing attendance, or leave balance errors before payroll.
 
 ---
 
@@ -736,7 +769,7 @@ Employee may edit/delete only while **PENDING**. No `CANCELLED` status. Reject n
 
 1. Reconcile attendance ([Section 10](#10-attendance--leave-reports)) — no system lock button.
 2. Update payroll and tax parameters if needed.
-3. Run payroll and reconcile.
+3. Run payroll on **Payroll**; when done, **Lock period** for that month (`PAYROLL_MANAGE` or `PAYROLL_PERIOD_LOCK`).
 
 ---
 

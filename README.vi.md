@@ -451,7 +451,7 @@ Hệ thống sinh các buổi trong tầm **12 tuần** tính từ tuần đang 
 
 ### 5.5 Quyền hạn trên lịch
 
-Thiết kế theo nguyên tắc: **ai tạo thì người đó quản lý**; **người được mời chỉ phản hồi bằng cách tham gia hoặc rút lui**; **mọi người đăng nhập đều có thể xem** lịch người khác (để sắp lịch họp).
+Thiết kế theo nguyên tắc: **ai tạo thì người đó quản lý**; **người được mời chỉ phản hồi bằng cách tham gia hoặc rút lui**; user có **`CALENDAR_VIEW`** (mặc định vai trò `EMPLOYEE` sau seed/migrate) được **xem** lịch người khác để sắp lịch họp. Menu **Calendar** (`/calendar`) yêu cầu `CALENDAR_VIEW`.
 
 #### Người tạo / tổ chức (Organizer)
 
@@ -479,7 +479,7 @@ Thiết kế theo nguyên tắc: **ai tạo thì người đó quản lý**; **n
 |-------|:-----:|---------|
 | Xem lịch mọi nhân viên | Có | Giống mọi user đã đăng nhập |
 | Sửa/xóa lịch của người khác | **Không** (trên API lịch) | Quyền `ADMIN` trên hệ thống **không** override quyền organizer trên lịch họp |
-| Cấu hình “xem tất cả” đặc biệt | Chưa áp dụng | Có mã cấu hình phía giao diện nhưng chưa gắn vào menu thực tế |
+| Bật “xem tất cả nhân viên” trên lịch | Có (tùy chọn) | Cần `CALENDAR_MANAGE` — switch trên trang **Calendar** |
 
 > **Tóm lại:** Admin quản lý nhân sự, phân quyền, lương — **không** can thiệp trực tiếp cuộc họp trên lịch của nhân viên khác; việc đó thuộc người tổ chức.
 
@@ -602,17 +602,25 @@ Chú thích cột:
 | `EMPLOYEE_UPDATE` | Sửa nhân viên, reset mật khẩu |
 | `EMPLOYEE_DELETE` | Xóa nhân viên |
 | `ATTENDANCE_VIEW` | Xem/chấm công |
-| `ATTENDANCE_MANAGE` | Quản lý chấm công nâng cao |
+| `ATTENDANCE_EXPORT` | Xuất Excel chi tiết công (Attendance Tracking) |
 | `ATTENDANCE_MANUAL_UPDATE` | Sửa giờ chấm công thủ công |
-| `LOCATION_VIEW` | Xem/cấu hình vị trí chi nhánh |
-| `LEAVE_VIEW` | Xem/tạo đơn nghỉ |
+| `LOCATION_VIEW` / `LOCATION_MANAGE` | Xem / quản lý vị trí chi nhánh |
+| `LEAVE_VIEW` | Xem/tạo đơn nghỉ (gồm loại OT) |
 | `LEAVE_APPROVE` | Duyệt đơn nghỉ |
+| `LEAVE_APPROVE_MANAGED` | Duyệt đơn nhân viên quản lý (phụ thuộc `LEAVE_APPROVE` trên UI phân quyền) |
+| `CALENDAR_VIEW` | Xem lịch, tạo/sửa sự kiện (organizer trong service) |
+| `CALENDAR_MANAGE` | Bật chế độ xem lịch toàn công ty trên Calendar |
 | `PAYROLL_VIEW` | Xem phiếu lương |
-| `PAYROLL_MANAGE` | Quản lý/tính lương |
+| `PAYROLL_MANAGE` | Quản lý/tính lương, cấu hình thuế |
+| `PAYROLL_PERIOD_LOCK` | Khóa/mở khóa kỳ lương |
 | `DEPARTMENT_VIEW` / `DEPARTMENT_MANAGE` | Xem / quản lý phòng ban |
 | `POSITION_VIEW` / `POSITION_MANAGE` | Xem / quản lý chức vụ |
 | `ROLE_VIEW` / `ROLE_MANAGE` | Xem / quản lý vai trò & phân quyền |
 | `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` | Xem / sửa cấu hình ngày nghỉ |
+| `APPEARANCE_VIEW` / `APPEARANCE_EDIT` | Xem / sửa giao diện (Settings) |
+| `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` | Xem / sửa ca làm việc mặc định (Settings) |
+
+> Mã `OVERTIME_*` và `ATTENDANCE_MANAGE` đã **gỡ** khỏi hệ thống — tăng ca dùng `LEAVE_*`; không gán lại các mã cũ.
 
 ---
 
@@ -635,13 +643,16 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 ### 7.4 Lương
 
-- `PAYROLL_VIEW`: xem phiếu lương (cá nhân hoặc rộng hơn tùy cấu hình).
-- `PAYROLL_MANAGE`: tạo, tính lại, cấu hình thuế.
+- `PAYROLL_VIEW`: xem phiếu lương (cá nhân hoặc rộng hơn tùy cấu hình); xem trạng thái kỳ lương.
+- `PAYROLL_MANAGE`: tạo, tính lại, cấu hình thuế, quản lý phiếu lương.
+- `PAYROLL_PERIOD_LOCK`: **khóa/mở khóa kỳ lương** (hoặc dùng `PAYROLL_MANAGE` — quyền này bao gồm khóa kỳ).
+- **Kỳ lương (`PayrollPeriod`):** mặc định **Đang mở**; HR bấm **Khóa kỳ** trên trang **Payroll** (`PayrollPeriodControls`) → trạng thái **Đã khóa**. Khi đã khóa: không tạo/sửa/nhập/sao chép phiếu lương (API `PAYROLL_PERIOD_LOCKED`); vẫn xem và xuất Excel. **Mở khóa** cần `PAYROLL_MANAGE` hoặc `PAYROLL_PERIOD_LOCK` + ghi chú (bắt buộc khi mở khóa). Khóa kỳ **chỉ** chặn thao tác lương — chấm công và đơn phép vẫn sửa được (xem [mục 10.4](#104-đối-soát-cuối-tháng-hr)).
 
 ### 7.5 Cấu hình hệ thống
 
 - **Ngày nghỉ:** `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT`.
-- **Vị trí chi nhánh:** `LOCATION_VIEW`.
+- **Vị trí chi nhánh:** `LOCATION_VIEW` / `LOCATION_MANAGE`.
+- **Cài đặt giao diện & ca làm việc:** `APPEARANCE_VIEW` / `APPEARANCE_EDIT`, `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — **Cấu hình hệ thống → Cài đặt** (`/sysConfig/settings`).
 - **Nhóm quyền / Phân quyền:** `ROLE_VIEW` / `ROLE_MANAGE`.
 
 ---
@@ -665,11 +676,11 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 | Đơn vị | Dùng ở đâu | Quy tắc |
 |--------|------------|---------|
 | **Phút** | Lưu DB, tính trạng thái | `checkOutTime − checkInTime` (phút làm việc trong ngày) |
-| **Ngày công (9 giờ)** | Phân loại WORK / LATE_EARLY | Đủ **≥ 9 giờ** (540 phút) giữa check-in và check-out → **WORK**; ít hơn → **LATE_EARLY** |
-| **Ngày (8 giờ)** | Tổng hợp nghỉ phép trên dashboard | 8 giờ nghỉ có lương ≈ 1 ngày (`paidLeave += giờ / 8`) |
-| **Ca làm việc (shift)** | **Không có** module ca | Xem [8.6](#86-ca-làm-việc--lịch-làm-việc-task-09) |
+| **Đơn vị công (theo ca)** | Phân loại WORK / LATE_EARLY | Theo **ca làm việc** trong Cài đặt: `expectedMinutes = (end − start) − lunchBreak`; đủ giờ công → **WORK**; muộn/sớm so ca (grace) hoặc thiếu giờ → **LATE_EARLY** |
+| **Ngày (giờ công động)** | Tổng hợp nghỉ phép trên dashboard | `expectedWorkingMinutes / 60` giờ/ngày (đọc từ ca làm việc) |
+| **Ca làm việc (shift)** | Cài đặt hệ thống | `work_shift_start_time`, `work_shift_end_time`, `grace_minutes`, `work_shift_lunch_break_minutes` — xem màn **Cài đặt → Ca làm việc** |
 
-> **Warning — Không phải “đi muộn 15 phút so với 8:00”:** Hệ thống **không** so giờ check-in với giờ vào ca (vì **không có ca**). **LATE_EARLY** nghĩa là **tổng thời gian làm trong ngày dưới 9 giờ**, không phải trễ 15 phút so với 8:00.
+> **LATE_EARLY:** So **giờ vào/ra ca** (có grace) **hoặc** tổng thời gian làm **dưới đơn vị công** (`workUnitLabel`, mặc định 8h sau khi trừ nghỉ trưa), **không** còn quy tắc cố định 9h/540 phút.
 
 **Ví dụ cụ thể (cùng một ngày):**
 
@@ -690,7 +701,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 | “Hôm nay” khi chấm công | Theo ngày VN |
 | Hiển thị giờ check-in/out | Giờ VN (lưu theo quy ước UTC slot trong DB) |
 
-**Kết quả mong đợi:** Bạn hiểu chấm công chỉ qua web + GPS, và trạng thái “Đi muộn, về sớm” = thiếu đủ 9 giờ làm việc trong ngày.
+**Kết quả mong đợi:** Bạn hiểu chấm công chỉ qua web + GPS, và trạng thái “Đi muộn, về sớm” được đánh giá theo **ca làm việc + grace + nghỉ trưa** (ngày công = span ca − nghỉ trưa).
 
 ---
 
@@ -778,8 +789,8 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 | Ký hiệu | Chế độ ngày | Chế độ giờ | Ý nghĩa | Ví dụ phân loại |
 |--------|-------------|------------|---------|-----------------|
-| `1` | Có đi làm | `8h` | WORK hoặc LATE_EARLY (đã có chấm công) | Check-in 8:00, check-out 17:00 → WORK |
-| *(vàng)* | `1` | `8h` | **LATE_EARLY** — thiếu 9h tổng | Check-in 8:00, check-out 16:30 |
+| `1` | Có đi làm | `{workUnitLabel}` từ API (VD `8h`) | WORK hoặc LATE_EARLY (đã có chấm công) | Check-in 8:00, check-out 17:00 (ca 8–17, trưa 60p) → WORK |
+| *(vàng)* | `1` | `{workUnitLabel}` | **LATE_EARLY** — muộn/sớm/thiếu giờ so ca | Check-in 8:00, check-out 16:00 |
 | `W` | Cuối tuần | — | Ngày nghỉ cố định theo cấu hình | Thứ Bảy, CN |
 | `H` | Nghỉ lễ | — | Ngày lễ trong Holiday Configuration | 30/4 |
 | `PL`, `SL`, `UL`… | Mã loại phép | — | Đơn nghỉ **đã duyệt** (2 chữ đầu mã loại phép) | `PAID_LEAVE` → `PL` |
@@ -791,10 +802,10 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 1. **Cấu hình ngày nghỉ** (cuối tuần, lễ) → `W`, `H`.
 2. **Đơn nghỉ đã duyệt** (trừ REMOTE_WORK, ATTENDANCE_CORRECTION trên lưới) → mã phép.
-3. **Bản ghi chấm công** → so **tổng phút** với **9 giờ** → WORK hoặc LATE_EARLY.
+3. **Bản ghi chấm công** → so **tổng phút thực tế** với **expectedWorkingMinutes** (ca − nghỉ trưa) và grace → WORK hoặc LATE_EARLY.
 4. **Không có bản ghi** + ngày đã qua → ABSENT (team) / FORGOT_CLOCK_IN (một số view cá nhân).
 
-**Không dựa trên:** ca làm việc (shift) — vì không có module ca.
+**Dựa trên cài đặt ca làm việc** (`workShiftStartTime`, `workShiftEndTime`, `workShiftLunchBreakMinutes`, `workShiftGraceMinutes`) tại **Settings → Ca làm việc**.
 
 **Kết quả mong đợi:** Đúng vai trò, mở đúng trang và đọc được từng ký hiệu ô ngày.
 
@@ -842,7 +853,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 | Lọc theo **tên** nhân viên | Có | Attendance Tracking |
 | Lọc theo **phòng ban** | Có | Chọn nhiều phòng ban |
 | Lọc theo **tuần** riêng | Không | Chỉ theo tháng |
-| Xuất **Excel** (.xlsx) | Có | Nút export trên Attendance Tracking — `GET /attendance/export-workingtime-detail` |
+| Xuất **Excel** (.xlsx) | Có | Nút export trên Attendance Tracking — `GET /attendance/export-workingtime-detail` — cần `ATTENDANCE_EXPORT` |
 | Xuất **CSV / PDF** | **Không** | — |
 
 **File Excel gồm:** mã NV, tên, từng ngày trong tháng (phút làm việc), mã chú thích (vắng, muộn, sớm), cột ngày phép còn lại, v.v.
@@ -859,10 +870,11 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 | Xem lịch chấm công **của mình** | Có* | Có* | Có* |
 | Xem lưới **Attendance Tracking** | Không | Có** | Có |
 | Xem chi tiết từng NV trong team | Không | Có** | Có |
-| Xuất Excel tháng | Không | Có** | Có |
+| Xuất Excel tháng | Không | Có** (`ATTENDANCE_EXPORT`) | Có (`ATTENDANCE_EXPORT`) |
 | Sửa giờ manual-time | Không*** | Có**** | Có***** |
 | Cấu hình vị trí văn phòng | Không | Không | Có (`LOCATION_VIEW`) |
 | Cấu hình ngày nghỉ | Không | Không | Có (`HOLIDAY_CONFIG_*`) |
+| Cấu hình ca làm việc (giờ ca, nghỉ trưa, grace) | Không | Không | Có (`WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — Settings) |
 
 \* Cần `ATTENDANCE_VIEW`.  
 \** Cần `EMPLOYEE_VIEW` + (Manager) cấp dưới hoặc (Admin) toàn công ty.  
@@ -874,33 +886,37 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 ### 8.7 Ca làm việc & Lịch làm việc (Task 09)
 
-> **Quan trọng:** Phiên bản HRM hiện tại **không có** module **Ca làm việc (Shift)**, **Lịch ca (Roster)**, hay **Work schedule** trong database và giao diện.
+> **Cập nhật:** HRM có **cài đặt ca làm việc mặc định** (không phải lịch ca theo nhân viên). HR cấu hình tại **Settings → Ca làm việc**.
 
-| Tính năng Task 09 mô tả | Trạng thái trong HRM |
-|-------------------------|----------------------|
-| Tạo ca (8:00–17:00, ca chiều, …) | **Chưa có** |
-| Gán ca cho nhân viên / phòng ban | **Chưa có** |
-| Lịch ca theo tuần/tháng | **Chưa có** |
-| Đổi ca một ngày + phê duyệt + lịch sử đổi ca | **Chưa có** |
+| Tính năng | Trạng thái trong HRM |
+|-----------|----------------------|
+| Giờ bắt đầu / kết thúc ca mặc định | **Có** — `workShiftStartTime`, `workShiftEndTime` |
+| Nghỉ trưa (phút) | **Có** — `workShiftLunchBreakMinutes` (mặc định 60) |
+| Ân hạn muộn/sớm (phút) | **Có** — `workShiftGraceMinutes` (mặc định 15) |
+| Preview ngày công | **Có** — `(end − start − lunch)` trên form settings |
+| Gán ca khác nhau cho từng NV / lịch ca tuần | **Chưa có** |
+| Đổi ca một ngày + phê duyệt | **Chưa có** |
 
-#### Thay thế bằng cơ chế hiện có
+#### Công thức thống nhất
+
+```text
+shiftSpanMinutes       = endTime − startTime
+expectedWorkingMinutes = shiftSpanMinutes − lunchBreakMinutes
+workUnitLabel          = expectedWorkingMinutes / 60 (VD "8h", "8.25h")
+```
+
+**Ví dụ:** Ca 08:00–17:00, nghỉ trưa 60 phút → **1 ngày công = 8 giờ**; tracking hour mode hiển thị `8h` từ API.
 
 | Khái niệm | Thực tế trong hệ thống |
 |-----------|------------------------|
-| “Giờ làm chuẩn” | **9 giờ tổng** giữa check-in và check-out → WORK / LATE_EARLY |
-| Khung 09:00–18:00 | Chỉ dùng cho: đơn **REMOTE_WORK** (tự điền công), đơn **LATE_ARRIVAL** / **EARLY_DEPARTURE** (tính phút), **không** dùng để chấm GPS |
-| Ngày nghỉ cố định | **Holiday Configuration** — cuối tuần, lễ |
-| Phụ cấp ca trên Excel | Chú thích **SS / NS** (Shift allowance) trong file export — **nhãn báo cáo**, không phải lịch ca |
+| Muộn vào | Check-in (giờ VN) > `startTime + grace` |
+| Về sớm | Check-out < `endTime − grace` |
+| Thiếu giờ | `actualMinutes` < `expectedWorkingMinutes` |
+| **WORK** | Không muộn, không về sớm, đủ giờ công |
+| Khung giờ đơn REMOTE_WORK / LATE_ARRIVAL | Mặc định form lấy từ ca làm việc |
+| Ngày nghỉ cố định | **Holiday Configuration** |
 
-#### Mối liên hệ “Ca” ↔ “Chấm công” (khi triển khai ca trong tương lai)
-
-Hiện tại hệ thống **không** so check-in với ca. Nếu sau này bổ sung module ca, cần định nghĩa lại:
-
-- Muộn = check-in sau `giờ bắt đầu ca + grace period`
-- Về sớm = check-out trước `giờ kết thúc ca`
-- Thiếu giờ = so với `giờ ca − nghỉ giữa ca`
-
-**Kết quả mong đợi:** Không tìm menu “Ca làm việc”; vận hành theo **9 giờ/ngày** + **cấu hình ngày nghỉ** + **đơn nghỉ/đơn sửa công**.
+**Kết quả mong đợi:** Cấu hình ca tại Settings; chấm công và tracking dùng **một nguồn** `expectedWorkingMinutes` / `workUnitLabel`.
 
 ---
 
@@ -1113,10 +1129,8 @@ APPROVED  REJECTED
 | **Chi tiết 1 nhân viên** | `/attendance-tracking/{id}` | Self / team / Admin | Tháng |
 | **Overview — biểu đồ leave/OT** | Số đơn chờ, ngày phép đã duyệt (SQL đơn giản) | `LEAVE_VIEW` + dashboard | — |
 | **Today summary** | Tổng hợp chấm công hôm nay (muộn/vắng, …) | Nội bộ API | — |
-| **Export Working time detail** | File Excel chi tiết công tháng | `EMPLOYEE_VIEW` + scope | Tháng (query) |
+| **Export Working time detail** | File Excel chi tiết công tháng | `ATTENDANCE_EXPORT` + scope lưới (theo `EMPLOYEE_VIEW` / team) | Tháng (query) |
 | **Báo cáo nghỉ phép riêng PDF/CSV** | **Không có** | — | — |
-
-> `ATTENDANCE_MANAGE` có trong seed nhưng **không** gắn API cụ thể — quyền dự phòng.
 
 ---
 
@@ -1163,12 +1177,12 @@ APPROVED  REJECTED
 
 #### Dữ liệu “chưa chốt” vs “đã chốt”
 
-| Khái niệm | Trong HRM hiện tại |
-|-----------|-------------------|
-| **Chưa chốt** | Mọi tháng đều **sửa được** nếu có quyền: chấm công, manual-time, tạo/sửa/xóa đơn, duyệt đơn |
-| **Đã chốt (lock/freeze)** | **Không có** nút Lock tháng, **không** có bảng khóa kỳ trong DB |
+| Phạm vi | Chưa chốt | Đã chốt trong HRM |
+|---------|-----------|-------------------|
+| **Chấm công & đơn phép** | Mọi tháng vẫn **sửa được** nếu có quyền: chấm công, manual-time, tạo/sửa đơn, duyệt đơn | **Không** có khóa tháng chấm công trong hệ thống (backlog Phase 2b) |
+| **Kỳ lương (Payroll)** | Kỳ **Đang mở** — tạo/sửa/nhập/sao chép phiếu lương | Kỳ **Đã khóa** — bảng `payroll_periods`, nút **Khóa kỳ** / **Mở khóa** trên **Payroll**; API `POST /payroll/periods/:year/:month/lock` và `unlock` (`PAYROLL_MANAGE` hoặc `PAYROLL_PERIOD_LOCK`) |
 
-“Chốt” trong tài liệu vận hành ([mục 11](#11-quy-trình-vận-hành-đề-xuất)) là **quy trình nghiệp vụ ngoài hệ thống** — sau khi HR rà soát xong và chuyển sang **Payroll**.
+HR vẫn nên **đối soát chấm công** theo checklist bên dưới trước khi khóa kỳ lương và chạy bảng lương ([mục 11.3](#113-hằng-tháng)).
 
 #### Checklist đối soát cuối tháng (HR)
 
@@ -1180,8 +1194,9 @@ APPROVED  REJECTED
 - [ ] Kiểm tra đơn **PENDING** trên **Leave Approvals** — duyệt hoặc từ chối trước khi tính lương
 - [ ] Đối chiếu **remainingLeaveDays** với đơn **PAID_LEAVE** đã duyệt trong tháng
 - [ ] Xuất **Excel** lưu làm bằng chứng đối soát (file có timestamp tải về)
-- [ ] Chuyển sang module **Payroll** (ngoài phạm vi chấm công) khi dữ liệu đã nhất quán
-- [ ] Ghi nhận nội bộ “đã chốt tháng MM/YYYY” (email/biên bản) vì hệ thống **không** khóa tự động
+- [ ] Chuyển sang module **Payroll** khi dữ liệu công đã nhất quán
+- [ ] Trên **Payroll**, chọn đúng tháng/năm → **Khóa kỳ** sau khi hoàn tất phiếu lương (hoặc trước khi phát hành — theo quy trình công ty)
+- [ ] (Tùy chọn) Ghi nhận nội bộ đối soát chấm công (email/biên bản) — **không** thay thế khóa kỳ lương trên hệ thống
 
 **Kết quả mong đợi:** HR không bỏ sót đơn chờ, thiếu công, hoặc sai phép trước khi tính lương.
 
@@ -1207,9 +1222,9 @@ APPROVED  REJECTED
 
 ### 11.3 Hằng tháng
 
-1. Rà soát dữ liệu công — xem [checklist mục 10.4](#104-đối-soát-cuối-tháng-hr) (không có nút khóa tháng trong hệ thống).
+1. Rà soát dữ liệu công — [checklist mục 10.4](#104-đối-soát-cuối-tháng-hr).
 2. Cập nhật thông số lương, thuế (nếu có).
-3. Chạy bảng lương và đối soát.
+3. Chạy bảng lương trên **Payroll**; khi xong, **Khóa kỳ** tháng tương ứng (cần `PAYROLL_MANAGE` hoặc `PAYROLL_PERIOD_LOCK`).
 
 ---
 

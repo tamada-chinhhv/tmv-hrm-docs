@@ -342,7 +342,7 @@ flowchart LR
 | **Participant（参加者）** | 不可 | 可（理由必須） |
 | **Admin** | 他人の会議は **不可**（organizer ルールは Admin でも例外なし） |
 
-**設計理由:** 会議の内容は作成者のみが変更すべき。参加者は「参加辞退」で対応。全員が他人のカレンダーを **閲覧** できるのは、会議調整のため。
+**設計理由:** 会議の内容は作成者のみが変更すべき。参加者は「参加辞退」で対応。`CALENDAR_VIEW` を持つユーザーは他人のカレンダーを **閲覧** できる（会議調整のため）。メニュー **Calendar** は `CALENDAR_VIEW` が必要。全社員表示スイッチは `CALENDAR_MANAGE`（Calendar 画面）。
 
 ### 5.6 通知
 
@@ -401,7 +401,7 @@ flowchart LR
 
 - **Admin:** 全従業員
 - **Manager:** `managerId` の部下ツリーのみ
-- **一般:** 一覧 API は自分のみ。Calendar の directory は会議招待用に全員検索可
+- **一般:** 一覧 API は自分のみ。`GET /employees/directory` は `EMPLOYEE_VIEW` / `CALENDAR_VIEW` / `LEAVE_VIEW` / `ATTENDANCE_VIEW` のいずれかが必要
 
 ### 6.4 ロール割当
 
@@ -410,7 +410,23 @@ flowchart LR
 
 ### 6.5 権限コード一覧
 
-`EMPLOYEE_VIEW`, `EMPLOYEE_CREATE`, `EMPLOYEE_UPDATE`, `EMPLOYEE_DELETE`, `ATTENDANCE_VIEW`, `ATTENDANCE_MANAGE`, `ATTENDANCE_MANUAL_UPDATE`, `LOCATION_VIEW`, `LEAVE_VIEW`, `LEAVE_APPROVE`, `PAYROLL_VIEW`, `PAYROLL_MANAGE`, `DEPARTMENT_VIEW`, `DEPARTMENT_MANAGE`, `POSITION_VIEW`, `POSITION_MANAGE`, `ROLE_VIEW`, `ROLE_MANAGE`, `HOLIDAY_CONFIG_VIEW`, `HOLIDAY_CONFIG_EDIT`
+| コード | 概要 |
+|--------|------|
+| `EMPLOYEE_VIEW` / `CREATE` / `UPDATE` / `DELETE` | 従業員の閲覧・作成・更新・削除 |
+| `ATTENDANCE_VIEW` | 勤怠閲覧・打刻 |
+| `ATTENDANCE_EXPORT` | Attendance Tracking の Excel 出力 |
+| `ATTENDANCE_MANUAL_UPDATE` | 手動時刻修正 |
+| `LOCATION_VIEW` / `LOCATION_MANAGE` | 拠点の閲覧・管理 |
+| `LEAVE_VIEW` / `LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED` | 休暇（OT 含む）の閲覧・承認 |
+| `CALENDAR_VIEW` / `CALENDAR_MANAGE` | カレンダー閲覧・全社表示スイッチ |
+| `PAYROLL_VIEW` / `PAYROLL_MANAGE` / `PAYROLL_PERIOD_LOCK` | 給与閲覧・管理・期間ロック |
+| `DEPARTMENT_*` / `POSITION_*` | 部署・役職 |
+| `ROLE_VIEW` / `ROLE_MANAGE` | ロールと権限割当 |
+| `HOLIDAY_CONFIG_VIEW` / `EDIT` | 休日設定 |
+| `APPEARANCE_VIEW` / `EDIT` | 外観設定 |
+| `WORK_SHIFT_VIEW` / `EDIT` | デフォルト勤務シフト |
+
+> `OVERTIME_*` と `ATTENDANCE_MANAGE` は **削除済み**（OT は `LEAVE_*`）。
 
 ---
 
@@ -438,11 +454,13 @@ GPS ジオフェンス内での Check in/out。位置情報許可が必要。
 
 ### 7.6 Payroll
 
-`PAYROLL_VIEW` 閲覧、`PAYROLL_MANAGE` 管理・再計算。
+- `PAYROLL_VIEW`: 閲覧・給与期間ステータス
+- `PAYROLL_MANAGE`: 管理・再計算・税設定
+- `PAYROLL_PERIOD_LOCK`: 給与期間のロック/解除（`PAYROLL_MANAGE` でも可）
 
 ### 7.7 System Settings
 
-Holiday Configuration, Office Locations, Roles, Permission Assignment。
+Holiday Configuration, Office Locations, **Settings**（外観 `APPEARANCE_*`、勤務シフト `WORK_SHIFT_*`）, Roles, Permission Assignment。
 
 ---
 
@@ -453,7 +471,7 @@ Holiday Configuration, Office Locations, Roles, Permission Assignment。
 - 状態: check-in〜check-out が **9時間以上** → **WORK**、未満 → **LATE_EARLY**（8:00遅刻15分ではなく **総労働時間**）
 - **シフト/ロスター機能なし**（[VI 版 8.7](README.vi.md#87-ca-làm-việc--lịch-làm-việc-task-09) 参照）
 - 手動修正: `ATTENDANCE_MANUAL_UPDATE`、監査ログなし
-- エクスポート: **Excel .xlsx** のみ（Attendance Tracking）
+- エクスポート: **Excel .xlsx** のみ（Attendance Tracking、`ATTENDANCE_EXPORT` 必須）
 
 ## 9. 休暇申請
 
@@ -464,7 +482,7 @@ Holiday Configuration, Office Locations, Roles, Permission Assignment。
 
 ## 10. 勤怠・休暇レポート
 
-- Attendance Tracking + Excel 出力
+- Attendance Tracking + Excel 出力（`ATTENDANCE_EXPORT`）
 - 月次ロック/フリーズ: **未実装**（運用で締め）
 
 ---
