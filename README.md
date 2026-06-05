@@ -424,10 +424,12 @@ flowchart LR
 | `DEPARTMENT_*` / `POSITION_*` | 部署・役職 |
 | `ROLE_VIEW` / `ROLE_MANAGE` | ロールと権限割当 |
 | `HOLIDAY_CONFIG_VIEW` / `EDIT` | 休日設定 |
+| `APPEARANCE_VIEW` / `EDIT` | システム外観（`/sysConfig/settings`） |
 | `WORK_SHIFT_VIEW` / `EDIT` | デフォルト勤務シフト（`/sysConfig/settings`） |
 
-> **個人外観**（色・フォント・ライト/ダーク）: ログイン済みユーザー全員 — **Account** → タブ **Settings**、`GET/PATCH /auth/me/appearance`（`APPEARANCE_*` は使用しない）。  
-> `OVERTIME_*`、`ATTENDANCE_MANAGE`、旧 `APPEARANCE_*` は **削除済み**。
+> **システム外観**（全社既定）: `app_settings` に保存 — **System Settings → Settings**、`GET/PATCH /settings/appearance`（`APPEARANCE_*`）。**ログイン画面**と**ログアウト後**は常にシステム外観（`GET /settings/public/appearance`）。  
+> **個人外観**: ログイン済みユーザー — **Account** → **Settings**、`GET/PATCH /auth/me/appearance`。ユーザーが保存した場合のみ上書き（`appearance_customized = true`）。  
+> `OVERTIME_*`、`ATTENDANCE_MANAGE` は **削除済み**。
 
 ---
 
@@ -443,7 +445,8 @@ flowchart LR
 | **Settings** | 外観: ライト/ダーク（即時保存）、テーマ色・フォント（**Save** でサーバー同期） |
 
 - Settings: `/account?tab=settings`
-- ヘッダーのライト/ダーク切替も同じ設定をサーバーに保存
+- ヘッダーのライト/ダーク切替も個人設定として保存（カスタム済みになる）
+- 未保存時は**システム外観**を使用。保存またはテーマ切替後は個人設定を優先
 - `EMPLOYEE_VIEW` のないユーザーが **Employees** を開くと **Account** へリダイレクト
 
 ### 7.1 Overview
@@ -476,7 +479,8 @@ GPS ジオフェンス内での Check in/out。位置情報許可が必要。
 
 - 休日: `HOLIDAY_CONFIG_*` — `/sysConfig/holidays`
 - 拠点: `LOCATION_*` — `/sysConfig/locations`
-- 勤務シフト（全社既定）: `WORK_SHIFT_*` — **System Settings → Work shift**（`/sysConfig/settings`）
+- システム外観: `APPEARANCE_*` — **System Settings → Settings**（`/sysConfig/settings`、**Appearance** アコーディオン）
+- 勤務シフト（全社既定）: `WORK_SHIFT_*` — 同ページ **Work shift** アコーディオン
 - ロール・権限: `/sysConfig/roles`, `/sysConfig/assign`
 
 > 個人外観は [7.0](#70-accountaccount) を参照。

@@ -582,10 +582,12 @@ Each employee has **one** `roleId` at a time.
 | `POSITION_VIEW` / `POSITION_MANAGE` | Positions |
 | `ROLE_VIEW` / `ROLE_MANAGE` | Roles & permissions |
 | `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` | Holiday configuration |
+| `APPEARANCE_VIEW` / `APPEARANCE_EDIT` | View / edit **system appearance** (`/sysConfig/settings`) |
 | `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` | View / edit default work shift (`/sysConfig/settings`) |
 
-> **Personal appearance** (color, font, light/dark): any logged-in user — **Account** → tab **Settings**; API `GET/PATCH /auth/me/appearance` (not `APPEARANCE_*`).  
-> `OVERTIME_*`, `ATTENDANCE_MANAGE`, and legacy `APPEARANCE_*` are **removed** — do not re-assign.
+> **System appearance** (company default): stored in `app_settings` — Admin configures at **System Settings → Settings**; API `GET/PATCH /settings/appearance` (`APPEARANCE_*`). **Login** and after **logout** always use system appearance (`GET /settings/public/appearance`).  
+> **Personal appearance:** any logged-in user — **Account** → tab **Settings**; `GET/PATCH /auth/me/appearance`. Overrides system only when the user has saved (`appearance_customized = true`).  
+> `OVERTIME_*` and `ATTENDANCE_MANAGE` are **removed** — do not re-assign.
 
 ---
 
@@ -601,7 +603,8 @@ Available to every logged-in user (sidebar **Account** or user menu).
 | **Settings** | Appearance: **Light/Dark** (saved immediately), primary color, font (click **Save** to sync to server) |
 
 - Settings tab URL: `/account?tab=settings`
-- The light/dark toggle in the header also saves to the same server-side preferences
+- The header light/dark toggle also saves personal preferences (marks appearance as customized)
+- Until the user saves, the app uses **system appearance**; after Save or toggling theme, personal settings take priority
 - Users **without** `EMPLOYEE_VIEW` who open **Employees** are redirected to **Account** (no legacy My Profile tab)
 
 ### 7.1 Overview (`/dashboard`)
@@ -627,10 +630,11 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 
 - **Holiday Configuration:** `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` — `/sysConfig/holidays`.
 - **Office Locations:** `LOCATION_VIEW` / `LOCATION_MANAGE` — `/sysConfig/locations`.
-- **Work shift (system-wide):** `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — **System Settings → Work shift** (`/sysConfig/settings`).
+- **System appearance:** `APPEARANCE_VIEW` / `APPEARANCE_EDIT` — **System Settings → Settings** (`/sysConfig/settings`, **Appearance** accordion). Applies to users without personal customization and to the login screen.
+- **Work shift (system-wide):** `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — same page `/sysConfig/settings`, **Work shift** accordion.
 - **Roles / Permission Assignment:** `ROLE_VIEW` / `ROLE_MANAGE` — `/sysConfig/roles`, `/sysConfig/assign`.
 
-> Personal appearance is not configured here — see [Section 7.0](#70-account-account).
+> **Personal** appearance is not configured here — see [Section 7.0](#70-account-account).
 
 ---
 

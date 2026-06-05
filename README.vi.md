@@ -83,7 +83,7 @@ Bạn dùng HRM để:
 | **Tổ chức** | Nhân viên, Phòng ban, Chức vụ | `/org/employees`, `/org/departments`, `/org/positions` |
 | **Chấm công & Thời gian** | Chấm công, Theo dõi chấm công, Đơn xin phép, Duyệt đơn | `/time/attendance`, `/time/attendance-tracking`, `/time/leave`, `/time/leave-approvals` |
 | **Lương** | Phiếu lương, cấu hình thuế | `/payroll` |
-| **Cấu hình hệ thống** | Ngày nghỉ, Vị trí, Ca làm việc, Nhóm quyền, Phân quyền | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/roles`, `/sysConfig/assign` |
+| **Cấu hình hệ thống** | Ngày nghỉ, Vị trí, Giao diện & Ca làm việc, Nhóm quyền, Phân quyền | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/roles`, `/sysConfig/assign` |
 
 Menu hiển thị **theo quyền** — nếu bạn không thấy mục nào, có thể tài khoản chưa được gán quyền tương ứng (xem [mục 6](#6-phân-quyền--vai-trò)).
 
@@ -618,10 +618,12 @@ Chú thích cột:
 | `POSITION_VIEW` / `POSITION_MANAGE` | Xem / quản lý chức vụ |
 | `ROLE_VIEW` / `ROLE_MANAGE` | Xem / quản lý vai trò & phân quyền |
 | `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` | Xem / sửa cấu hình ngày nghỉ |
+| `APPEARANCE_VIEW` / `APPEARANCE_EDIT` | Xem / sửa **giao diện hệ thống** (`/sysConfig/settings`) |
 | `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` | Xem / sửa ca làm việc mặc định (`/sysConfig/settings`) |
 
-> **Giao diện cá nhân** (màu, font, sáng/tối): mọi user đăng nhập — **Tài khoản** → tab **Cài đặt**; API `GET/PATCH /auth/me/appearance` (không dùng `APPEARANCE_*`).  
-> Mã `OVERTIME_*`, `ATTENDANCE_MANAGE`, `APPEARANCE_*` (cũ) đã **gỡ** — không gán lại.
+> **Giao diện hệ thống** (mặc định toàn công ty): lưu trong `app_settings` — Admin cấu hình tại **Cấu hình hệ thống → Cài đặt**; API `GET/PATCH /settings/appearance` (`APPEARANCE_*`). Màn **login** và sau **đăng xuất** luôn dùng giao diện hệ thống (`GET /settings/public/appearance`).  
+> **Giao diện cá nhân:** mọi user đăng nhập — **Tài khoản** → tab **Cài đặt**; `GET/PATCH /auth/me/appearance`. Chỉ **ghi đè** hệ thống khi user đã lưu (cột `appearance_customized = true`).  
+> Mã `OVERTIME_*`, `ATTENDANCE_MANAGE` đã **gỡ** — không gán lại.
 
 ---
 
@@ -637,7 +639,8 @@ Mọi người đăng nhập đều truy cập được (sidebar **Tài khoản*
 | **Cài đặt** | Giao diện: chế độ **Sáng/Tối** (lưu ngay), màu chủ đạo, phông chữ (bấm **Lưu** để đồng bộ server) |
 
 - URL tab Cài đặt: `/account?tab=settings`
-- Nút sáng/tối trên thanh header cũng lưu vào cùng cấu hình trên server
+- Nút sáng/tối trên thanh header cũng lưu vào cấu hình cá nhân (đánh dấu đã tùy chỉnh)
+- Chưa tự lưu giao diện → app dùng **giao diện hệ thống**; sau khi Lưu hoặc đổi sáng/tối → ưu tiên cài đặt cá nhân
 - User **không** có `EMPLOYEE_VIEW` mở **Nhân viên** sẽ được chuyển sang **Tài khoản** thay vì tab Hồ sơ cũ
 
 ### 7.1 Tổng quan (`/dashboard`)
@@ -666,10 +669,11 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 - **Ngày nghỉ:** `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` — `/sysConfig/holidays`.
 - **Vị trí chi nhánh:** `LOCATION_VIEW` / `LOCATION_MANAGE` — `/sysConfig/locations`.
-- **Ca làm việc (toàn hệ thống):** `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — **Cấu hình hệ thống → Ca làm việc** (`/sysConfig/settings`).
+- **Giao diện hệ thống:** `APPEARANCE_VIEW` / `APPEARANCE_EDIT` — **Cấu hình hệ thống → Cài đặt** (`/sysConfig/settings`, accordion **Giao diện**). Áp dụng cho user chưa tùy chỉnh cá nhân và cho màn login.
+- **Ca làm việc (toàn hệ thống):** `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — cùng trang `/sysConfig/settings`, accordion **Ca làm việc**.
 - **Nhóm quyền / Phân quyền:** `ROLE_VIEW` / `ROLE_MANAGE` — `/sysConfig/roles`, `/sysConfig/assign`.
 
-> Giao diện cá nhân không nằm đây — xem [mục 7.0](#70-tài-khoản-account).
+> Giao diện **cá nhân** không cấu hình tại đây — xem [mục 7.0](#70-tài-khoản-account).
 
 ---
 
