@@ -22,7 +22,7 @@ If you are new to HRM, follow these five steps:
 
 1. **Open a browser** and go to [https://hrm.tamada.vn/login](https://hrm.tamada.vn/login).
 2. **Log in** with the username and password provided by HR (the default password is usually the same as the username).
-3. **Change your password** (recommended): click your name at the top → **Change password**.
+3. **Change your password** (recommended): user menu (top bar) → **Change password**.
 4. **Attendance**: menu **Attendance & Time** → **Attendance** → **Check in** / **Check out** (allow browser location when prompted).
 5. **Personal calendar**: menu **Calendar** → select your column → click an empty time slot to create a meeting (if needed).
 
@@ -78,11 +78,12 @@ You use HRM to:
 | Menu group | Function | URL path |
 |------------|----------|----------|
 | **Overview** | Dashboard, quick metrics | `/dashboard` |
+| **Account** | Personal profile, appearance (color, font, light/dark) | `/account` (tabs **Information** / **Settings**) |
 | **Calendar** | Multi-employee meeting schedule | `/calendar` |
-| **Organization** | Employees, Departments, Positions | `/employees`, `/departments`, `/positions` |
-| **Attendance & Time** | Attendance, Attendance Tracking, Leave Requests, Leave Approvals | `/attendance`, `/attendance-tracking`, `/leave`, `/leave-approvals` |
+| **Organization** | Employees, Departments, Positions | `/org/employees`, `/org/departments`, `/org/positions` |
+| **Attendance & Time** | Attendance, Attendance Tracking, Leave Requests, Leave Approvals | `/time/attendance`, `/time/attendance-tracking`, `/time/leave`, `/time/leave-approvals` |
 | **Payroll** | Payslips, tax settings | `/payroll` |
-| **System Settings** | Holiday Configuration, Office Locations, Roles, Permission Assignment | `/attendance/holidays`, `/attendance/locations`, `/roles`, `/roles/assign` |
+| **System Settings** | Holidays, Locations, Work shift, Roles, Permission Assignment | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/roles`, `/sysConfig/assign` |
 
 Menus appear **based on permissions**. If a menu item is missing, your account may lack the required permission (see [Section 6](#6-roles--permissions)).
 
@@ -138,7 +139,7 @@ New employees **cannot self-register** — HR must create the profile first.
 | **Production** | [https://hrm.tamada.vn/](https://hrm.tamada.vn/) |
 | **Login page** | [https://hrm.tamada.vn/login](https://hrm.tamada.vn/login) |
 
-After a successful login, you are redirected to **Attendance** (`/attendance`) or the page you tried to open before being sent to login.
+After a successful login, you are redirected to **Attendance** (`/time/attendance`) or the page you tried to open before being sent to login.
 
 ---
 
@@ -271,7 +272,7 @@ There is **no** “Forgot password” flow on the login page.
 ### 4.1 Create a new employee — step by step
 
 1. Log in with an account that can create employees.
-2. **Organization** → **Employees** (`/employees`).
+2. **Organization** → **Employees** (`/org/employees`) — requires `EMPLOYEE_VIEW`.
 3. Click **Add employee**.
 4. Fill the form (table below).
 5. Review **Username** (auto-filled from full name — editable before save).
@@ -333,11 +334,11 @@ There is **no** “Forgot password” flow on the login page.
 ### 4.4 Edit after create
 
 1. **Organization** → **Employees** → open the employee.
-2. Click **Edit** (`/employees/{id}/edit`).
+2. Click **Edit** (`/org/employees/{id}/edit`).
 3. Update fields (**Username** is locked).
 4. Click **Save**.
 
-**Self-service profile:** **My Profile** tab — limited personal fields only (no department, role, or username).
+**Self-service profile:** **Account** (`/account`) → tab **Information** (or user menu → **Account**) — limited personal fields only (no department, role, or username). Tab **Settings**: theme color, font, light/dark mode — saved per user and synced on login on other devices.
 
 **Admin reset password:** Employee detail → **Reset password** → confirm → password = username.
 
@@ -511,7 +512,7 @@ Each employee has **one** `roleId` at a time.
 | Feature | Admin | HR* | Manager | Employee |
 |---------|:-----:|:---:|:-------:|:--------:|
 | Create employee | Yes | Yes* | No** | No |
-| Update employee | Yes | Yes* | No** | Own profile (limited) |
+| Update employee | Yes | Yes* | No** | Account → Information (limited) |
 | Delete employee | Yes | Yes* | No | No |
 | View employees — company-wide | Yes | Yes* | No | No |
 | View employees — team | Yes | Yes* | Yes*** | No |
@@ -549,7 +550,7 @@ Each employee has **one** `roleId` at a time.
 | Who can assign? | Users with `EMPLOYEE_UPDATE` (usually Admin/HR) |
 | Where? | **Organization → Employees** → Create/Edit → **Role** field |
 | Multiple roles? | **No** — one role per employee |
-| Assign permissions? | **System Settings → Permission Assignment** (`/roles/assign`) |
+| Assign permissions? | **System Settings → Permission Assignment** (`/sysConfig/assign`) |
 
 **Steps for role permissions:**
 
@@ -581,14 +582,27 @@ Each employee has **one** `roleId` at a time.
 | `POSITION_VIEW` / `POSITION_MANAGE` | Positions |
 | `ROLE_VIEW` / `ROLE_MANAGE` | Roles & permissions |
 | `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` | Holiday configuration |
-| `APPEARANCE_VIEW` / `APPEARANCE_EDIT` | View / edit appearance (Settings) |
-| `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` | View / edit default work shift (Settings) |
+| `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` | View / edit default work shift (`/sysConfig/settings`) |
 
-> `OVERTIME_*` and `ATTENDANCE_MANAGE` are **removed** — overtime uses `LEAVE_*` only; do not re-assign legacy codes.
+> **Personal appearance** (color, font, light/dark): any logged-in user — **Account** → tab **Settings**; API `GET/PATCH /auth/me/appearance` (not `APPEARANCE_*`).  
+> `OVERTIME_*`, `ATTENDANCE_MANAGE`, and legacy `APPEARANCE_*` are **removed** — do not re-assign.
 
 ---
 
 ## 7. Module Guides
+
+### 7.0 Account (`/account`)
+
+Available to every logged-in user (sidebar **Account** or user menu).
+
+| Tab | Content |
+|-----|---------|
+| **Information** | My profile — edit name, email, phone, … (cannot change username, department, or role) |
+| **Settings** | Appearance: **Light/Dark** (saved immediately), primary color, font (click **Save** to sync to server) |
+
+- Settings tab URL: `/account?tab=settings`
+- The light/dark toggle in the header also saves to the same server-side preferences
+- Users **without** `EMPLOYEE_VIEW` who open **Employees** are redirected to **Account** (no legacy My Profile tab)
 
 ### 7.1 Overview (`/dashboard`)
 
@@ -611,10 +625,12 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 
 ### 7.5 System Settings
 
-- **Holiday Configuration:** `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT`.
-- **Office Locations:** `LOCATION_VIEW` / `LOCATION_MANAGE`.
-- **Appearance & work shift:** `APPEARANCE_VIEW` / `APPEARANCE_EDIT`, `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — **System Settings → Settings** (`/sysConfig/settings`).
-- **Roles / Permission Assignment:** `ROLE_VIEW` / `ROLE_MANAGE`.
+- **Holiday Configuration:** `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` — `/sysConfig/holidays`.
+- **Office Locations:** `LOCATION_VIEW` / `LOCATION_MANAGE` — `/sysConfig/locations`.
+- **Work shift (system-wide):** `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — **System Settings → Work shift** (`/sysConfig/settings`).
+- **Roles / Permission Assignment:** `ROLE_VIEW` / `ROLE_MANAGE` — `/sysConfig/roles`, `/sysConfig/assign`.
+
+> Personal appearance is not configured here — see [Section 7.0](#70-account-account).
 
 ---
 
@@ -627,13 +643,13 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 | Methods | **Web only** — Check in/out + GPS geofence. **No** hardware time clocks. |
 | Time unit | Minutes stored; status uses **≥ 9 hours** between check-in and check-out → **WORK**, else **LATE_EARLY**. |
 | Timezone | **`Asia/Ho_Chi_Minh`** |
-| Work shifts | **Not implemented** — see [8.5](#85-work-shifts-not-implemented) |
+| Work shifts | **System default** at `/sysConfig/settings` — no per-employee roster; see [8.5](#85-work-shifts) |
 
 > **Important:** **LATE_EARLY** is evaluated from the configured **work shift** (start/end, grace minutes, lunch break) and **expected working minutes** (`workUnitLabel`), not a fixed 9h/540-minute rule. Late/early vs shift boundaries or insufficient net working time → LATE_EARLY; otherwise WORK.
 
 ### 8.2 Self check-in
 
-1. **Attendance** (`/attendance`) — current month only shows Check in/out buttons.
+1. **Attendance** (`/time/attendance`) — current month only shows Check in/out buttons.
 2. Confirm → allow **Location** → must be inside configured **Office Locations** (unless approved **REMOTE_WORK** that day).
 3. Check out after check-in; buttons hide when done.
 
@@ -645,8 +661,8 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 
 | Role | Where | Scope |
 |------|-------|-------|
-| Employee | `/attendance` | Own month calendar |
-| Manager | `/attendance-tracking` | Report subtree (`EMPLOYEE_VIEW`) |
+| Employee | `/time/attendance` | Own month calendar |
+| Manager | `/time/attendance-tracking` | Report subtree (`EMPLOYEE_VIEW`) |
 | Admin | Same | All employees |
 
 Grid symbols: `1`/`8h` worked, `W` weekend, `H` holiday, leave codes, `F` forgot punch, `A` absent (team view), `-` future.
@@ -657,9 +673,9 @@ Grid symbols: `1`/`8h` worked, `W` weekend, `H` holiday, leave codes, `F` forgot
 - **Leave approval** can update times (late/early/remote/correction types).
 - **Export:** Excel `.xlsx` only from Attendance Tracking — no CSV/PDF.
 
-### 8.5 Work shifts (not implemented)
+### 8.5 Work shifts
 
-No Shift/Roster module. Use **9-hour rule** + **Holiday Configuration** + leave requests. Excel may show SS/NS labels as payroll allowance legend only.
+HRM has a **system-wide default work shift** (start/end, grace minutes, lunch break) — **System Settings → Work shift** (`/sysConfig/settings`), permissions `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT`. There is **no** per-employee shift roster. Late/early and `workUnitLabel` use these settings (see note in [8.1](#81-how-it-works)). Excel may show SS/NS labels as payroll allowance legend only.
 
 ### 8.6 Permission matrix
 
@@ -691,7 +707,7 @@ No per-type annual caps, carryover, or attachments in system.
 
 ### 9.2 Create request
 
-**Leave Requests** (`/leave`) → form: type, date range, times (default 09:00–18:00 on form only), reason, **one Approver** (required). Submit → **PENDING**; approver gets in-app notification (no email).
+**Leave Requests** (`/time/leave`) → form: type, date range, times (default 09:00–18:00 on form only), reason, **one Approver** (required). Submit → **PENDING**; approver gets in-app notification (no email).
 
 **Over balance:** blocked at **approve** time for `PAID_LEAVE`, not at submit.
 
@@ -716,7 +732,7 @@ Employee may edit/delete only while **PENDING**. No `CANCELLED` status. Reject n
 
 | Report | Access | Export |
 |--------|--------|--------|
-| Personal `/attendance` dashboard | `ATTENDANCE_VIEW` | — |
+| Personal `/time/attendance` dashboard | `ATTENDANCE_VIEW` | — |
 | **Attendance Tracking** grid | `EMPLOYEE_VIEW` + scope | **Excel .xlsx** (`ATTENDANCE_EXPORT`) |
 | Dedicated leave PDF/CSV | **No** | — |
 

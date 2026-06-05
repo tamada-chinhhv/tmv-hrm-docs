@@ -22,7 +22,7 @@ Nếu bạn lần đầu dùng HRM, làm lần lượt 5 bước sau:
 
 1. **Mở trình duyệt** và truy cập [https://hrm.tamada.vn/login](https://hrm.tamada.vn/login).
 2. **Đăng nhập** bằng tên đăng nhập và mật khẩu do HR cấp (mật khẩu mặc định thường trùng với tên đăng nhập).
-3. **Đổi mật khẩu** (khuyến nghị): bấm tên của bạn ở góc trên → **Đổi mật khẩu**.
+3. **Đổi mật khẩu** (khuyến nghị): menu user (góc trên) → **Đổi mật khẩu**.
 4. **Chấm công**: menu **Chấm công & Thời gian** → **Chấm công** → bấm **Chấm công vào** / **Chấm công ra** (cần bật quyền vị trí trên trình duyệt).
 5. **Xem lịch cá nhân**: menu **Lịch** → chọn cột của bạn → bấm khung giờ trống để tạo cuộc họp (nếu cần).
 
@@ -78,11 +78,12 @@ Bạn dùng HRM để:
 | Nhóm menu | Chức năng | Đường dẫn (URL) |
 |-----------|-----------|-----------------|
 | **Tổng quan** | Bảng điều khiển, chỉ số nhanh | `/dashboard` |
+| **Tài khoản** | Hồ sơ cá nhân, giao diện (màu, font, sáng/tối) | `/account` (tab **Thông tin** / **Cài đặt**) |
 | **Lịch** | Lịch họp nhiều nhân viên | `/calendar` |
-| **Tổ chức** | Nhân viên, Phòng ban, Chức vụ | `/employees`, `/departments`, `/positions` |
-| **Chấm công & Thời gian** | Chấm công, Theo dõi chấm công, Đơn xin phép, Duyệt đơn | `/attendance`, `/attendance-tracking`, `/leave`, `/leave-approvals` |
+| **Tổ chức** | Nhân viên, Phòng ban, Chức vụ | `/org/employees`, `/org/departments`, `/org/positions` |
+| **Chấm công & Thời gian** | Chấm công, Theo dõi chấm công, Đơn xin phép, Duyệt đơn | `/time/attendance`, `/time/attendance-tracking`, `/time/leave`, `/time/leave-approvals` |
 | **Lương** | Phiếu lương, cấu hình thuế | `/payroll` |
-| **Cấu hình hệ thống** | Ngày nghỉ, Vị trí chi nhánh, Nhóm quyền, Phân quyền | `/attendance/holidays`, `/attendance/locations`, `/roles`, `/roles/assign` |
+| **Cấu hình hệ thống** | Ngày nghỉ, Vị trí, Ca làm việc, Nhóm quyền, Phân quyền | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/roles`, `/sysConfig/assign` |
 
 Menu hiển thị **theo quyền** — nếu bạn không thấy mục nào, có thể tài khoản chưa được gán quyền tương ứng (xem [mục 6](#6-phân-quyền--vai-trò)).
 
@@ -138,7 +139,7 @@ Nhân viên mới **không tự đăng ký** — cần HR tạo hồ sơ trướ
 | **Hệ thống chính (production)** | [https://hrm.tamada.vn/](https://hrm.tamada.vn/) |
 | **Trang đăng nhập** | [https://hrm.tamada.vn/login](https://hrm.tamada.vn/login) |
 
-Sau khi đăng nhập thành công, hệ thống chuyển bạn tới trang **Chấm công** (`/attendance`) hoặc trang bạn đang cố mở trước đó (nếu bị chuyển về login giữa chừng).
+Sau khi đăng nhập thành công, hệ thống chuyển bạn tới trang **Chấm công** (`/time/attendance`) hoặc trang bạn đang cố mở trước đó (nếu bị chuyển về login giữa chừng).
 
 ---
 
@@ -276,7 +277,7 @@ Hệ thống **không có** chức năng “Quên mật khẩu” qua email.
 ### 4.1 Tạo nhân viên mới — từng bước
 
 1. Đăng nhập bằng tài khoản có quyền tạo nhân viên.
-2. Menu **Tổ chức** → **Nhân viên** (`/employees`).
+2. Menu **Tổ chức** → **Nhân viên** (`/org/employees`) — chỉ khi có quyền `EMPLOYEE_VIEW`.
 3. Bấm **Thêm nhân viên** (hoặc tương đương trên danh sách).
 4. Điền form (bảng bên dưới).
 5. Kiểm tra **Tên đăng nhập** (tự điền từ họ tên — có thể sửa trước khi lưu).
@@ -340,11 +341,11 @@ Hệ thống **không có** chức năng “Quên mật khẩu” qua email.
 ### 4.4 Chỉnh sửa thông tin sau khi tạo
 
 1. **Tổ chức** → **Nhân viên** → bấm vào tên nhân viên.
-2. Bấm **Chỉnh sửa** (hoặc vào `/employees/{id}/edit`).
+2. Bấm **Chỉnh sửa** (hoặc vào `/org/employees/{id}/edit`).
 3. Cập nhật các trường (trừ **Tên đăng nhập** — ô bị khóa).
 4. Bấm **Lưu**.
 
-**Nhân viên tự sửa hồ sơ cá nhân:** Menu nhân viên → tab **Hồ sơ của tôi** — chỉ sửa được một phần thông tin cá nhân (không đổi phòng ban, vai trò, username).
+**Nhân viên tự sửa hồ sơ cá nhân:** **Tài khoản** (`/account`) → tab **Thông tin** (hoặc menu user → **Tài khoản**) — chỉ sửa một phần thông tin cá nhân (không đổi phòng ban, vai trò, username). Tab **Cài đặt**: màu chủ đạo, phông chữ, chế độ sáng/tối — lưu trên tài khoản, đồng bộ khi đăng nhập trên thiết bị khác.
 
 **Reset mật khẩu (Admin):** Trên trang xem chi tiết nhân viên → **Reset mật khẩu** → xác nhận → mật khẩu = username.
 
@@ -534,7 +535,7 @@ Chú thích cột:
 | Tính năng | Admin | HR (đủ quyền) | Manager | Employee |
 |-----------|:-----:|:--------------:|:-------:|:--------:|
 | Tạo nhân viên | Có | Có* | Không** | Không |
-| Sửa nhân viên | Có | Có* | Không** | Hồ sơ của tôi (giới hạn) |
+| Sửa nhân viên | Có | Có* | Không** | Tài khoản → Thông tin (giới hạn) |
 | Xóa nhân viên | Có | Có* | Không | Không |
 | Xem nhân viên — toàn công ty | Có | Có* | Không | Không |
 | Xem nhân viên — team | Có | Có* | Có*** | Không |
@@ -617,14 +618,27 @@ Chú thích cột:
 | `POSITION_VIEW` / `POSITION_MANAGE` | Xem / quản lý chức vụ |
 | `ROLE_VIEW` / `ROLE_MANAGE` | Xem / quản lý vai trò & phân quyền |
 | `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` | Xem / sửa cấu hình ngày nghỉ |
-| `APPEARANCE_VIEW` / `APPEARANCE_EDIT` | Xem / sửa giao diện (Settings) |
-| `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` | Xem / sửa ca làm việc mặc định (Settings) |
+| `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` | Xem / sửa ca làm việc mặc định (`/sysConfig/settings`) |
 
-> Mã `OVERTIME_*` và `ATTENDANCE_MANAGE` đã **gỡ** khỏi hệ thống — tăng ca dùng `LEAVE_*`; không gán lại các mã cũ.
+> **Giao diện cá nhân** (màu, font, sáng/tối): mọi user đăng nhập — **Tài khoản** → tab **Cài đặt**; API `GET/PATCH /auth/me/appearance` (không dùng `APPEARANCE_*`).  
+> Mã `OVERTIME_*`, `ATTENDANCE_MANAGE`, `APPEARANCE_*` (cũ) đã **gỡ** — không gán lại.
 
 ---
 
 ## 7. Hướng dẫn theo từng phân hệ
+
+### 7.0 Tài khoản (`/account`)
+
+Mọi người đăng nhập đều truy cập được (sidebar **Tài khoản** hoặc menu user).
+
+| Tab | Nội dung |
+|-----|----------|
+| **Thông tin** | Hồ sơ của tôi — sửa họ tên, email, điện thoại, … (không đổi username, phòng ban, vai trò) |
+| **Cài đặt** | Giao diện: chế độ **Sáng/Tối** (lưu ngay), màu chủ đạo, phông chữ (bấm **Lưu** để đồng bộ server) |
+
+- URL tab Cài đặt: `/account?tab=settings`
+- Nút sáng/tối trên thanh header cũng lưu vào cùng cấu hình trên server
+- User **không** có `EMPLOYEE_VIEW` mở **Nhân viên** sẽ được chuyển sang **Tài khoản** thay vì tab Hồ sơ cũ
 
 ### 7.1 Tổng quan (`/dashboard`)
 
@@ -650,10 +664,12 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 ### 7.5 Cấu hình hệ thống
 
-- **Ngày nghỉ:** `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT`.
-- **Vị trí chi nhánh:** `LOCATION_VIEW` / `LOCATION_MANAGE`.
-- **Cài đặt giao diện & ca làm việc:** `APPEARANCE_VIEW` / `APPEARANCE_EDIT`, `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — **Cấu hình hệ thống → Cài đặt** (`/sysConfig/settings`).
-- **Nhóm quyền / Phân quyền:** `ROLE_VIEW` / `ROLE_MANAGE`.
+- **Ngày nghỉ:** `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` — `/sysConfig/holidays`.
+- **Vị trí chi nhánh:** `LOCATION_VIEW` / `LOCATION_MANAGE` — `/sysConfig/locations`.
+- **Ca làm việc (toàn hệ thống):** `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — **Cấu hình hệ thống → Ca làm việc** (`/sysConfig/settings`).
+- **Nhóm quyền / Phân quyền:** `ROLE_VIEW` / `ROLE_MANAGE` — `/sysConfig/roles`, `/sysConfig/assign`.
+
+> Giao diện cá nhân không nằm đây — xem [mục 7.0](#70-tài-khoản-account).
 
 ---
 
@@ -667,7 +683,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 | Phương thức | Có trong HRM? | Mô tả |
 |-------------|:-------------:|--------|
-| **Tự chấm trên web** (Check in / Check out + GPS) | **Có** | Nhân viên bấm trên trang **Attendance** (`/attendance`) hoặc từ **Overview** |
+| **Tự chấm trên web** (Check in / Check out + GPS) | **Có** | Nhân viên bấm trên trang **Chấm công** (`/time/attendance`) hoặc từ **Tổng quan** |
 | **Máy chấm công vật lý** (vân tay, thẻ, ZKTeco, …) | **Không** | Không có API/tích hợp thiết bị phần cứng trong codebase |
 | **Cả hai** | — | Chỉ có kênh web; nếu công ty dùng máy vật lý, dữ liệu phải xử lý **ngoài** HRM hoặc qua sửa công thủ công / đơn **ATTENDANCE_CORRECTION** |
 
@@ -711,7 +727,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 **Truy cập:**
 
-1. Menu **Attendance & Time** → **Attendance** (`/attendance`), hoặc
+1. Menu **Chấm công & Thời gian** → **Chấm công** (`/time/attendance`), hoặc
 2. **Overview** → tab nhân viên → nút Check in/out nhanh.
 
 **Chấm công vào (Check in):**
@@ -759,7 +775,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 | Cách | Đường dẫn | Nội dung |
 |------|-----------|----------|
-| Lịch tháng + tổng hợp | `/attendance` | Lịch từng ngày, giờ vào/ra, loại ngày (làm, lễ, nghỉ phép, …), thẻ tổng hợp tháng |
+| Lịch tháng + tổng hợp | `/time/attendance` | Lịch từng ngày, giờ vào/ra, loại ngày (làm, lễ, nghỉ phép, …), thẻ tổng hợp tháng |
 | Chi tiết một ngày | Bấm ô ngày trên lịch | Popup: giờ vào, giờ ra, bản đồ vị trí chấm (nếu có), form sửa giờ (nếu được quyền) |
 
 **Cột / thông tin trên lịch cá nhân:**
@@ -805,7 +821,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 3. **Bản ghi chấm công** → so **tổng phút thực tế** với **expectedWorkingMinutes** (ca − nghỉ trưa) và grace → WORK hoặc LATE_EARLY.
 4. **Không có bản ghi** + ngày đã qua → ABSENT (team) / FORGOT_CLOCK_IN (một số view cá nhân).
 
-**Dựa trên cài đặt ca làm việc** (`workShiftStartTime`, `workShiftEndTime`, `workShiftLunchBreakMinutes`, `workShiftGraceMinutes`) tại **Settings → Ca làm việc**.
+**Dựa trên cài đặt ca làm việc** (`workShiftStartTime`, `workShiftEndTime`, `workShiftLunchBreakMinutes`, `workShiftGraceMinutes`) tại **Cấu hình hệ thống → Ca làm việc** (`/sysConfig/settings`).
 
 **Kết quả mong đợi:** Đúng vai trò, mở đúng trang và đọc được từng ký hiệu ô ngày.
 
@@ -886,7 +902,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 ### 8.7 Ca làm việc & Lịch làm việc (Task 09)
 
-> **Cập nhật:** HRM có **cài đặt ca làm việc mặc định** (không phải lịch ca theo nhân viên). HR cấu hình tại **Settings → Ca làm việc**.
+> **Cập nhật:** HRM có **cài đặt ca làm việc mặc định** (không phải lịch ca theo nhân viên). HR cấu hình tại **Cấu hình hệ thống → Ca làm việc** (`/sysConfig/settings`).
 
 | Tính năng | Trạng thái trong HRM |
 |-----------|----------------------|
@@ -1141,7 +1157,7 @@ APPROVED  REJECTED
 3. Đọc lưới từng ngày + cột **tổng** cuối bảng.
 4. Chuyển **Đơn vị** Day/Hour (ngày: `1`, `F`, `A`…; giờ: `8h` cho ngày làm).
 
-**Chỉ số trên dashboard cá nhân** (`/attendance`):
+**Chỉ số trên dashboard cá nhân** (`/time/attendance`):
 
 | Chỉ số | Ý nghĩa |
 |--------|---------|
