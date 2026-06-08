@@ -8,7 +8,7 @@
 
 # Web HRM 利用ガイド
 
-> バージョン: 2.0  
+> バージョン: 2.1  
 > 対象: HRM システム利用者・管理者  
 > 対象範囲: FE `tmv-hrm`, BE `tmv-hrm-be`  
 > Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)  
@@ -208,7 +208,7 @@ flowchart LR
 | 初期パスワードは？ | **Username と同じ** |
 | 生成ルール | 作成時に別パスワードを入力しなければ Username を使用 |
 | 初回ログイン時の強制変更 | **なし** |
-| 開発用 seed | `admin` / `admin123` — 本番では直ちに変更 |
+| 本番システム管理者 | 初回 `admin` / `admin123` — デプロイ後に backend が自動作成/復元（`ensure-system-admin.mjs`）。ログイン後**直ちにパスワード変更** |
 
 ### 3.4 パスワード変更
 
@@ -218,18 +218,29 @@ flowchart LR
 
 **新パスワード条件:** 8 文字以上、大文字・小文字・数字・記号を各 1 文字以上（例: `Abcdef1!`）。
 
+**想定結果:** 変更成功後も**現在のブラウザではログイン状態を維持**。次回から新しいパスワードを使用。他のタブ・端末は再ログインが必要な場合あり。
+
 ### 3.5 パスワードを忘れた場合
 
 ログイン画面に **Forgot password** はありません。
 
 | 担当 | 対応 |
 |------|------|
-| HR/Admin（`EMPLOYEE_UPDATE`） | 従業員詳細 → **Reset password** → Username と同じ値に戻る |
+| HR/Admin（`EMPLOYEE_UPDATE`） | 従業員詳細 → **Reset password** → Username と同じ値に戻る。従業員は**全端末で再ログイン**が必要 |
 | 従業員 | HR/IT に連絡 |
 
 ### 3.6 ログアウト
 
 名前メニュー → **Logout** → 確認。
+
+### 3.7 システム `admin` アカウント（保護）
+
+本番では常に **`admin`**（ADMIN、全権限）が存在。`ensure-system-admin.mjs` が migration 後に自動実行。
+
+- `admin` の削除・HR による **Reset password**・ロール変更・他ユーザーによる編集: **不可**
+- `admin` の **Change password**（自己変更）: **可** — 再デプロイでも `admin123` に戻さない
+- **ADMIN** ロールの付与・ADMIN ロール権限の編集: **`admin` のみ**
+- Username `admin` は **予約済み**
 
 ---
 
@@ -256,7 +267,8 @@ flowchart LR
 | Email | — | 重複不可 |
 | Hire date | ○ | 既定は当日、**YYYY-MM-DD** |
 | Username | ○ | 氏名から自動、保存前のみ編集可 |
-| Role | — | `ADMIN`, `EMPLOYEE` 等 |
+| Role | — | `EMPLOYEE` 等 — **`ADMIN` は `admin` のみ付与可** |
+| Attendance not required | — | Admin のみ — Attendance Tracking / Excel から除外 |
 | Employment status | — | 既定 **ACTIVE** |
 
 > **注意:** 日付は DatePicker で選択し、DB には **YYYY-MM-DD** で保存されます。
@@ -407,7 +419,8 @@ flowchart LR
 ### 6.4 ロール割当
 
 **Organization** → **Employees** → Role フィールド。  
-権限の細かい設定は **System Settings** → **Permission Assignment**（`/sysConfig/assign`）。
+権限の細かい設定は **System Settings** → **Permission Assignment**（`/sysConfig/assign`）。  
+**ADMIN** ロール付与・ADMIN 権限編集は **`admin` のみ**。
 
 ### 6.5 権限コード一覧
 
@@ -419,6 +432,7 @@ flowchart LR
 | `ATTENDANCE_MANUAL_UPDATE` | 手動時刻修正 |
 | `LOCATION_VIEW` / `LOCATION_MANAGE` | 拠点の閲覧・管理 |
 | `LEAVE_VIEW` / `LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED` | 休暇（OT 含む）の閲覧・承認 |
+| `LEAVE_DELETE_APPROVED` | **承認済み**申請の削除（Leave Approvals、既定 ADMIN） |
 | `CALENDAR_VIEW` / `CALENDAR_MANAGE` | カレンダー閲覧・全社表示スイッチ |
 | `PAYROLL_VIEW` / `PAYROLL_MANAGE` / `PAYROLL_PERIOD_LOCK` | 給与閲覧・管理・期間ロック |
 | `DEPARTMENT_*` / `POSITION_*` | 部署・役職 |
@@ -490,16 +504,19 @@ GPS ジオフェンス内での Check in/out。位置情報許可が必要。
 ## 8. 勤怠
 
 - **Web のみ**（Check in/out + GPS）。ハードウェア連携なし。
+- Attendance Tracking 対象: 勤怠必須の従業員のみ（`ADMIN` ロールと **Attendance not required** は除外）
 - タイムゾーン: **`Asia/Ho_Chi_Minh`**
-- 状態: check-in〜check-out が **9時間以上** → **WORK**、未満 → **LATE_EARLY**（8:00遅刻15分ではなく **総労働時間**）
+- 状態: **勤務シフト**（開始/終了、grace、昼休み、`expectedWorkingMinutes` / `workUnitLabel`）で **WORK** / **LATE_EARLY** を判定 — 固定9時間ルールではない
 - **全社デフォルト勤務シフト**あり（`/sysConfig/settings`）— 従業員別ロスターはなし（[VI 版 8.7](README.vi.md#87-ca-làm-việc--lịch-làm-việc-task-09) 参照）
 - 手動修正: `ATTENDANCE_MANUAL_UPDATE`、監査ログなし
 - エクスポート: **Excel .xlsx** のみ（Attendance Tracking、`ATTENDANCE_EXPORT` 必須）
 
 ## 9. 休暇申請
 
-- 種別: `PAID_LEAVE`（残日数減算）、`SICK_LEAVE`、`UNPAID_LEAVE`、`LATE_ARRIVAL`、`EARLY_DEPARTURE`、`REMOTE_WORK`、`ATTENDANCE_CORRECTION`、`HIEU_HI`
+- 種別: `PAID_LEAVE`（残日数減算）、`SICK_LEAVE`、`UNPAID_LEAVE`、`LATE_ARRIVAL`、`EARLY_DEPARTURE`、`REMOTE_WORK`、`ATTENDANCE_CORRECTION`、`HIEU_HI`、`OVERTIME`（残業 — 月次 OT は **承認済み** `OVERTIME` のみ、勤怠からの自動計算なし）
 - 承認: **1名の Approver** のみ（連鎖承認・代理承認なし）
+- 承認済み削除: `LEAVE_DELETE_APPROVED` — Leave Approvals で **Delete**
+- 重複ガード: `LEAVE_APPROVE_BLOCKED_BY_OVERLAP` / `LEAVE_DELETE_BLOCKED_BY_OVERLAP` — 別の **APPROVED** と期間重複時は承認/削除不可。手順: 旧承認済みを削除 → 新規作成 → 承認
 - 添付ファイル・半日0.5減算・年次繰越: **未実装**
 - 状態: `PENDING` → `APPROVED` / `REJECTED`（`CANCELLED` なし）
 
@@ -556,6 +573,8 @@ GPS ジオフェンス内での Check in/out。位置情報許可が必要。
 |--------|------|
 | Username already exists | 保存前に Username 変更 |
 | Insufficient permissions | セクション 6、Admin に連絡 |
+| LEAVE_APPROVE_BLOCKED_BY_OVERLAP | 別の承認済みと期間重複 — 先に旧承認済みを削除（`LEAVE_DELETE_APPROVED`） |
+| LEAVE_DELETE_BLOCKED_BY_OVERLAP | 重複する承認済みが残っている — 先に他方を削除 |
 | Only the event organizer can modify | 主催者に依頼、または Leave meeting |
 
 ### 9.5 サポート
@@ -580,4 +599,4 @@ GPS ジオフェンス内での Check in/out。位置情報許可が必要。
 
 ---
 
-*ドキュメント バージョン 2.0 — `tmv-hrm` / `tmv-hrm-be` と同期。最終更新: 2026。*
+*ドキュメント バージョン 2.1 — `tmv-hrm` / `tmv-hrm-be` と同期。最終更新: 2026。*

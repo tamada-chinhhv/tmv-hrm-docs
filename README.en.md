@@ -8,7 +8,7 @@
 
 # Web HRM User Guide
 
-> Version: 2.0  
+> Version: 2.1  
 > Audience: End users and HRM administrators  
 > Scope: FE `tmv-hrm`, BE `tmv-hrm-be`  
 > Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)  
@@ -219,7 +219,7 @@ The system **does not** auto-append numbers (`nguyenvanan1`, `nguyenvanan2`, …
 | Default password? | **Same as username** (e.g. `nguyenvanan` / `nguyenvanan`) |
 | How is it set? | Uses username when HR does not enter a separate password on create |
 | Forced change on first login? | **No** |
-| Dev seed admin | `admin` / `admin123` — change immediately in production |
+| Production system admin | `admin` / `admin123` on first deploy — backend auto-creates/restores after each deploy (`ensure-system-admin.mjs`); **change password immediately** after login |
 
 **Example:** Employee **Nguyễn Văn An** → login: `nguyenvanan` / `nguyenvanan`.
 
@@ -245,7 +245,7 @@ The system **does not** auto-append numbers (`nguyenvanan1`, `nguyenvanan2`, …
 | At least 1 special character | `!` `@` `#` … |
 | New = confirmation | Must match |
 
-**Expected outcome:** Next login uses the new password.
+**Expected outcome:** After a successful change you **stay signed in** on the current browser; use the new password next time. Other tabs or devices may need to sign in again.
 
 ### 3.5 Forgot password & admin reset
 
@@ -253,7 +253,7 @@ There is **no** “Forgot password” flow on the login page.
 
 | Who | Action |
 |-----|--------|
-| **HR / Admin** (`EMPLOYEE_UPDATE`) | Open employee profile → **Reset password** → password becomes **username** again |
+| **HR / Admin** (`EMPLOYEE_UPDATE`) | Open employee profile → **Reset password** → password becomes **username** again; employee must **sign in again** on all devices |
 | **Employee** | Contact HR/IT — cannot recover from the login screen |
 
 ### 3.6 Logout
@@ -262,6 +262,22 @@ There is **no** “Forgot password” flow on the login page.
 2. Confirm if prompted.
 
 **Expected outcome:** You return to the login page; the session ends.
+
+### 3.7 System `admin` account (immutable)
+
+Production always has username **`admin`** with role **ADMIN** and **all permissions**. Script `ensure-system-admin.mjs` runs automatically after migrations on backend startup.
+
+| Rule | Detail |
+|------|--------|
+| First login | `admin` / `admin123` (if newly created) — change password immediately |
+| Delete `admin` account | **Not allowed** |
+| **Reset password** (HR button on profile) | **Not allowed** — cannot reset `admin` back to username |
+| **Change password** (user menu → Change password) | **Allowed** — `admin` can change own password; redeploy **does not** revert to `admin123` |
+| Change role / deactivate `admin` | **Not allowed** — always ADMIN + ACTIVE |
+| Edit `admin` profile by other users | **Not allowed** |
+| Assign **ADMIN** role to others | **Only** username `admin` |
+| Edit **ADMIN** role permissions | **Only** username `admin`; system always grants full permissions to ADMIN |
+| Username `admin` | **Reserved** — cannot create another employee with this username |
 
 ---
 
@@ -302,7 +318,8 @@ There is **no** “Forgot password” flow on the login page.
 | **Contract type** | No | Full-time, Probation, etc. |
 | **Employment status** | No | Default **ACTIVE**; also **INACTIVE** / **TERMINATED** |
 | **Username** | Yes (*) | Auto from full name; editable **before** save |
-| **Role** | No | e.g. `ADMIN`, `EMPLOYEE`, `HR_MANAGER` |
+| **Role** | No | e.g. `EMPLOYEE`, `HR_MANAGER` — **only `admin` may assign `ADMIN`** |
+| **Attendance not required** | No | Admin only — excludes employee from Attendance Tracking grid and Excel export |
 | **Direct manager** | No | Active employees only |
 | **Avatar** | No | Upload image |
 
@@ -340,7 +357,9 @@ There is **no** “Forgot password” flow on the login page.
 
 **Self-service profile:** **Account** (`/account`) → tab **Information** (or user menu → **Account**) — limited personal fields only (no department, role, or username). Tab **Settings**: theme color, font, light/dark mode — saved per user and synced on login on other devices.
 
-**Admin reset password:** Employee detail → **Reset password** → confirm → password = username.
+**Admin reset password:** Employee detail → **Reset password** → confirm → password = username. **Does not apply** to `admin`.
+
+**Attendance not required:** Admin enables the checkbox on the employee form — that employee is excluded from **Attendance Tracking** and attendance Excel export. Role `ADMIN` is always excluded from attendance tracking.
 
 ### 4.5 Offboarding
 
@@ -350,7 +369,7 @@ Prefer changing status over deleting:
 2. Set **Employment status** to **TERMINATED** or **INACTIVE**.
 3. Save.
 
-**Delete** (`EMPLOYEE_DELETE`): Permanent removal — may affect related attendance, payroll, and calendar data. Use status change instead when possible.
+**Delete** (`EMPLOYEE_DELETE`): Permanent removal — may affect related attendance, payroll, and calendar data. Use status change instead when possible. **Cannot delete** the `admin` account.
 
 ---
 
@@ -550,6 +569,8 @@ Each employee has **one** `roleId` at a time.
 | Who can assign? | Users with `EMPLOYEE_UPDATE` (usually Admin/HR) |
 | Where? | **Organization → Employees** → Create/Edit → **Role** field |
 | Multiple roles? | **No** — one role per employee |
+| Assign **ADMIN** role? | **Only** username `admin` |
+| Edit **ADMIN** role permissions? | **Only** username `admin` — system always grants full permissions to ADMIN |
 | Assign permissions? | **System Settings → Permission Assignment** (`/sysConfig/assign`) |
 
 **Steps for role permissions:**
@@ -573,6 +594,7 @@ Each employee has **one** `roleId` at a time.
 | `LEAVE_VIEW` | View / create leave requests (including OT type) |
 | `LEAVE_APPROVE` | Approve leave |
 | `LEAVE_APPROVE_MANAGED` | Approve managed employees’ leave (child of `LEAVE_APPROVE` in assign UI) |
+| `LEAVE_DELETE_APPROVED` | Delete **approved** requests on **Leave Approvals** (default: ADMIN role) |
 | `CALENDAR_VIEW` | View calendar, create/edit own events |
 | `CALENDAR_MANAGE` | Company-wide calendar admin switch |
 | `PAYROLL_VIEW` | View payslips |
@@ -645,8 +667,9 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 | Topic | Answer |
 |-------|--------|
 | Methods | **Web only** — Check in/out + GPS geofence. **No** hardware time clocks. |
-| Time unit | Minutes stored; status uses **≥ 9 hours** between check-in and check-out → **WORK**, else **LATE_EARLY**. |
+| Time unit | Minutes stored (`checkOut − checkIn`); **WORK** / **LATE_EARLY** from **work shift** (grace, lunch break, `expectedWorkingMinutes` / `workUnitLabel`) — not a fixed 9h rule |
 | Timezone | **`Asia/Ho_Chi_Minh`** |
+| Who appears in Attendance Tracking? | Employees who require attendance — role `ADMIN` and employees with **Attendance not required** are excluded |
 | Work shifts | **System default** at `/sysConfig/settings` — no per-employee roster; see [8.5](#85-work-shifts) |
 
 > **Important:** **LATE_EARLY** is evaluated from the configured **work shift** (start/end, grace minutes, lunch break) and **expected working minutes** (`workUnitLabel`), not a fixed 9h/540-minute rule. Late/early vs shift boundaries or insufficient net working time → LATE_EARLY; otherwise WORK.
@@ -667,7 +690,7 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 |------|-------|-------|
 | Employee | `/time/attendance` | Own month calendar |
 | Manager | `/time/attendance-tracking` | Report subtree (`EMPLOYEE_VIEW`) |
-| Admin | Same | All employees |
+| Admin | Same | All employees **who require attendance** (role `ADMIN` and **Attendance not required** excluded) |
 
 Grid symbols: `1`/`8h` worked, `W` weekend, `H` holiday, leave codes, `F` forgot punch, `A` absent (team view), `-` future.
 
@@ -706,6 +729,7 @@ HRM has a **system-wide default work shift** (start/end, grace minutes, lunch br
 | `LATE_ARRIVAL`, `EARLY_DEPARTURE` | No | Updates attendance on approve |
 | `REMOTE_WORK`, `ATTENDANCE_CORRECTION` | No | Attendance effects |
 | `HIEU_HI` | No | Paid flag but no balance UI |
+| `OVERTIME` | No | Overtime hours; monthly OT totals use **approved** `OVERTIME` requests only (no attendance-computed OT) |
 
 No per-type annual caps, carryover, or attachments in system.
 
@@ -723,12 +747,17 @@ PENDING → APPROVED or REJECTED
 
 Employee may edit/delete only while **PENDING**. No `CANCELLED` status. Reject notifies requester; **no mandatory** reject reason field.
 
+Users with `LEAVE_DELETE_APPROVED` see **Delete** on **Leave Approvals** for **APPROVED** rows (restores `PAID_LEAVE` balance; reverts attendance for `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` when safe).
+
 ### 9.4 Approval (single step)
 
 - **One approver** per request — not Manager→HR chain, not parallel.
 - Approver list: direct manager + higher level in dept/parent depts.
 - Only assigned approver can decide (`LEAVE_APPROVE` + matching `approverId`).
 - **No** delegation when manager is away.
+- **Approve** blocked with `LEAVE_APPROVE_BLOCKED_BY_OVERLAP` if another **APPROVED** request overlaps the same period.
+- **Delete approved** blocked with `LEAVE_DELETE_BLOCKED_BY_OVERLAP` while another **APPROVED** request still overlaps.
+- **Replace workflow:** delete old approved request → create new → approve new.
 
 ---
 
@@ -738,6 +767,7 @@ Employee may edit/delete only while **PENDING**. No `CANCELLED` status. Reject n
 |--------|--------|--------|
 | Personal `/time/attendance` dashboard | `ATTENDANCE_VIEW` | — |
 | **Attendance Tracking** grid | `EMPLOYEE_VIEW` + scope | **Excel .xlsx** (`ATTENDANCE_EXPORT`) |
+| Dashboard leave/OT widgets | Pending count, approved leave days; **OT hours** = sum of **approved** `OVERTIME` in month | — |
 | Dedicated leave PDF/CSV | **No** | — |
 
 ### 10.4 Month-end reconciliation (HR)
@@ -848,6 +878,8 @@ Check: they are in the participant list; correct **column** and **week/day**; th
 | Invalid username or password | Check Caps Lock; ask HR to reset |
 | Page will not load | Check network and `https://hrm.tamada.vn/login`; clear cache; contact IT |
 | Only the event organizer can modify | Ask the **organizer** to edit, or **leave** the meeting |
+| **LEAVE_APPROVE_BLOCKED_BY_OVERLAP** | Another **APPROVED** request overlaps | Delete/adjust old approved request first (`LEAVE_DELETE_APPROVED`), then approve |
+| **LEAVE_DELETE_BLOCKED_BY_OVERLAP** | Cannot delete while another **APPROVED** overlaps | Delete the other overlapping approved request first |
 
 ### 12.5 Support contacts
 
@@ -873,4 +905,4 @@ Check: they are in the participant list; correct **column** and **week/day**; th
 
 ---
 
-*Documentation version 2.0 — aligned with `tmv-hrm` / `tmv-hrm-be` codebase. Last updated: 2026.*
+*Documentation version 2.1 — aligned with `tmv-hrm` / `tmv-hrm-be` codebase. Last updated: 2026.*

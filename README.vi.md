@@ -8,7 +8,7 @@
 
 # Tài liệu Hướng dẫn Sử dụng Hệ thống Web HRM
 
-> Phiên bản: 1.0.1  
+> Phiên bản: 1.0.2  
 > Đối tượng: Người dùng cuối và quản trị viên HRM  
 > Phạm vi: FE `tmv-hrm`, BE `tmv-hrm-be`  
 > Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)  
@@ -221,7 +221,7 @@ Hệ thống **không** tự thêm số đuôi (`nguyenvanan1`, `nguyenvanan2`, 
 | Mật khẩu mặc định là gì? | **Trùng với tên đăng nhập** (ví dụ: user `nguyenvanan` → mật khẩu `nguyenvanan`) |
 | Quy tắc sinh mật khẩu | Cố định theo username khi HR **không** nhập mật khẩu riêng lúc tạo |
 | Bắt buộc đổi lần đầu? | **Không** — hệ thống không ép đổi khi đăng nhập lần đầu |
-| Tài khoản Admin mẫu (môi trường dev) | `admin` / `admin123` — chỉ dùng khi IT cấu hình seed; production nên đổi ngay |
+| Tài khoản Admin hệ thống (production) | `admin` / `admin123` lần đầu — backend tự tạo/khôi phục sau mỗi lần deploy (`ensure-system-admin.mjs`); **đổi mật khẩu ngay** sau khi đăng nhập |
 
 **Ví dụ:** Nhân viên **Nguyễn Văn An** → đăng nhập: `nguyenvanan` / `nguyenvanan`.
 
@@ -250,7 +250,7 @@ Hệ thống **không** tự thêm số đuôi (`nguyenvanan1`, `nguyenvanan2`, 
 | Ít nhất 1 ký tự đặc biệt | `!` `@` `#` … |
 | Mật khẩu mới = xác nhận | Phải giống nhau |
 
-**Kết quả mong đợi:** Đăng nhập lần sau bằng mật khẩu mới.
+**Kết quả mong đợi:** Đổi mật khẩu thành công thì **vẫn đăng nhập** trên trình duyệt hiện tại; lần sau dùng mật khẩu mới. Tab hoặc thiết bị khác có thể phải đăng nhập lại.
 
 ### 3.5 Quên mật khẩu & reset bởi Admin
 
@@ -258,7 +258,7 @@ Hệ thống **không có** chức năng “Quên mật khẩu” qua email.
 
 | Ai xử lý | Cách làm |
 |----------|----------|
-| **HR / Admin** (có quyền `EMPLOYEE_UPDATE`) | Mở hồ sơ nhân viên → **Reset mật khẩu** → mật khẩu trở lại **bằng tên đăng nhập** |
+| **HR / Admin** (có quyền `EMPLOYEE_UPDATE`) | Mở hồ sơ nhân viên → **Reset mật khẩu** → mật khẩu trở lại **bằng tên đăng nhập**; nhân viên phải **đăng nhập lại** trên mọi thiết bị |
 | **Nhân viên** | Liên hệ HR/IT — không tự khôi phục trên màn hình login |
 
 ### 3.6 Đăng xuất
@@ -267,6 +267,24 @@ Hệ thống **không có** chức năng “Quên mật khẩu” qua email.
 2. Xác nhận nếu hệ thống hỏi.
 
 **Kết quả mong đợi:** Quay về trang đăng nhập, phiên làm việc kết thúc.
+
+### 3.7 Tài khoản `admin` hệ thống (bất khả xâm phạm)
+
+Khi triển khai production, hệ thống luôn có tài khoản **`admin`** với role **ADMIN** và **toàn bộ quyền**. Script `ensure-system-admin.mjs` chạy tự động sau migration mỗi lần backend khởi động.
+
+| Quy tắc | Chi tiết |
+|---------|----------|
+| Đăng nhập lần đầu | `admin` / `admin123` (nếu mới tạo) — đổi mật khẩu ngay |
+| Xóa tài khoản `admin` | **Không** |
+| **Reset mật khẩu** (nút HR trên hồ sơ) | **Không** — không reset `admin` về username |
+| **Đổi mật khẩu** (menu user → Change password) | **Có** — `admin` tự đổi được; deploy lại **không** ép về `admin123` |
+| Đổi role / vô hiệu hóa `admin` | **Không** — role luôn ADMIN, trạng thái ACTIVE |
+| Sửa hồ sơ `admin` bởi user khác | **Không** |
+| Gán role **ADMIN** cho người khác | **Chỉ** tài khoản `admin` |
+| Sửa quyền role **ADMIN** (Phân quyền) | **Chỉ** tài khoản `admin`; hệ thống luôn gán full quyền cho role ADMIN |
+| Username `admin` | **Reserved** — không tạo nhân viên mới với username này |
+
+> **Vận hành:** Dùng `admin` để quản trị phân quyền và gán ADMIN cho người khác nếu cần. Nhân viên thường dùng role `EMPLOYEE` hoặc `HR_MANAGER` + permission tùy chỉnh.
 
 ---
 
@@ -307,7 +325,8 @@ Hệ thống **không có** chức năng “Quên mật khẩu” qua email.
 | **Loại hợp đồng** | Không | Toàn thời gian, Thử việc, … |
 | **Trạng thái làm việc** | Không | Mặc định **Đang làm** (`ACTIVE`); có **Ngừng** / **Nghỉ việc** |
 | **Tên đăng nhập** | Có (*) | Tự sinh từ họ tên; có thể sửa **trước** khi lưu |
-| **Vai trò** | Không | Gán `ADMIN`, `EMPLOYEE`, `HR_MANAGER`, … |
+| **Vai trò** | Không | Gán `EMPLOYEE`, `HR_MANAGER`, … — **chỉ `admin` mới gán được `ADMIN`** |
+| **Không cần chấm công** | Không | Chỉ Admin chỉnh sửa — loại nhân viên khỏi báo cáo chấm công / theo dõi công |
 | **Quản lý trực tiếp** | Không | Chọn nhân viên đang hoạt động |
 | **Ảnh đại diện** | Không | Tải file ảnh |
 
@@ -347,7 +366,9 @@ Hệ thống **không có** chức năng “Quên mật khẩu” qua email.
 
 **Nhân viên tự sửa hồ sơ cá nhân:** **Tài khoản** (`/account`) → tab **Thông tin** (hoặc menu user → **Tài khoản**) — chỉ sửa một phần thông tin cá nhân (không đổi phòng ban, vai trò, username). Tab **Cài đặt**: màu chủ đạo, phông chữ, chế độ sáng/tối — lưu trên tài khoản, đồng bộ khi đăng nhập trên thiết bị khác.
 
-**Reset mật khẩu (Admin):** Trên trang xem chi tiết nhân viên → **Reset mật khẩu** → xác nhận → mật khẩu = username.
+**Reset mật khẩu (Admin):** Trên trang xem chi tiết nhân viên → **Reset mật khẩu** → xác nhận → mật khẩu = username. **Không áp dụng** cho tài khoản `admin`.
+
+**Không cần chấm công:** Admin bật checkbox trên form nhân viên — nhân viên đó không xuất hiện trong **Theo dõi chấm công** và xuất Excel chấm công. Role `ADMIN` tự động được loại khỏi chấm công.
 
 **Kết quả mong đợi:** Thông tin mới hiển thị trên danh sách và hồ sơ.
 
@@ -359,7 +380,7 @@ Không cần xóa hồ sơ ngay:
 2. Đổi **Trạng thái làm việc** → **Nghỉ việc** (`TERMINATED`) hoặc **Ngừng** (`INACTIVE`).
 3. Lưu.
 
-**Xóa nhân viên** (`EMPLOYEE_DELETE`): Xóa **vĩnh viễn** bản ghi — chỉ dùng khi chắc chắn; có thể ảnh hưởng dữ liệu liên quan. Ưu tiên đổi trạng thái thay vì xóa.
+**Xóa nhân viên** (`EMPLOYEE_DELETE`): Xóa **vĩnh viễn** bản ghi — chỉ dùng khi chắc chắn; có thể ảnh hưởng dữ liệu liên quan. Ưu tiên đổi trạng thái thay vì xóa. **Không thể xóa** tài khoản `admin`.
 
 ---
 
@@ -585,6 +606,8 @@ Chú thích cột:
 | Gán ở đâu? | **Tổ chức → Nhân viên** → Tạo mới hoặc **Chỉnh sửa** → trường **Vai trò** |
 | Nhiều vai trò cùng lúc? | **Không** — chỉ một vai trò / một nhân viên |
 | Gán permission chi tiết? | **Cấu hình hệ thống → Phân quyền** (`/roles/assign`) — cần `ROLE_MANAGE` hoặc `ROLE_VIEW` tùy thao tác |
+| Gán role **ADMIN**? | **Chỉ** tài khoản `admin` |
+| Sửa quyền role **ADMIN**? | **Chỉ** tài khoản `admin` — hệ thống luôn gán full quyền cho role ADMIN |
 
 **Các bước gán permission cho nhóm quyền:**
 
@@ -609,6 +632,7 @@ Chú thích cột:
 | `LEAVE_VIEW` | Xem/tạo đơn nghỉ (gồm loại OT) |
 | `LEAVE_APPROVE` | Duyệt đơn nghỉ |
 | `LEAVE_APPROVE_MANAGED` | Duyệt đơn nhân viên quản lý (phụ thuộc `LEAVE_APPROVE` trên UI phân quyền) |
+| `LEAVE_DELETE_APPROVED` | Xóa đơn đã **duyệt** trên **Leave Approvals** (mặc định gán role ADMIN) |
 | `CALENDAR_VIEW` | Xem lịch, tạo/sửa sự kiện (organizer trong service) |
 | `CALENDAR_MANAGE` | Bật chế độ xem lịch toàn công ty trên Calendar |
 | `PAYROLL_VIEW` | Xem phiếu lương |
@@ -788,7 +812,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 |-----------|---------|
 | **Giờ vào** (`checkInTime`) | Thời điểm Check in (HH:mm, giờ VN) |
 | **Giờ ra** (`checkOutTime`) | Thời điểm Check out |
-| **Số giờ thực tế** | Suy ra từ vào–ra; dùng để xét ≥ 9h |
+| **Số giờ thực tế** | Suy ra từ vào–ra; so với **đơn vị công** (`workUnitLabel`) và grace ca làm việc |
 | **Màu / loại ngày** | WORK, LATE_EARLY, FORGOT_CLOCK_IN, nghỉ phép, lễ, cuối tuần, … |
 
 #### Manager — xem team
@@ -802,7 +826,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 #### HR / Admin — xem toàn công ty
 
 - Cùng trang **Attendance Tracking**.
-- Role **ADMIN** (`roleCode = ADMIN`): thấy **tất cả** nhân viên.
+- Role **ADMIN** (`roleCode = ADMIN`): thấy **tất cả** nhân viên **cần chấm công** (role ADMIN và nhân viên bật **Không cần chấm công** bị loại khỏi lưới/xuất Excel).
 - HR có `EMPLOYEE_VIEW` + được gán đủ quyền: tùy cấu hình (thường gần như toàn công ty nếu là Admin hoặc có quyền rộng).
 
 #### Bảng ký hiệu trên lưới (Attendance Tracking)
@@ -958,6 +982,7 @@ Loại phép nằm trong bảng **leave_types** (mã `code`). Có thể thêm lo
 | `REMOTE_WORK` | Làm remote | Không | Không | Duyệt xong → công 09:00–18:00 các ngày trong khoảng; bỏ geofence |
 | `ATTENDANCE_CORRECTION` | Cập nhật công | Không | Không | Duyệt xong → ghi check-in/out theo đơn |
 | `HIEU_HI` | Hiếu hỉ | Có (flag) | **Không** trừ số dư | Cưới/tang — không hiện số dư trên form |
+| `OVERTIME` | Tăng ca | Không | Không | Tạo/duyệt như đơn phép khác; **tổng giờ OT tháng** chỉ từ đơn `OVERTIME` đã **duyệt** (không tự tính từ chấm công) |
 
 **Chưa có trong hệ thống:**
 
@@ -1048,7 +1073,8 @@ Loại phép nằm trong bảng **leave_types** (mã `code`). Có thể thêm lo
 **Nhân viên hủy / xóa đơn:**
 
 - Chỉ được **sửa / xóa** khi trạng thái **PENDING**.
-- Sau khi duyệt/từ chối → nhân viên **không** xóa được (trừ Admin/HR có quyền đặc biệt).
+- Sau khi duyệt/từ chối → nhân viên **không** xóa được.
+- HR/Admin có `LEAVE_DELETE_APPROVED` → nút **Xóa** trên **Leave Approvals** với đơn **APPROVED** (hoàn phép `PAID_LEAVE`, revert công với `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` khi xóa an toàn).
 
 **Đơn bị từ chối:**
 
@@ -1100,8 +1126,9 @@ APPROVED  REJECTED
 3. Chọn **tháng**, lọc trạng thái (**PENDING** / All / …).
 4. Bảng danh sách: người xin, loại phép, thời gian, **lý do**, trạng thái.
 5. Bấm xem chi tiết → thấy đủ thông tin đơn (số dư phép **không** hiện riêng trên màn duyệt — HR xem hồ sơ NV nếu cần).
-6. **Approve:** xác nhận → trạng thái APPROVED; người xin nhận thông báo; nếu PAID_LEAVE → trừ `remainingLeaveDays`; nếu loại đặc biệt → cập nhật chấm công.
+6. **Approve:** xác nhận → trạng thái APPROVED; người xin nhận thông báo; nếu PAID_LEAVE → trừ `remainingLeaveDays`; nếu loại đặc biệt → cập nhật chấm công. Nếu còn đơn **APPROVED** trùng thời gian → lỗi `LEAVE_APPROVE_BLOCKED_BY_OVERLAP`.
 7. **Reject:** xác nhận → REJECTED; người xin nhận thông báo. **Không bắt buộc** nhập lý do từ chối.
+8. **Xóa đơn APPROVED** (có `LEAVE_DELETE_APPROVED`): xác nhận → xóa đơn; hoàn phép / revert công nếu áp dụng. Nếu còn đơn **APPROVED** khác trùng thời gian → lỗi `LEAVE_DELETE_BLOCKED_BY_OVERLAP`.
 
 #### Quyền theo role
 
@@ -1110,7 +1137,8 @@ APPROVED  REJECTED
 | Manager duyệt đơn của ai? | Chỉ đơn mà **mình được chọn** làm Người duyệt — **không** phải mọi đơn của team |
 | HR Admin duyệt tất cả? | Chỉ nếu được **chọn** trên từng đơn, hoặc tự tạo đơn hộ — **không** có quyền duyệt mọi đơn tự động |
 | Manager vắng, ai duyệt thay? | **Không có** ủy quyền — cần chọn người duyệt khác lúc tạo đơn hoặc HR xử lý thủ công |
-| HR xóa đơn đã duyệt? | Có nếu có `EMPLOYEE_VIEW` hoặc `LEAVE_APPROVE` — có thể **hoàn lại** ngày phép PAID_LEAVE |
+| HR xóa đơn đã duyệt? | Có nếu có `LEAVE_DELETE_APPROVED` — **Leave Approvals** → Xóa; có thể **hoàn lại** ngày phép PAID_LEAVE |
+| Đổi đơn đã duyệt (sửa thời gian)? | **Không** sửa trực tiếp — xóa đơn APPROVED cũ (nếu không bị chặn overlap) → tạo đơn mới → duyệt |
 
 #### Tình huống đặc biệt
 
@@ -1118,7 +1146,7 @@ APPROVED  REJECTED
 |------------|----------------|
 | Nhiều người cùng team xin phép một ngày | **Không** cảnh báo trùng / thiếu nhân sự |
 | Xin phép ngày lễ / cuối tuần | Vẫn tạo được; ngày **không tính** trừ phép nếu nằm trong **off dates** (holiday config) |
-| Đơn đã duyệt cần hủy | **Không** nút Cancel — HR xóa đơn (hoàn phép nếu PAID_LEAVE) hoặc tạo đơn bù / sửa công |
+| Đơn đã duyệt cần hủy / đổi | **Không** nút Cancel — HR xóa đơn APPROVED (`LEAVE_DELETE_APPROVED`) rồi tạo lại; bị chặn nếu overlap với đơn APPROVED khác |
 | Nhắc duyệt khi PENDING quá lâu | **Không** có deadline / reminder tự động |
 
 #### Bảng thông báo
@@ -1147,7 +1175,7 @@ APPROVED  REJECTED
 | **Attendance** (dashboard cá nhân) | Lịch tháng, tổng ngày làm, phép có/không lương, lễ | Nhân viên (`ATTENDANCE_VIEW`) | Tháng |
 | **Attendance Tracking** | Lưới cả tháng theo nhân viên | `EMPLOYEE_VIEW` + scope team/Admin | Tháng, tên, phòng ban |
 | **Chi tiết 1 nhân viên** | `/attendance-tracking/{id}` | Self / team / Admin | Tháng |
-| **Overview — biểu đồ leave/OT** | Số đơn chờ, ngày phép đã duyệt (SQL đơn giản) | `LEAVE_VIEW` + dashboard | — |
+| **Overview — biểu đồ leave/OT** | Số đơn chờ, ngày phép đã duyệt; **giờ OT** = tổng đơn `OVERTIME` **APPROVED** trong tháng (không tự tính từ chấm công) | `LEAVE_VIEW` + dashboard | — |
 | **Today summary** | Tổng hợp chấm công hôm nay (muộn/vắng, …) | Nội bộ API | — |
 | **Export Working time detail** | File Excel chi tiết công tháng | `ATTENDANCE_EXPORT` + scope lưới (theo `EMPLOYEE_VIEW` / team) | Tháng (query) |
 | **Báo cáo nghỉ phép riêng PDF/CSV** | **Không có** | — | — |
@@ -1170,7 +1198,7 @@ APPROVED  REJECTED
 | Nghỉ có lương / không lương | Quy đổi từ giờ đơn đã duyệt (÷ 8) |
 | Ngày lễ | Từ holiday config |
 
-**Lưu ý:** “Số ngày đi muộn” trên thống kê **hôm nay** = đếm bản ghi status **LATE_EARLY** (thiếu 9h), không phải “muộn so với 8:00”.
+**Lưu ý:** “Số ngày đi muộn” trên thống kê **hôm nay** = đếm bản ghi status **LATE_EARLY** (muộn/sớm/thiếu giờ so ca), không chỉ “muộn so với giờ vào ca”.
 
 ---
 
@@ -1210,7 +1238,7 @@ HR vẫn nên **đối soát chấm công** theo checklist bên dưới trước
 - [ ] Lọc từng **phòng ban** hoặc xuất **Excel** toàn công ty
 - [ ] Rà **ô `F`** (quên chấm) → yêu cầu bổ sung chấm / đơn ATTENDANCE_CORRECTION / manual-time
 - [ ] Rà **ô `A`** (vắng) → xác nhận nghỉ không phép hay thiếu đơn
-- [ ] Rà **ô vàng / LATE_EARLY** → xác nhận đủ 9h hay cần xử lý
+- [ ] Rà **ô vàng / LATE_EARLY** → xác nhận đủ **đơn vị công** (`workUnitLabel`) hay cần xử lý
 - [ ] Kiểm tra đơn **PENDING** trên **Leave Approvals** — duyệt hoặc từ chối trước khi tính lương
 - [ ] Đối chiếu **remainingLeaveDays** với đơn **PAID_LEAVE** đã duyệt trong tháng
 - [ ] Xuất **Excel** lưu làm bằng chứng đối soát (file có timestamp tải về)
@@ -1342,13 +1370,15 @@ Organizer nhận thông báo bạn đã rút lui. Bạn **không** cần (và kh
 | **Trang không tải được** | Mạng, server, URL sai | Kiểm tra internet; thử `https://hrm.tamada.vn/login`; xóa cache; liên hệ IT |
 | **Only the event organizer can modify** | Sửa lịch của người khác | Nhờ **người tạo** cuộc họp sửa, hoặc bạn **rút lui** nếu không tham gia |
 | **Insufficient remaining leave days** | Duyệt PAID_LEAVE vượt số dư | Từ chối hoặc HR cập nhật **Ngày phép còn lại** trên hồ sơ |
+| **LEAVE_APPROVE_BLOCKED_BY_OVERLAP** | Duyệt đơn trùng thời gian với đơn APPROVED khác | Xóa/điều chỉnh đơn APPROVED cũ trước (`LEAVE_DELETE_APPROVED`), rồi duyệt đơn mới |
+| **LEAVE_DELETE_BLOCKED_BY_OVERLAP** | Xóa đơn APPROVED còn đơn APPROVED khác trùng thời gian | Xóa đơn APPROVED còn lại trước, hoặc điều chỉnh khoảng thời gian |
 | **OUTSIDE_OFFICE_AREA** khi chấm công | GPS ngoài văn phòng | Di chuyển vào bán kính; hoặc đơn **REMOTE_WORK** đã duyệt |
 
 ### 12.2b Về chấm công & phép (bổ sung)
 
 **Tôi check-in lúc 8:15 mà vẫn bị “Đi muộn, về sớm”?**
 
-Hệ thống **không** so với giờ vào ca 8:00. **LATE_EARLY** = tổng thời gian giữa check-in và check-out **dưới 9 giờ**. Ví dụ: 8:15–16:45 = 8h30 → LATE_EARLY. Cần check-out sau 17:15 (nếu vào 8:15) mới đủ 9h.
+Hệ thống đánh **LATE_EARLY** khi muộn/sớm so **ca làm việc** (có grace) **hoặc** tổng giờ làm **dưới đơn vị công** (`workUnitLabel`, VD 8h sau trừ nghỉ trưa) — xem [mục 8.1](#81-cơ-chế-chấm-công-của-hệ-thống). Ví dụ ca 8:00–17:00, trưa 60p: 8:15–16:45 = 8h30 → LATE_EARLY.
 
 **Có ca làm việc (ca sáng/chiều) trong menu không?**
 
@@ -1384,4 +1414,4 @@ Chỉ duyệt được nếu đơn **chọn bạn làm Người duyệt**. Khôn
 
 ---
 
-*Tài liệu phiên bản 1.0.1 — đồng bộ với codebase `tmv-hrm` / `tmv-hrm-be`. Cập nhật lần cuối: 2026.*
+*Tài liệu phiên bản 1.0.2 — đồng bộ với codebase `tmv-hrm` / `tmv-hrm-be`. Cập nhật lần cuối: 2026.*
