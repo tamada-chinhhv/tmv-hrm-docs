@@ -515,8 +515,9 @@ GPS ジオフェンス内での Check in/out。位置情報許可が必要。
 
 - 種別: `PAID_LEAVE`（残日数減算）、`SICK_LEAVE`、`UNPAID_LEAVE`、`LATE_ARRIVAL`、`EARLY_DEPARTURE`、`REMOTE_WORK`、`ATTENDANCE_CORRECTION`、`HIEU_HI`、`OVERTIME`（残業 — 月次 OT は **承認済み** `OVERTIME` のみ、勤怠からの自動計算なし）
 - 承認: **1名の Approver** のみ（連鎖承認・代理承認なし）
-- 承認済み削除: `LEAVE_DELETE_APPROVED` — Leave Approvals で **Delete**
+- 承認済み削除: Leave Approvals で **Delete** — 管理者・指定承認者・直属上司（`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`）または `LEAVE_DELETE_APPROVED`。従業員の自己削除なし（PENDING は編集のみ、OVERTIME は Cancel）
 - 重複ガード: `LEAVE_APPROVE_BLOCKED_BY_OVERLAP` / `LEAVE_DELETE_BLOCKED_BY_OVERLAP` — 別の **APPROVED** と期間重複時は承認/削除不可。手順: 旧承認済みを削除 → 新規作成 → 承認
+- 削除権限: `LEAVE_DELETE_NOT_ALLOWED` — 管理者・指定承認者・直属上司または `LEAVE_DELETE_APPROVED` のみ削除可
 - 添付ファイル・半日0.5減算・年次繰越: **未実装**
 - 状態: `PENDING` → `APPROVED` / `REJECTED`（`CANCELLED` なし）
 
@@ -575,6 +576,7 @@ GPS ジオフェンス内での Check in/out。位置情報許可が必要。
 | Insufficient permissions | セクション 6、Admin に連絡 |
 | LEAVE_APPROVE_BLOCKED_BY_OVERLAP | 別の承認済みと期間重複 — 先に旧承認済みを削除（`LEAVE_DELETE_APPROVED`） |
 | LEAVE_DELETE_BLOCKED_BY_OVERLAP | 重複する承認済みが残っている — 先に他方を削除 |
+| LEAVE_DELETE_NOT_ALLOWED | 削除権限なし — 管理者または承認者のみ |
 | Only the event organizer can modify | 主催者に依頼、または Leave meeting |
 
 ### 9.5 サポート

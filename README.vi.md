@@ -632,7 +632,7 @@ Chú thích cột:
 | `LEAVE_VIEW` | Xem/tạo đơn nghỉ (gồm loại OT) |
 | `LEAVE_APPROVE` | Duyệt đơn nghỉ |
 | `LEAVE_APPROVE_MANAGED` | Duyệt đơn nhân viên quản lý (phụ thuộc `LEAVE_APPROVE` trên UI phân quyền) |
-| `LEAVE_DELETE_APPROVED` | Xóa đơn đã **duyệt** trên **Leave Approvals** (mặc định gán role ADMIN) |
+| `LEAVE_DELETE_APPROVED` | Xóa đơn đã **duyệt** trên **Leave Approvals** (mặc định ADMIN); người duyệt (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`) cũng xóa được đơn APPROVED trong phạm vi duyệt |
 | `CALENDAR_VIEW` | Xem lịch, tạo/sửa sự kiện (organizer trong service) |
 | `CALENDAR_MANAGE` | Bật chế độ xem lịch toàn công ty trên Calendar |
 | `PAYROLL_VIEW` | Xem phiếu lương |
@@ -1070,18 +1070,19 @@ Loại phép nằm trong bảng **leave_types** (mã `code`). Có thể thêm lo
  (kết thúc)               (kết thúc)
 ```
 
-**Nhân viên hủy / xóa đơn:**
+**Nhân viên hủy / sửa đơn:**
 
-- Chỉ được **sửa / xóa** khi trạng thái **PENDING**.
-- Sau khi duyệt/từ chối → nhân viên **không** xóa được.
-- HR/Admin có `LEAVE_DELETE_APPROVED` → nút **Xóa** trên **Leave Approvals** với đơn **APPROVED** (hoàn phép `PAID_LEAVE`, revert công với `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` khi xóa an toàn).
+- Chỉ được **sửa** đơn của mình khi trạng thái **PENDING** (trang **Leave** — **không** có nút **Xóa**).
+- Đơn **OVERTIME** **PENDING**: nhân viên **Hủy** (`PATCH /leave/:id/cancel`) — không xóa cứng.
+- Sau khi duyệt/từ chối → nhân viên **không** xóa / hủy được (trừ hủy OT đang chờ như trên).
+- **Xóa đơn APPROVED** trên **Leave Approvals**: **admin** (role `ADMIN`), **người duyệt được gán** / **quản lý trực tiếp** (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`), hoặc HR có `LEAVE_DELETE_APPROVED` (hoàn phép `PAID_LEAVE`, revert công với `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` khi xóa an toàn). Lỗi quyền: `LEAVE_DELETE_NOT_ALLOWED` (i18n).
 
 **Đơn bị từ chối:**
 
 - Người xin nhận **thông báo trong app** (`LEAVE_REQUEST_REJECTED`).
 - Lý do từ chối: API **không** bắt buộc ghi chú riêng khi reject — chỉ thấy **lý do trong đơn gốc** (nếu người xin đã điền). Người duyệt không có trường “lý do từ chối” bắt buộc trên UI.
 
-**Kết quả mong đợi:** Nhân viên theo dõi được trạng thái và biết khi nào được sửa/xóa.
+**Kết quả mong đợi:** Nhân viên theo dõi được trạng thái và biết khi nào được sửa / hủy OT; xóa đơn đã duyệt do admin hoặc người duyệt trên Leave Approvals.
 
 ---
 
@@ -1128,7 +1129,7 @@ APPROVED  REJECTED
 5. Bấm xem chi tiết → thấy đủ thông tin đơn (số dư phép **không** hiện riêng trên màn duyệt — HR xem hồ sơ NV nếu cần).
 6. **Approve:** xác nhận → trạng thái APPROVED; người xin nhận thông báo; nếu PAID_LEAVE → trừ `remainingLeaveDays`; nếu loại đặc biệt → cập nhật chấm công. Nếu còn đơn **APPROVED** trùng thời gian → lỗi `LEAVE_APPROVE_BLOCKED_BY_OVERLAP`.
 7. **Reject:** xác nhận → REJECTED; người xin nhận thông báo. **Không bắt buộc** nhập lý do từ chối.
-8. **Xóa đơn APPROVED** (có `LEAVE_DELETE_APPROVED`): xác nhận → xóa đơn; hoàn phép / revert công nếu áp dụng. Nếu còn đơn **APPROVED** khác trùng thời gian → lỗi `LEAVE_DELETE_BLOCKED_BY_OVERLAP`.
+8. **Xóa đơn APPROVED** (admin / người duyệt được gán / quản lý trực tiếp / `LEAVE_DELETE_APPROVED`): xác nhận → xóa đơn; hoàn phép / revert công nếu áp dụng. Không đủ quyền → `LEAVE_DELETE_NOT_ALLOWED`. Nếu còn đơn **APPROVED** khác trùng thời gian → `LEAVE_DELETE_BLOCKED_BY_OVERLAP`.
 
 #### Quyền theo role
 
@@ -1137,7 +1138,7 @@ APPROVED  REJECTED
 | Manager duyệt đơn của ai? | Chỉ đơn mà **mình được chọn** làm Người duyệt — **không** phải mọi đơn của team |
 | HR Admin duyệt tất cả? | Chỉ nếu được **chọn** trên từng đơn, hoặc tự tạo đơn hộ — **không** có quyền duyệt mọi đơn tự động |
 | Manager vắng, ai duyệt thay? | **Không có** ủy quyền — cần chọn người duyệt khác lúc tạo đơn hoặc HR xử lý thủ công |
-| HR xóa đơn đã duyệt? | Có nếu có `LEAVE_DELETE_APPROVED` — **Leave Approvals** → Xóa; có thể **hoàn lại** ngày phép PAID_LEAVE |
+| HR xóa đơn đã duyệt? | **Leave Approvals** → Xóa khi là admin, người duyệt được gán, quản lý trực tiếp, hoặc có `LEAVE_DELETE_APPROVED`; có thể **hoàn lại** ngày phép PAID_LEAVE |
 | Đổi đơn đã duyệt (sửa thời gian)? | **Không** sửa trực tiếp — xóa đơn APPROVED cũ (nếu không bị chặn overlap) → tạo đơn mới → duyệt |
 
 #### Tình huống đặc biệt
@@ -1146,7 +1147,7 @@ APPROVED  REJECTED
 |------------|----------------|
 | Nhiều người cùng team xin phép một ngày | **Không** cảnh báo trùng / thiếu nhân sự |
 | Xin phép ngày lễ / cuối tuần | Vẫn tạo được; ngày **không tính** trừ phép nếu nằm trong **off dates** (holiday config) |
-| Đơn đã duyệt cần hủy / đổi | **Không** nút Cancel — HR xóa đơn APPROVED (`LEAVE_DELETE_APPROVED`) rồi tạo lại; bị chặn nếu overlap với đơn APPROVED khác |
+| Đơn đã duyệt cần hủy / đổi | **Không** nút Cancel — admin/người duyệt xóa đơn APPROVED trên Leave Approvals rồi tạo lại; bị chặn nếu overlap với đơn APPROVED khác |
 | Nhắc duyệt khi PENDING quá lâu | **Không** có deadline / reminder tự động |
 
 #### Bảng thông báo
@@ -1372,6 +1373,7 @@ Organizer nhận thông báo bạn đã rút lui. Bạn **không** cần (và kh
 | **Insufficient remaining leave days** | Duyệt PAID_LEAVE vượt số dư | Từ chối hoặc HR cập nhật **Ngày phép còn lại** trên hồ sơ |
 | **LEAVE_APPROVE_BLOCKED_BY_OVERLAP** | Duyệt đơn trùng thời gian với đơn APPROVED khác | Xóa/điều chỉnh đơn APPROVED cũ trước (`LEAVE_DELETE_APPROVED`), rồi duyệt đơn mới |
 | **LEAVE_DELETE_BLOCKED_BY_OVERLAP** | Xóa đơn APPROVED còn đơn APPROVED khác trùng thời gian | Xóa đơn APPROVED còn lại trước, hoặc điều chỉnh khoảng thời gian |
+| **LEAVE_DELETE_NOT_ALLOWED** | User không phải admin / người duyệt / `LEAVE_DELETE_APPROVED` | Chỉ admin hoặc người duyệt xóa trên Leave Approvals |
 | **OUTSIDE_OFFICE_AREA** khi chấm công | GPS ngoài văn phòng | Di chuyển vào bán kính; hoặc đơn **REMOTE_WORK** đã duyệt |
 
 ### 12.2b Về chấm công & phép (bổ sung)

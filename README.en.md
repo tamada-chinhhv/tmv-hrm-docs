@@ -594,7 +594,7 @@ Each employee has **one** `roleId` at a time.
 | `LEAVE_VIEW` | View / create leave requests (including OT type) |
 | `LEAVE_APPROVE` | Approve leave |
 | `LEAVE_APPROVE_MANAGED` | Approve managed employees’ leave (child of `LEAVE_APPROVE` in assign UI) |
-| `LEAVE_DELETE_APPROVED` | Delete **approved** requests on **Leave Approvals** (default: ADMIN role) |
+| `LEAVE_DELETE_APPROVED` | Delete **approved** requests on **Leave Approvals** (default: ADMIN role); approvers with `LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED` may also delete **APPROVED** rows they can decide on |
 | `CALENDAR_VIEW` | View calendar, create/edit own events |
 | `CALENDAR_MANAGE` | Company-wide calendar admin switch |
 | `PAYROLL_VIEW` | View payslips |
@@ -745,9 +745,9 @@ No per-type annual caps, carryover, or attachments in system.
 PENDING → APPROVED or REJECTED
 ```
 
-Employee may edit/delete only while **PENDING**. No `CANCELLED` status. Reject notifies requester; **no mandatory** reject reason field.
+Employees may **edit** own requests only while **PENDING** on **Leave** — **no self-delete** ( **OVERTIME** **PENDING** uses **Cancel** → `PATCH /leave/:id/cancel`). No `CANCELLED` status for other types. Reject notifies requester; **no mandatory** reject reason field.
 
-Users with `LEAVE_DELETE_APPROVED` see **Delete** on **Leave Approvals** for **APPROVED** rows (restores `PAID_LEAVE` balance; reverts attendance for `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` when safe).
+**Delete** on **Leave Approvals** for **APPROVED** rows: **admin** (`ADMIN` role), **assigned approver** / **direct manager** (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`), or users with `LEAVE_DELETE_APPROVED` (restores `PAID_LEAVE` balance; reverts attendance for `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` when safe). Permission errors: `LEAVE_DELETE_NOT_ALLOWED` (i18n).
 
 ### 9.4 Approval (single step)
 
@@ -880,6 +880,7 @@ Check: they are in the participant list; correct **column** and **week/day**; th
 | Only the event organizer can modify | Ask the **organizer** to edit, or **leave** the meeting |
 | **LEAVE_APPROVE_BLOCKED_BY_OVERLAP** | Another **APPROVED** request overlaps | Delete/adjust old approved request first (`LEAVE_DELETE_APPROVED`), then approve |
 | **LEAVE_DELETE_BLOCKED_BY_OVERLAP** | Cannot delete while another **APPROVED** overlaps | Delete the other overlapping approved request first |
+| **LEAVE_DELETE_NOT_ALLOWED** | User is not admin, assigned approver, direct manager, or lacks `LEAVE_DELETE_APPROVED` | Delete only from Leave Approvals with proper role |
 
 ### 12.5 Support contacts
 
