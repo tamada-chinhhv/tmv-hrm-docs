@@ -8,7 +8,7 @@
 
 # Web HRM User Guide
 
-> Version: 2.1  
+> Version: 2.2  
 > Audience: End users and HRM administrators  
 > Scope: FE `tmv-hrm`, BE `tmv-hrm-be`  
 > Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)  
@@ -23,7 +23,7 @@ If you are new to HRM, follow these five steps:
 1. **Open a browser** and go to [https://hrm.tamada.vn/login](https://hrm.tamada.vn/login).
 2. **Log in** with the username and password provided by HR (the default password is usually the same as the username).
 3. **Change your password** (recommended): user menu (top bar) → **Change password**.
-4. **Attendance**: menu **Attendance & Time** → **Attendance** → **Check in** / **Check out** (allow browser location when prompted).
+4. **Attendance**: menu **Attendance & Time** → **Attendance** → **Check in** / **Check out** (web: allow browser **Location/GPS**; mobile app: connect to **company WiFi** when the branch uses WiFi — see [Section 8.1](#81-how-it-works)).
 5. **Personal calendar**: menu **Calendar** → select your column → click an empty time slot to create a meeting (if needed).
 
 **Expected outcome:** You can log in, see menus matching your permissions, check in/out, and use the calendar basics.
@@ -117,7 +117,7 @@ Use a **recent version** of a browser on desktop or mobile:
 | Mozilla Firefox | Yes |
 | Safari (macOS / iOS) | Yes |
 
-**Location-based attendance:** The browser must allow **Location** access when asked. Without it, you cannot check in within the office geofence.
+**Location-based attendance:** The system accepts **GPS inside a branch radius** or **office WiFi (BSSID match)** — either one is enough. On **web**, the browser must allow **Location**; browsers cannot read WiFi BSSID, so web check-in uses GPS only. On **mobile** (when integrated), the client sends `wifi.ssid` and `wifi.bssid`.
 
 **Expected outcome:** The HRM page loads and the login form displays correctly.
 
@@ -651,12 +651,31 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 ### 7.5 System Settings
 
 - **Holiday Configuration:** `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` — `/sysConfig/holidays`.
-- **Office Locations:** `LOCATION_VIEW` / `LOCATION_MANAGE` — `/sysConfig/locations`.
+- **Office Locations:** `LOCATION_VIEW` / `LOCATION_MANAGE` — `/sysConfig/locations`. Each **active** branch must have **GPS** or **at least one active WiFi network** (GPS only, WiFi only, or both). See [Section 7.5.1](#751-branch-configuration-gps--wifi).
 - **System appearance:** `APPEARANCE_VIEW` / `APPEARANCE_EDIT` — **System Settings → Settings** (`/sysConfig/settings`, **Appearance** accordion). Applies to users without personal customization and to the login screen.
 - **Work shift (system-wide):** `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — same page `/sysConfig/settings`, **Work shift** accordion.
 - **Roles / Permission Assignment:** `ROLE_VIEW` / `ROLE_MANAGE` — `/sysConfig/roles`, `/sysConfig/assign`.
 
 > **Personal** appearance is not configured here — see [Section 7.0](#70-account-account).
+
+### 7.5.1 Branch configuration (GPS + WiFi)
+
+**Path:** `/sysConfig/locations` — **Branch configuration** dialog.
+
+| Field | Description |
+|-------|-------------|
+| **Active** | Branch on/off. An active branch must have GPS or ≥1 active WiFi network. |
+| **GPS** | Toggle **Enable GPS** → latitude, longitude, radius (m). Disabling GPS clears coordinates on the server. |
+| **WiFi** | Per access point: **SSID** (display name) + **BSSID** (AP MAC, required). Multiple APs may share the same SSID. Per-network **Active** switch. |
+| **Detect current WiFi** | Calls `GET /office-locations/wifi/current` (`LOCATION_MANAGE`). Reads WiFi from the **machine running the backend** (Windows `netsh` / Linux `nmcli`) — for admins configuring from a PC on the office network. |
+
+**SSID vs BSSID:**
+
+- **SSID** — network name (may repeat across APs).
+- **BSSID** — MAC address of each AP; **attendance matching uses BSSID**, not SSID alone.
+- Employees do not see BSSID in the check-in UI; only admins configure it.
+
+**Config API error codes:** `OFFICE_METHOD_REQUIRED`, `GPS_ENABLED_INCOMPLETE`, `WIFI_BSSID_INVALID`, `WIFI_BSSID_ALREADY_EXISTS` (duplicate BSSID within the same branch).
 
 ---
 
@@ -666,7 +685,10 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 
 | Topic | Answer |
 |-------|--------|
-| Methods | **Web only** — Check in/out + GPS geofence. **No** hardware time clocks. |
+| Methods | **Web** — Check in/out + **GPS**. **Mobile API** — GPS and/or **WiFi** (`wifi.bssid`). **No** hardware time clocks. |
+| Geofence | Pass if GPS inside any active branch radius **OR** client BSSID matches any **active** configured WiFi network |
+| Geofence skipped | Approved **REMOTE_WORK** that day; or no active branch has GPS **and** no active WiFi networks configured |
+| Web limitation | Web sends GPS only; **WiFi-only** branches block web check-in until mobile sends `wifi` or GPS is enabled |
 | Time unit | Minutes stored (`checkOut − checkIn`); **WORK** / **LATE_EARLY** from **work shift** (grace, lunch break, `expectedWorkingMinutes` / `workUnitLabel`) — not a fixed 9h rule |
 | Timezone | **`Asia/Ho_Chi_Minh`** |
 | Who appears in Attendance Tracking? | Employees who require attendance — role `ADMIN` and employees with **Attendance not required** are excluded |
@@ -677,7 +699,7 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 ### 8.2 Self check-in
 
 1. **Attendance** (`/time/attendance`) — current month only shows Check in/out buttons.
-2. Confirm → allow **Location** → must be inside configured **Office Locations** (unless approved **REMOTE_WORK** that day).
+2. Confirm → allow **Location** → GPS must be inside a configured branch radius (unless approved **REMOTE_WORK** that day). WiFi check-in is for mobile clients sending `wifi.bssid`.
 3. Check out after check-in; buttons hide when done.
 
 **Forgot punch:** status **FORGOT_CLOCK_IN** / grid **F** or **A**; fix via second punch, leave types (**LATE_ARRIVAL**, **EARLY_DEPARTURE**, **ATTENDANCE_CORRECTION**), or **manual time** (`ATTENDANCE_MANUAL_UPDATE`).
@@ -881,6 +903,8 @@ Check: they are in the participant list; correct **column** and **week/day**; th
 | **LEAVE_APPROVE_BLOCKED_BY_OVERLAP** | Another **APPROVED** request overlaps | Delete/adjust old approved request first (`LEAVE_DELETE_APPROVED`), then approve |
 | **LEAVE_DELETE_BLOCKED_BY_OVERLAP** | Cannot delete while another **APPROVED** overlaps | Delete the other overlapping approved request first |
 | **LEAVE_DELETE_NOT_ALLOWED** | User is not admin, assigned approver, direct manager, or lacks `LEAVE_DELETE_APPROVED` | Delete only from Leave Approvals with proper role |
+| **GEO_LOCATION_OR_WIFI_REQUIRED** | Branch requires verification but client sent neither GPS nor WiFi | Web: allow Location; mobile: send `wifi.bssid` or enable GPS |
+| **OUTSIDE_OFFICE_AREA** | GPS outside radius or BSSID does not match | Move into branch range or connect to company WiFi; or approved **REMOTE_WORK** |
 
 ### 12.5 Support contacts
 
@@ -896,7 +920,7 @@ Check: they are in the participant list; correct **column** and **week/day**; th
 
 - [ ] Initial account list (username, role)
 - [ ] Internal permission assignment process
-- [ ] Attendance & GPS guide for employees
+- [ ] Attendance guide (GPS on web; WiFi/BSSID on mobile if used) and branch setup at `/sysConfig/locations`
 - [ ] Password reset process when forgotten
 - [ ] Offboarding process (status change, not casual delete)
 - [ ] HR/IT support contacts and SLA
@@ -906,4 +930,4 @@ Check: they are in the participant list; correct **column** and **week/day**; th
 
 ---
 
-*Documentation version 2.1 — aligned with `tmv-hrm` / `tmv-hrm-be` codebase. Last updated: 2026.*
+*Documentation version 2.2 — aligned with `tmv-hrm` / `tmv-hrm-be` codebase. Last updated: 2026-06-08 (WiFi attendance / branch configuration).*
