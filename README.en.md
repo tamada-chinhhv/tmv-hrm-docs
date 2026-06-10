@@ -579,6 +579,12 @@ Each employee has **one** `roleId` at a time.
 2. **System Settings → Permission Assignment** — select role → tick permissions → Save.
 3. Assign that **role** to each employee in the employee form.
 
+**Expected outcome:**
+
+- **Changing permissions on a role** (steps 1–2): users are **not** logged out; menus and actions update on the next API call (reload or tab switch also works).
+- **Changing an employee's assigned role** (step 3): that employee must **log in again** on all devices/tabs.
+- **Saving an employee profile without changing role:** does not affect that employee's session.
+
 ### 6.5 Permission codes
 
 | Code | Meaning |

@@ -615,7 +615,11 @@ Chú thích cột:
 2. **Cấu hình hệ thống → Phân quyền** — chọn vai trò → tick các quyền → Lưu.
 3. Gán **vai trò** đó cho từng nhân viên trong form nhân viên.
 
-**Kết quả mong đợi:** Nhân viên đăng nhập lại (hoặc chờ token hết hạn) sẽ thấy menu đúng quyền mới.
+**Kết quả mong đợi:**
+
+- **Đổi permission của một nhóm quyền** (bước 1–2): nhân viên **không** bị đăng xuất; menu và thao tác cập nhật theo quyền mới ở lần gọi API tiếp theo (refresh trang hoặc chuyển tab cũng được).
+- **Đổi vai trò (role) gắn với nhân viên** (bước 3): nhân viên đó phải **đăng nhập lại** trên mọi thiết bị/tab.
+- **Lưu hồ sơ nhân viên mà không đổi vai trò:** không ảnh hưởng phiên đăng nhập của nhân viên đó.
 
 ### 6.5 Danh sách permission (mã quyền)
 
