@@ -353,9 +353,9 @@ flowchart LR
 |------|-----------|---------------|
 | **Organizer（主催者）** | 可 | 不可（削除でキャンセル） |
 | **Participant（参加者）** | 不可 | 可（理由必須） |
-| **Admin** | 他人の会議は **不可**（organizer ルールは Admin でも例外なし） |
+| **Admin / HR** | 他人の会議は **`CALENDAR_EDIT_ANY` が必要**（`ADMIN` は migrate 後デフォルト付与） | — |
 
-**設計理由:** 会議の内容は作成者のみが変更すべき。参加者は「参加辞退」で対応。`CALENDAR_VIEW` を持つユーザーは他人のカレンダーを **閲覧** できる（会議調整のため）。メニュー **Calendar** は `CALENDAR_VIEW` が必要。全社員表示スイッチは `CALENDAR_MANAGE`（Calendar 画面）。
+**設計理由:** 通常は作成者のみが変更。運用支援のため `CALENDAR_EDIT_ANY` で他人の会議を編集可能（Admin 等）。参加者は「参加辞退」で対応。`CALENDAR_VIEW` を持つユーザーは他人のカレンダーを **閲覧** できる（会議調整のため）。メニュー **Calendar** は `CALENDAR_VIEW` が必要。全社員表示スイッチは `CALENDAR_MANAGE`（Calendar 画面）。
 
 ### 5.6 通知
 
@@ -368,16 +368,26 @@ flowchart LR
 
 画面上部の **ベル** アイコン。Web Push はサーバー設定次第。
 
-**リマインダー（15 分前など）:** **未対応**。
+**リマインダー（15 分前）:** **対応済み** — cron 5 分間隔（`Asia/Ho_Chi_Minh`）で開始約 15 分前に通知。主催者・参加者が対象。表示時刻はグリッドと一致（§5.8）。
 
 ### 5.7 操作まとめ
 
 | 操作 | 方法 |
 |------|------|
 | 詳細 | イベントをクリック |
-| 編集 | 詳細 → **Edit**（主催者のみ） |
+| 編集 | 詳細 → **Edit**（主催者、または `CALENDAR_EDIT_ANY`） |
 | 削除 | 詳細 → **Delete**（1件 or シリーズ） |
 | 辞退 | 詳細 → **Leave meeting** → 理由入力 |
+
+### 5.8 タイムゾーンと表示時刻
+
+| 項目 | 規約 |
+|------|------|
+| 業務 TZ | **`Asia/Ho_Chi_Minh`** (UTC+7) |
+| API/DB | **VN 壁時計を UTC スロットに保存** — 例: 09:00 → `…T09:00:00.000Z` |
+| Web グリッド/詳細 | `startAt`/`endAt` の **UTC 成分**を表示時刻として使用 |
+| 通知/reminder (BE) | 同上 — `formatVietnamStorageDateTime` (`vietnam-storage.util.ts`) |
+| reminder 発火 | `vietnamStorageDateToInstant` で実 instant に変換後、15 分窓と比較 |
 
 ---
 
@@ -400,14 +410,14 @@ flowchart LR
 | 従業員作成 | ○ | ○* | × | × |
 | 全社員閲覧 | ○ | ○* | × | × |
 | チーム閲覧 | ○ | ○* | ○*** | × |
-| 他人の会議編集 | ×**** | ×**** | ×**** | ×**** |
+| 他人の会議編集 | ○* | ○* | × | × |
 | 自分の会議編集 | ○ | ○ | ○ | ○ |
 | 他人のカレンダー閲覧 | ○ | ○ | ○ | ○ |
 | 休暇承認 | ○ | ○* | ○***** | × |
 
 \* 該当 permission が必要。  
 \*** `EMPLOYEE_VIEW` + 部下ツリー。  
-\**** organizer のみ編集可。  
+\**** カレンダー API の編集/削除: **主催者** または **`CALENDAR_EDIT_ANY`**。  
 \***** `LEAVE_APPROVE` が必要。
 
 ### 6.3 スコープ
@@ -439,7 +449,7 @@ flowchart LR
 | `LOCATION_VIEW` / `LOCATION_MANAGE` | 拠点の閲覧・管理 |
 | `LEAVE_VIEW` / `LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED` | 休暇（OT 含む）の閲覧・承認 |
 | `LEAVE_DELETE_APPROVED` | **承認済み**申請の削除（Leave Approvals、既定 ADMIN） |
-| `CALENDAR_VIEW` / `CALENDAR_MANAGE` | カレンダー閲覧・全社表示スイッチ |
+| `CALENDAR_VIEW` / `CALENDAR_MANAGE` / `CALENDAR_EDIT_ANY` | カレンダー閲覧・全社表示スイッチ・他人の会議編集（`CALENDAR_EDIT_ANY` は ADMIN デフォルト） |
 | `PAYROLL_VIEW` / `PAYROLL_MANAGE` / `PAYROLL_PERIOD_LOCK` | 給与閲覧・管理・期間ロック |
 | `DEPARTMENT_*` / `POSITION_*` | 部署・役職 |
 | `ROLE_VIEW` / `ROLE_MANAGE` | ロールと権限割当 |

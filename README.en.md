@@ -481,8 +481,10 @@ Principle: **creator manages**; **invitees can leave**; users with **`CALENDAR_V
 | Action | Allowed? | Notes |
 |--------|:--------:|-------|
 | View anyone’s calendar | Yes | Same as any authenticated user |
-| Edit/delete others’ meetings | **No** on calendar API | `ADMIN` does **not** override organizer rules |
+| Edit/delete others’ meetings | **Yes** (needs `CALENDAR_EDIT_ANY`) | Granted to `ADMIN` by default; assign via **Roles & permissions** for other roles |
 | “View all employees” on calendar | Yes (optional) | Requires `CALENDAR_MANAGE` — switch on **Calendar** page |
+
+> **Summary:** Users with `CALENDAR_EDIT_ANY` (typically Admin) can edit/delete others’ meetings for operational support. Regular users may only modify events they organize.
 
 ### 5.6 Notifications and reminders
 
@@ -496,16 +498,28 @@ Principle: **creator manages**; **invitees can leave**; users with **`CALENDAR_V
 
 **Delivery:** **Bell** icon on the top bar; **Web Push** if IT configured VAPID on the server.
 
-**Reminders before meeting time:** **Not available** — no automatic “15 minutes before” alert.
+**Reminders before meeting time:** **Yes** — scheduler sends a notification **~15 minutes** before start (cron every 5 minutes, timezone `Asia/Ho_Chi_Minh`). Recipients: organizer and participants. Displayed time matches the calendar grid (see §5.8).
 
 ### 5.7 Quick actions
 
 | Action | How |
 |--------|-----|
 | View details | Click an event on the grid |
-| Edit | Details → **Edit** (organizer only) |
+| Edit | Details → **Edit** (organizer, or user with `CALENDAR_EDIT_ANY`) |
 | Delete | Details → **Delete** → **single** or **entire series** |
 | Leave | Details → **Leave meeting** → enter reason → confirm |
+
+### 5.8 Calendar timezone and displayed time
+
+| Topic | Convention |
+|-------|--------------|
+| Business timezone | **`Asia/Ho_Chi_Minh`** (UTC+7) |
+| API/DB storage | **Vietnam wall-clock in UTC slot** — e.g. 09:00 VN meeting → `startAt`: `…T09:00:00.000Z` |
+| Grid & dialog (web) | Read **UTC components** of `startAt`/`endAt` as display time |
+| Notifications / reminders (BE) | Same contract — `formatVietnamStorageDateTime` (`src/shared/vietnam-storage.util.ts`) |
+| Reminder fire time | Convert to real VN instant (`vietnamStorageDateToInstant`) then compare to 15-minute window |
+
+**Expected result:** Grid, detail dialog, and reminder notification times **match**; no extra +7h offset when displaying.
 
 ---
 
@@ -537,7 +551,7 @@ Each employee has **one** `roleId` at a time.
 | View employees — team | Yes | Yes* | Yes*** | No |
 | View employees — self only | Yes | Yes | Yes | Yes |
 | Reset others’ passwords | Yes | Yes* | No | No |
-| Edit/delete others’ meetings | No**** | No**** | No**** | No**** |
+| Edit/delete others’ meetings | Yes* | Yes* | No | No |
 | Edit/delete own meetings | Yes | Yes | Yes | Yes |
 | View others’ calendars | Yes | Yes | Yes | Yes |
 | Own attendance | Yes | Yes | Yes | Yes |
@@ -551,7 +565,7 @@ Each employee has **one** `roleId` at a time.
 \* Requires the matching permission code.  
 \** Unless Admin grants extra permissions.  
 \*** Manager = `EMPLOYEE_VIEW` + report subtree.  
-\**** Only the **organizer** can modify their events.  
+\**** Edit/delete on calendar API: **organizer** or user with **`CALENDAR_EDIT_ANY`**.  
 \***** Requires `LEAVE_APPROVE`.
 
 ### 6.3 Scope by level
@@ -603,6 +617,7 @@ Each employee has **one** `roleId` at a time.
 | `LEAVE_DELETE_APPROVED` | Delete **approved** requests on **Leave Approvals** (default: ADMIN role); approvers with `LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED` may also delete **APPROVED** rows they can decide on |
 | `CALENDAR_VIEW` | View calendar, create/edit own events |
 | `CALENDAR_MANAGE` | Company-wide calendar admin switch |
+| `CALENDAR_EDIT_ANY` | Edit/delete calendar events owned by other employees (default: ADMIN role) |
 | `PAYROLL_VIEW` | View payslips |
 | `PAYROLL_MANAGE` | Manage / calculate payroll, tax settings |
 | `PAYROLL_PERIOD_LOCK` | Lock / unlock payroll periods |

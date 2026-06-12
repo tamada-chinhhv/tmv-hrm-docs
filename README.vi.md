@@ -500,10 +500,10 @@ Thiết kế theo nguyên tắc: **ai tạo thì người đó quản lý**; **n
 | Quyền | Được? | Ghi chú |
 |-------|:-----:|---------|
 | Xem lịch mọi nhân viên | Có | Giống mọi user đã đăng nhập |
-| Sửa/xóa lịch của người khác | **Không** (trên API lịch) | Quyền `ADMIN` trên hệ thống **không** override quyền organizer trên lịch họp |
+| Sửa/xóa lịch của người khác | **Có** (cần `CALENDAR_EDIT_ANY`) | Role `ADMIN` có sẵn sau migrate; role khác cần Admin gán qua **Phân quyền** |
 | Bật “xem tất cả nhân viên” trên lịch | Có (tùy chọn) | Cần `CALENDAR_MANAGE` — switch trên trang **Calendar** |
 
-> **Tóm lại:** Admin quản lý nhân sự, phân quyền, lương — **không** can thiệp trực tiếp cuộc họp trên lịch của nhân viên khác; việc đó thuộc người tổ chức.
+> **Tóm lại:** Admin/HR có `CALENDAR_EDIT_ANY` có thể sửa/xóa cuộc họp của nhân viên khác (hỗ trợ vận hành). User thường chỉ sửa sự kiện mình tạo (organizer).
 
 ### 5.6 Thông báo và nhắc nhở
 
@@ -517,7 +517,7 @@ Thiết kế theo nguyên tắc: **ai tạo thì người đó quản lý**; **n
 
 **Cách nhận:** Biểu tượng **chuông** trên thanh trên → danh sách thông báo; có thể hỗ trợ **Web Push** nếu IT bật cấu hình máy chủ.
 
-**Nhắc nhở trước giờ họp (reminder):** **Chưa có** — hệ thống không gửi “nhắc trước 15 phút” tự động. Người dùng cần tự theo dõi lịch hoặc thêm lịch vào ứng dụng ngoài (Outlook, Google Calendar) nếu công ty tích hợp riêng.
+**Nhắc nhở trước giờ họp (reminder):** Có — scheduler gửi thông báo **~15 phút** trước giờ bắt đầu (cron mỗi 5 phút, múi giờ `Asia/Ho_Chi_Minh`). Người nhận: organizer và người tham gia. Giờ trong thông báo khớp lưới lịch (xem §5.8).
 
 **Kết quả mong đợi:** Khi có thay đổi liên quan đến bạn, thông báo xuất hiện trong HRM (và có thể push trình duyệt).
 
@@ -526,9 +526,21 @@ Thiết kế theo nguyên tắc: **ai tạo thì người đó quản lý**; **n
 | Thao tác | Cách làm |
 |----------|----------|
 | Xem chi tiết | Bấm vào ô sự kiện trên lịch |
-| Sửa | Chi tiết → **Chỉnh sửa** (chỉ khi bạn là organizer) |
+| Sửa | Chi tiết → **Chỉnh sửa** (organizer, hoặc user có `CALENDAR_EDIT_ANY`) |
 | Xóa | Chi tiết → **Xóa** → chọn **một buổi** hoặc **cả chuỗi** |
 | Rút lui | Chi tiết → **Rút lui** → nhập lý do → xác nhận |
+
+### 5.8 Múi giờ và hiển thị giờ trên lịch
+
+| Mục | Quy ước |
+|-----|---------|
+| Múi giờ nghiệp vụ | **`Asia/Ho_Chi_Minh`** (UTC+7) |
+| Lưu API/DB | **Giờ VN trong UTC slot** — ví dụ họp 09:00 VN → `startAt`: `…T09:00:00.000Z` |
+| Lưới lịch & dialog (web) | Đọc **thành phần UTC** của `startAt`/`endAt` là giờ hiển thị (09:00 trên lưới = `T09:00:00.000Z`) |
+| Thông báo / reminder (BE) | Cùng quy ước — `formatVietnamStorageDateTime` (`src/shared/vietnam-storage.util.ts`) |
+| Thời điểm gửi reminder | Quy đổi sang instant VN thật (`vietnamStorageDateToInstant`) rồi so với cửa sổ 15 phút |
+
+**Kết quả mong đợi:** Giờ trên lưới, dialog chi tiết và thông báo nhắc họp **khớp nhau**; không cộng/trừ thêm +7h khi hiển thị.
 
 ---
 
@@ -562,7 +574,7 @@ Chú thích cột:
 | Xem nhân viên — team | Có | Có* | Có*** | Không |
 | Xem nhân viên — chỉ mình | Có | Có | Có | Có |
 | Reset mật khẩu người khác | Có | Có* | Không | Không |
-| Tạo/sửa/xóa lịch họp của người khác | Không**** | Không**** | Không**** | Không**** |
+| Tạo/sửa/xóa lịch họp của người khác | Có* | Có* | Không | Không |
 | Tạo/sửa/xóa lịch họp của mình | Có | Có | Có | Có |
 | Xem lịch người khác | Có | Có | Có | Có |
 | Chấm công (bản thân) | Có | Có | Có | Có |
@@ -576,7 +588,7 @@ Chú thích cột:
 \* Cần permission tương ứng (`EMPLOYEE_CREATE`, …) — HR thường được Admin gán.  
 \** Trừ khi Admin gán thêm permission cho cá nhân đó.  
 \*** Manager = nhân viên có quyền `EMPLOYEE_VIEW` và có cấp dưới trong cây `managerId`.  
-\**** Lịch họp: chỉ **organizer** sửa/xóa sự kiện của mình — không phụ thuộc Admin.  
+\**** Sửa/xóa sự kiện trên API lịch: chỉ **organizer** hoặc user có **`CALENDAR_EDIT_ANY`**.  
 \***** Cần `LEAVE_APPROVE`.
 
 ### 6.3 Phạm vi (scope) theo cấp bậc
@@ -639,6 +651,7 @@ Chú thích cột:
 | `LEAVE_DELETE_APPROVED` | Xóa đơn đã **duyệt** trên **Leave Approvals** (mặc định ADMIN); người duyệt (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`) cũng xóa được đơn APPROVED trong phạm vi duyệt |
 | `CALENDAR_VIEW` | Xem lịch, tạo/sửa sự kiện (organizer trong service) |
 | `CALENDAR_MANAGE` | Bật chế độ xem lịch toàn công ty trên Calendar |
+| `CALENDAR_EDIT_ANY` | Sửa/xóa sự kiện lịch của nhân viên khác (mặc định role ADMIN) |
 | `PAYROLL_VIEW` | Xem phiếu lương |
 | `PAYROLL_MANAGE` | Quản lý/tính lương, cấu hình thuế |
 | `PAYROLL_PERIOD_LOCK` | Khóa/mở khóa kỳ lương |
