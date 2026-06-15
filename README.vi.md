@@ -1120,17 +1120,18 @@ Loại phép nằm trong bảng **leave_types** (mã `code`). Có thể thêm lo
 
 **Nhân viên hủy / sửa đơn:**
 
-- Chỉ được **sửa** đơn của mình khi trạng thái **PENDING** (trang **Leave** — **không** có nút **Xóa**).
-- Đơn **OVERTIME** **PENDING**: nhân viên **Hủy** (`PATCH /leave/:id/cancel`) — không xóa cứng.
+- Chỉ được **sửa** và **xóa** đơn của mình khi trạng thái **PENDING** (trang **Leave** — nút **Xóa** cho đơn không phải OT; xác nhận qua `leave.confirmDelete`).
+- Đơn **OVERTIME** **PENDING**: nhân viên **Hủy** (`PATCH /leave/:id/cancel`; xác nhận `overtime.confirmCancel`) — không xóa cứng.
 - Sau khi duyệt/từ chối → nhân viên **không** xóa / hủy được (trừ hủy OT đang chờ như trên).
 - **Xóa đơn APPROVED** trên **Leave Approvals**: **admin** (role `ADMIN`), **người duyệt được gán** / **quản lý trực tiếp** (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`), hoặc HR có `LEAVE_DELETE_APPROVED` (hoàn phép `PAID_LEAVE`, revert công với `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` khi xóa an toàn). Lỗi quyền: `LEAVE_DELETE_NOT_ALLOWED` (i18n).
+- Sau khi xóa (PENDING hoặc APPROVED), backend phát realtime `leave:approvals-changed` (`action: deleted`) tới người thực hiện và người duyệt được gán — danh sách Leave Approvals tự refresh.
 
 **Đơn bị từ chối:**
 
 - Người xin nhận **thông báo trong app** (`LEAVE_REQUEST_REJECTED`).
 - Lý do từ chối: API **không** bắt buộc ghi chú riêng khi reject — chỉ thấy **lý do trong đơn gốc** (nếu người xin đã điền). Người duyệt không có trường “lý do từ chối” bắt buộc trên UI.
 
-**Kết quả mong đợi:** Nhân viên theo dõi được trạng thái và biết khi nào được sửa / hủy OT; xóa đơn đã duyệt do admin hoặc người duyệt trên Leave Approvals.
+**Kết quả mong đợi:** Nhân viên theo dõi được trạng thái; sửa / xóa đơn PENDING (hoặc hủy OT đang chờ); xóa đơn đã duyệt do admin hoặc người duyệt trên Leave Approvals; người duyệt thấy danh sách cập nhật sau khi đơn bị xóa.
 
 ---
 

@@ -788,7 +788,9 @@ No per-type annual caps, carryover, or attachments in system.
 PENDING → APPROVED or REJECTED
 ```
 
-Employees may **edit** own requests only while **PENDING** on **Leave** — **no self-delete** ( **OVERTIME** **PENDING** uses **Cancel** → `PATCH /leave/:id/cancel`). No `CANCELLED` status for other types. Reject notifies requester; **no mandatory** reject reason field.
+Employees may **edit** and **delete** own requests while **PENDING** on **Leave** (non-OT delete confirm: `leave.confirmDelete`). **OVERTIME** **PENDING** uses **Cancel** → `PATCH /leave/:id/cancel` (confirm: `overtime.confirmCancel`). No `CANCELLED` status for other non-OT types. Reject notifies requester; **no mandatory** reject reason field.
+
+After delete (**PENDING** or **APPROVED**), backend emits realtime `leave:approvals-changed` (`action: deleted`) to the actor and assigned approver so Leave Approvals lists refresh.
 
 **Delete** on **Leave Approvals** for **APPROVED** rows: **admin** (`ADMIN` role), **assigned approver** / **direct manager** (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`), or users with `LEAVE_DELETE_APPROVED` (restores `PAID_LEAVE` balance; reverts attendance for `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` when safe). Permission errors: `LEAVE_DELETE_NOT_ALLOWED` (i18n).
 
