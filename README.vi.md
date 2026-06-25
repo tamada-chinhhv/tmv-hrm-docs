@@ -784,6 +784,32 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 | 08:00 | *(chưa check-out)* | — | **FORGOT_CLOCK_IN** hoặc **WORK** (tùy trường hợp) | `F` hoặc chỉ có giờ vào |
 | *(không chấm)* | *(không chấm)* | — | Trên lưới team: **ABSENT** (`A`); lịch cá nhân quá khứ: **FORGOT_CLOCK_IN** (`F`) | `A` / `F` |
 
+#### Đơn đến muộn / về sớm và đánh giá công
+
+Khi ngày đó có đơn **`LATE_ARRIVAL`** hoặc **`EARLY_DEPARTURE`** đã **duyệt**:
+
+| Quy tắc | Chi tiết |
+|---------|----------|
+| **Giờ chấm thực tế** | Nhân viên vẫn **Check in / Check out bình thường**; hệ thống **không** tự điền giờ vào/ra từ đơn khi duyệt |
+| **Ngưỡng muộn** | So với **giờ đến được duyệt** trên đơn (ca bắt đầu + số phút đơn), **không** dùng `startTime + grace` |
+| **Ngưỡng về sớm** | So với **giờ về được duyệt** trên đơn (ca kết thúc − số phút đơn), **không** dùng `endTime − grace` |
+| **Một chiều duyệt, chiều kia vi phạm** | Duyệt đến muộn nhưng về sớm hơn đơn (hoặc ngược lại) → vẫn **LATE_EARLY** cho vi phạm còn lại |
+| **Phút công được ghi nhận** | `phút làm thực tế` (vào–ra, trừ trùng nghỉ trưa) **+** `phút được đơn bù` (khoảng ca → giờ duyệt, trừ trùng nghỉ trưa, không cộng trùng) |
+| **WORK** | Không muộn/về sớm theo ngưỡng đã điều chỉnh **và** đủ `expectedWorkingMinutes` |
+
+**Ví dụ (ca 08:00–17:00, nghỉ trưa 60 phút, đơn vị công 8h):**
+
+| Đơn duyệt | Chấm thực tế | Kết quả | Giải thích ngắn |
+|-----------|--------------|---------|-----------------|
+| Đến muộn đến **09:30** | 09:30–17:00 | **WORK** | 7,5h làm + 1,5h đơn bù (08:00–09:30) = 8h |
+| Đến muộn đến **09:30** | **10:00**–17:00 | **LATE_EARLY** | Muộn 30 phút so **đơn** (không so 08:00+grace) |
+| Về sớm **16:00** | 08:00–16:00 | **WORK** | Đủ công khi cộng phút đơn bù |
+| Đến muộn **09:30** | 09:30–**16:00** | **LATE_EARLY** | Được phép đến muộn nhưng về sớm hơn đơn |
+
+**Chấm lại trong ngày:** Bấm Check in/out lần hai khi giờ đã lưu → API trả về bản ghi hiện có (idempotent). Chấm qua **WiFi** không bắt buộc GPS.
+
+**Sau triển khai bản mới:** Chạy `yarn recompute-attendance` trong `tmv-hrm-be` (hoặc `:dry-run` để xem trước) để đồng bộ `attendance.status` trong DB với quy tắc trên.
+
 #### Múi giờ
 
 | Mục | Giá trị |
@@ -820,6 +846,8 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 2. Lặp lại bước xác nhận + GPS.
 3. Sau khi check-out xong, nút chấm công **ẩn** (đã đủ một lượt trong ngày).
 
+**Ngày có đơn đến muộn / về sớm đã duyệt:** Vẫn chấm **giờ thực tế**; đơn **không** thay thế thao tác chấm công và **không** ghi đè giờ vào/ra khi duyệt.
+
 **Ngoại lệ geofence (GPS / WiFi):**
 
 - Có **đơn REMOTE_WORK** đã **duyệt** trong ngày → chấm **không cần** GPS/WiFi hợp lệ.
@@ -852,7 +880,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 | Cách | Đường dẫn | Nội dung |
 |------|-----------|----------|
 | Lịch tháng + tổng hợp | `/time/attendance` | Lịch từng ngày, giờ vào/ra, loại ngày (làm, lễ, nghỉ phép, …), thẻ tổng hợp tháng |
-| Chi tiết một ngày | Bấm ô ngày trên lịch | Popup: giờ vào, giờ ra, bản đồ vị trí chấm (nếu có), form sửa giờ (nếu được quyền) |
+| Chi tiết một ngày | Bấm ô ngày trên lịch | Popup: giờ vào, giờ ra, vị trí chấm (nếu có), gợi ý đơn phép/ngày nghỉ, form sửa giờ (nếu được quyền) |
 
 **Cột / thông tin trên lịch cá nhân:**
 
@@ -894,7 +922,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 1. **Cấu hình ngày nghỉ** (cuối tuần, lễ) → `W`, `H`.
 2. **Đơn nghỉ đã duyệt** (trừ REMOTE_WORK, ATTENDANCE_CORRECTION trên lưới) → mã phép.
-3. **Bản ghi chấm công** → so **tổng phút thực tế** với **expectedWorkingMinutes** (ca − nghỉ trưa) và grace → WORK hoặc LATE_EARLY.
+3. **Bản ghi chấm công** → đánh giá WORK / LATE_EARLY theo ca, grace, **và** đơn `LATE_ARRIVAL` / `EARLY_DEPARTURE` đã duyệt (phút công được ghi nhận — xem [8.1](#81-cơ-chế-chấm-công-của-hệ-thống)).
 4. **Không có bản ghi** + ngày đã qua → ABSENT (team) / FORGOT_CLOCK_IN (một số view cá nhân).
 
 **Dựa trên cài đặt ca làm việc** (`workShiftStartTime`, `workShiftEndTime`, `workShiftLunchBreakMinutes`, `workShiftGraceMinutes`) tại **Cấu hình hệ thống → Ca làm việc** (`/sysConfig/settings`).
@@ -915,17 +943,16 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 **API sửa thủ công:** `PATCH /attendance/manual-time` — permission **`ATTENDANCE_MANUAL_UPDATE`**.
 
-**UI:** Trang chi tiết nhân viên (`/attendance-tracking/{id}`) → bấm ngày **LATE_EARLY**, **FORGOT_CLOCK_IN**, hoặc **WORK** (chỉ có giờ vào) → nhập **Giờ vào / Giờ ra** → Lưu.
+**UI:** Trang chi tiết nhân viên (`/attendance-tracking/{id}`) hoặc lịch cá nhân → bấm ngày **≤ hôm nay** → nhập **Giờ vào / Giờ ra** (tọa độ tùy chọn) → Lưu. Admin thấy gợi ý khi ngày có **nghỉ phép** hoặc đơn **đến muộn / về sớm** — vẫn được sửa để chỉnh **giờ chấm thực tế**.
 
 #### Quy trình sửa — có phê duyệt không?
 
 | Cách | Phê duyệt? | Mô tả |
 |------|:----------:|--------|
-| **Sửa thủ công** (manual-time) | **Không** quy trình duyệt trong hệ thống | Người có quyền sửa trực tiếp; **không** lưu người sửa / lý do trong DB |
-| **Đơn LATE_ARRIVAL / EARLY_DEPARTURE / ATTENDANCE_CORRECTION / REMOTE_WORK** | **Có** — một người duyệt được chọn khi tạo đơn | Sau **Approve**, hệ thống cập nhật giờ chấm công tự động |
-| **Đơn nghỉ phép thông thường** | Duyệt đơn nghỉ | Không sửa giờ vào/ra trừ các loại đặc biệt trên |
-
-**Chặn sửa:** Nếu ngày đó đã có **bất kỳ đơn nghỉ** nào → manual-time báo lỗi `LEAVE_REQUEST_EXISTS`.
+| **Sửa thủ công** (manual-time) | **Không** quy trình duyệt trong hệ thống | Người có quyền sửa trực tiếp; **không** lưu người sửa / lý do trong DB. **Không** chặn ngày có đơn nghỉ (`LEAVE_REQUEST_EXISTS` đã bỏ) |
+| **Đơn LATE_ARRIVAL / EARLY_DEPARTURE** | **Có** — một người duyệt | Sau **Approve** → **chỉ tính lại trạng thái** theo giờ chấm + phút đơn; **không** ghi đè giờ vào/ra |
+| **Đơn ATTENDANCE_CORRECTION / REMOTE_WORK** | **Có** | Sau **Approve** → cập nhật giờ chấm / bỏ geofence theo loại đơn |
+| **Đơn nghỉ phép thông thường** | Duyệt đơn nghỉ | Không tự sửa giờ vào/ra |
 
 #### Lịch sử thay đổi
 
@@ -1001,10 +1028,10 @@ workUnitLabel          = expectedWorkingMinutes / 60 (VD "8h", "8.25h")
 
 | Khái niệm | Thực tế trong hệ thống |
 |-----------|------------------------|
-| Muộn vào | Check-in (giờ VN) > `startTime + grace` |
-| Về sớm | Check-out < `endTime − grace` |
-| Thiếu giờ | `actualMinutes` < `expectedWorkingMinutes` |
-| **WORK** | Không muộn, không về sớm, đủ giờ công |
+| Muộn vào | Check-in > `startTime + grace` — **hoặc** > giờ duyệt trên đơn `LATE_ARRIVAL` (nếu có) |
+| Về sớm | Check-out < `endTime − grace` — **hoặc** < giờ duyệt trên đơn `EARLY_DEPARTURE` (nếu có) |
+| Thiếu giờ | Phút công được ghi nhận (làm thực + phút đơn bù, trừ trùng nghỉ trưa) < `expectedWorkingMinutes` |
+| **WORK** | Không muộn/về sớm theo ngưỡng đã điều chỉnh và đủ giờ công |
 | Khung giờ đơn REMOTE_WORK / LATE_ARRIVAL | Mặc định form lấy từ ca làm việc |
 | Ngày nghỉ cố định | **Holiday Configuration** |
 
@@ -1025,8 +1052,8 @@ Loại phép nằm trong bảng **leave_types** (mã `code`). Có thể thêm lo
 | `PAID_LEAVE` | Nghỉ phép có lương | Có | **Có** — chỉ loại này trừ `remainingLeaveDays` | Tính **cả ngày** mỗi ngày làm việc trong khoảng đơn |
 | `UNPAID_LEAVE` | Nghỉ phép không lương | Không | Không | |
 | `SICK_LEAVE` | Nghỉ ốm | Có (flag) | **Không** trừ số dư (không phải PAID_LEAVE) | **Không** có upload giấy tờ trong hệ thống |
-| `LATE_ARRIVAL` | Đến muộn | Không | Không | Đơn **phút**; duyệt xong cập nhật **giờ vào** |
-| `EARLY_DEPARTURE` | Về sớm | Không | Không | Cập nhật **giờ ra** |
+| `LATE_ARRIVAL` | Đến muộn | Không | Không | Đơn **phút**; duyệt xong **tính lại trạng thái** — **không** ghi đè giờ vào; nhân viên vẫn chấm thực tế |
+| `EARLY_DEPARTURE` | Về sớm | Không | Không | Tương tự — **không** ghi đè giờ ra |
 | `REMOTE_WORK` | Làm remote | Không | Không | Duyệt xong → công 09:00–18:00 các ngày trong khoảng; bỏ geofence |
 | `ATTENDANCE_CORRECTION` | Cập nhật công | Không | Không | Duyệt xong → ghi check-in/out theo đơn |
 | `HIEU_HI` | Hiếu hỉ | Có (flag) | **Không** trừ số dư | Cưới/tang — không hiện số dư trên form |
@@ -1124,7 +1151,7 @@ Loại phép nằm trong bảng **leave_types** (mã `code`). Có thể thêm lo
 - Đơn **OVERTIME** **PENDING**: nhân viên **Hủy** (`PATCH /leave/:id/cancel`; xác nhận `overtime.confirmCancel`) — không xóa cứng.
 - Sau khi duyệt/từ chối → nhân viên **không** xóa / hủy được (trừ hủy OT đang chờ như trên).
 - **Xóa đơn APPROVED** trên **Leave Approvals**: **admin** (role `ADMIN`), **người duyệt được gán** / **quản lý trực tiếp** (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`), hoặc HR có `LEAVE_DELETE_APPROVED` (hoàn phép `PAID_LEAVE`, revert công với `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` khi xóa an toàn). Lỗi quyền: `LEAVE_DELETE_NOT_ALLOWED` (i18n).
-- Sau khi xóa (PENDING hoặc APPROVED), backend phát realtime `leave:approvals-changed` (`action: deleted`) tới người thực hiện và người duyệt được gán — danh sách Leave Approvals tự refresh.
+- Sau khi xóa (PENDING hoặc APPROVED), backend xóa thông báo in-app liên quan (`leaveRequestId` trong payload) và phát realtime `notifications:removed` + `leave:approvals-changed` (`action: deleted`) tới người thực hiện và người duyệt được gán.
 
 **Đơn bị từ chối:**
 
@@ -1248,7 +1275,7 @@ APPROVED  REJECTED
 | Nghỉ có lương / không lương | Quy đổi từ giờ đơn đã duyệt (÷ 8) |
 | Ngày lễ | Từ holiday config |
 
-**Lưu ý:** “Số ngày đi muộn” trên thống kê **hôm nay** = đếm bản ghi status **LATE_EARLY** (muộn/sớm/thiếu giờ so ca), không chỉ “muộn so với giờ vào ca”.
+**Lưu ý:** Widget **đi muộn hôm nay** trên dashboard (`getTodaySummary.late`) = đếm theo **đánh giá trực tiếp** (có tính đơn đến muộn/về sớm đã duyệt), **không** ghi DB khi mở dashboard. Cột `status` trong DB nên đồng bộ bằng `yarn recompute-attendance` sau triển khai.
 
 ---
 
@@ -1466,4 +1493,4 @@ Chỉ duyệt được nếu đơn **chọn bạn làm Người duyệt**. Khôn
 
 ---
 
-*Tài liệu phiên bản 1.0.3 — đồng bộ với codebase `tmv-hrm` / `tmv-hrm-be`. Cập nhật lần cuối: 2026-06-08 (chấm công WiFi / cấu hình chi nhánh).*
+*Tài liệu phiên bản 1.0.4 — đồng bộ với codebase `tmv-hrm` / `tmv-hrm-be`. Cập nhật lần cuối: 2026-06-25 (đánh giá công với đơn đến muộn/về sớm, sửa giờ admin, recompute-attendance).*

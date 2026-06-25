@@ -524,19 +524,24 @@ Check in/out は **GPS（拠点半径内）** または **オフィス WiFi（BS
 - Attendance Tracking 対象: 勤怠必須の従業員のみ（`ADMIN` ロールと **Attendance not required** は除外）
 - タイムゾーン: **`Asia/Ho_Chi_Minh`**
 - 状態: **勤務シフト**（開始/終了、grace、昼休み、`expectedWorkingMinutes` / `workUnitLabel`）で **WORK** / **LATE_EARLY** を判定 — 固定9時間ルールではない
+- **遅刻・早退申請**（`LATE_ARRIVAL` / `EARLY_DEPARTURE`）承認済み: 実打刻は維持、承認時は **status の再計算のみ**（打刻時刻は上書きしない）。評価は承認時刻と **credit 分**（実労働＋申請分、昼休み重複なし）
+- 同日再打刻: 既存時刻があれば idempotent。WiFi 打刻は GPS 不要
+- デプロイ後: `tmv-hrm-be` で `yarn recompute-attendance`（`:dry-run` でプレビュー可）
 - **全社デフォルト勤務シフト**あり（`/sysConfig/settings`）— 従業員別ロスターはなし（[VI 版 8.7](README.vi.md#87-ca-làm-việc--lịch-làm-việc-task-09) 参照）
-- 手動修正: `ATTENDANCE_MANUAL_UPDATE`、監査ログなし
+- 手動修正: `ATTENDANCE_MANUAL_UPDATE`、休暇申請日も可（`LEAVE_REQUEST_EXISTS` なし）、監査ログなし
 - エクスポート: **Excel .xlsx** のみ（Attendance Tracking、`ATTENDANCE_EXPORT` 必須）
 
 ## 9. 休暇申請
 
-- 種別: `PAID_LEAVE`（残日数減算）、`SICK_LEAVE`、`UNPAID_LEAVE`、`LATE_ARRIVAL`、`EARLY_DEPARTURE`、`REMOTE_WORK`、`ATTENDANCE_CORRECTION`、`HIEU_HI`、`OVERTIME`（残業 — 月次 OT は **承認済み** `OVERTIME` のみ、勤怠からの自動計算なし）
+- 種別: `PAID_LEAVE`（残日数減算）、`SICK_LEAVE`、`UNPAID_LEAVE`、`LATE_ARRIVAL`（承認→status のみ）、`EARLY_DEPARTURE`（同）、`REMOTE_WORK`、`ATTENDANCE_CORRECTION`、`HIEU_HI`、`OVERTIME`（残業 — 月次 OT は **承認済み** `OVERTIME` のみ、勤怠からの自動計算なし）
 - 承認: **1名の Approver** のみ（連鎖承認・代理承認なし）
-- 承認済み削除: Leave Approvals で **Delete** — 管理者・指定承認者・直属上司（`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`）または `LEAVE_DELETE_APPROVED`。従業員の自己削除なし（PENDING は編集のみ、OVERTIME は Cancel）
+- 従業員（Leave `/time/leave`）: 自分の **PENDING** 申請は **編集** と **削除** 可（OT 以外 — 確認 `leave.confirmDelete`）。**OVERTIME** **PENDING** は **Cancel**（`PATCH /leave/:id/cancel`、確認 `overtime.confirmCancel`）— 物理削除ではない
+- 承認済み削除: Leave Approvals で **Delete** — 管理者・指定承認者・直属上司（`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`）または `LEAVE_DELETE_APPROVED`
+- 削除後（**PENDING** / **APPROVED**）: 関連 in-app 通知（`payload` の `leaveRequestId`）を DB から削除し、realtime `notifications:removed` と `leave:approvals-changed`（`action: deleted`）を申請者・指定承認者へ送信 — Leave Approvals 一覧と通知ベルが同期
 - 重複ガード: `LEAVE_APPROVE_BLOCKED_BY_OVERLAP` / `LEAVE_DELETE_BLOCKED_BY_OVERLAP` — 別の **APPROVED** と期間重複時は承認/削除不可。手順: 旧承認済みを削除 → 新規作成 → 承認
-- 削除権限: `LEAVE_DELETE_NOT_ALLOWED` — 管理者・指定承認者・直属上司または `LEAVE_DELETE_APPROVED` のみ削除可
+- 削除権限: `LEAVE_DELETE_NOT_ALLOWED` — **PENDING** は申請者本人または管理者・指定承認者・直属上司、**APPROVED** は管理者・指定承認者・直属上司または `LEAVE_DELETE_APPROVED` のみ
 - 添付ファイル・半日0.5減算・年次繰越: **未実装**
-- 状態: `PENDING` → `APPROVED` / `REJECTED`（`CANCELLED` なし）
+- 状態: `PENDING` → `APPROVED` / `REJECTED`（OT 以外は `CANCELLED` なし — PENDING は削除で対応）
 
 ## 10. 勤怠・休暇レポート
 
@@ -618,4 +623,4 @@ Check in/out は **GPS（拠点半径内）** または **オフィス WiFi（BS
 
 ---
 
-*ドキュメント バージョン 2.1 — `tmv-hrm` / `tmv-hrm-be` と同期。最終更新: 2026。*
+*ドキュメント バージョン 2.2 — `tmv-hrm` / `tmv-hrm-be` と同期。最終更新: 2026-06-25（遅刻・早退申請と勤怠評価、手動修正、recompute-attendance）。*

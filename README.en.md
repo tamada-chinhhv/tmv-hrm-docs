@@ -711,17 +711,22 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 | Geofence skipped | Approved **REMOTE_WORK** that day; or no active branch has GPS **and** no active WiFi networks configured |
 | Web limitation | Web sends GPS only; **WiFi-only** branches block web check-in until mobile sends `wifi` or GPS is enabled |
 | Time unit | Minutes stored (`checkOut − checkIn`); **WORK** / **LATE_EARLY** from **work shift** (grace, lunch break, `expectedWorkingMinutes` / `workUnitLabel`) — not a fixed 9h rule |
+| Late / early leave | Approved **`LATE_ARRIVAL`** / **`EARLY_DEPARTURE`** adjust evaluation thresholds and **credited minutes** (actual punch + leave-covered minutes, minus lunch overlap). Approve **does not** overwrite punch times — employees still check in/out normally |
+| Re-punch | Second check-in/out when time already stored returns existing record (idempotent). WiFi punch does not require GPS |
+| Post-deploy | Run `yarn recompute-attendance` in `tmv-hrm-be` to align stored `attendance.status` with new rules (`:dry-run` to preview) |
 | Timezone | **`Asia/Ho_Chi_Minh`** |
 | Who appears in Attendance Tracking? | Employees who require attendance — role `ADMIN` and employees with **Attendance not required** are excluded |
 | Work shifts | **System default** at `/sysConfig/settings` — no per-employee roster; see [8.5](#85-work-shifts) |
 
-> **Important:** **LATE_EARLY** is evaluated from the configured **work shift** (start/end, grace minutes, lunch break) and **expected working minutes** (`workUnitLabel`), not a fixed 9h/540-minute rule. Late/early vs shift boundaries or insufficient net working time → LATE_EARLY; otherwise WORK.
+> **Important:** **LATE_EARLY** is evaluated from the configured **work shift** (start/end, grace minutes, lunch break) and **expected working minutes** (`workUnitLabel`), not a fixed 9h/540-minute rule. With approved **late/early leave**, thresholds use the **approved** arrival/departure time; **credited minutes** = actual work + leave-covered minutes (no double-count at lunch). Example: shift 08:00–17:00, 60m lunch, approved late until 09:30, punch 09:30–17:00 → **WORK** (7.5h + 1.5h credited). Punch 10:00–17:00 → **LATE_EARLY** (30m late vs approval, not vs shift+grace).
 
 ### 8.2 Self check-in
 
 1. **Attendance** (`/time/attendance`) — current month only shows Check in/out buttons.
 2. Confirm → allow **Location** → GPS must be inside a configured branch radius (unless approved **REMOTE_WORK** that day). WiFi check-in is for mobile clients sending `wifi.bssid`.
 3. Check out after check-in; buttons hide when done.
+
+**Days with approved late/early leave:** Still punch **actual** times; approval **recomputes status only** — it does **not** preset check-in/out.
 
 **Forgot punch:** status **FORGOT_CLOCK_IN** / grid **F** or **A**; fix via second punch, leave types (**LATE_ARRIVAL**, **EARLY_DEPARTURE**, **ATTENDANCE_CORRECTION**), or **manual time** (`ATTENDANCE_MANUAL_UPDATE`).
 
@@ -739,8 +744,8 @@ Grid symbols: `1`/`8h` worked, `W` weekend, `H` holiday, leave codes, `F` forgot
 
 ### 8.4 Edits & export
 
-- **Manual time:** `ATTENDANCE_MANUAL_UPDATE` — self, Admin, or manager subtree. **No** approval workflow or audit log.
-- **Leave approval** can update times (late/early/remote/correction types).
+- **Manual time:** `ATTENDANCE_MANUAL_UPDATE` — self, Admin, or manager subtree. **No** approval workflow or audit log. **No** block when a leave request exists on that day. Admin UI: any day **≤ today**; optional coordinates; hints on paid-leave / late-early days.
+- **Leave approval:** `LATE_ARRIVAL` / `EARLY_DEPARTURE` → recompute **status** only (punch times unchanged). `ATTENDANCE_CORRECTION` / `REMOTE_WORK` → attendance effects per type.
 - **Export:** Excel `.xlsx` only from Attendance Tracking — no CSV/PDF.
 
 ### 8.5 Work shifts
@@ -769,8 +774,8 @@ HRM has a **system-wide default work shift** (start/end, grace minutes, lunch br
 |------|:-----------------------------:|-------|
 | `PAID_LEAVE` | **Yes** (on approve) | Full day per working day in range |
 | `UNPAID_LEAVE`, `SICK_LEAVE` | No / not PAID_LEAVE logic | No file attachments |
-| `LATE_ARRIVAL`, `EARLY_DEPARTURE` | No | Updates attendance on approve |
-| `REMOTE_WORK`, `ATTENDANCE_CORRECTION` | No | Attendance effects |
+| `LATE_ARRIVAL`, `EARLY_DEPARTURE` | No | On approve: **recompute status** from actual punch + approved minutes — **does not** overwrite check-in/out |
+| `REMOTE_WORK`, `ATTENDANCE_CORRECTION` | No | Attendance effects (geofence skip / punch times per type) |
 | `HIEU_HI` | No | Paid flag but no balance UI |
 | `OVERTIME` | No | Overtime hours; monthly OT totals use **approved** `OVERTIME` requests only (no attendance-computed OT) |
 
@@ -790,7 +795,7 @@ PENDING → APPROVED or REJECTED
 
 Employees may **edit** and **delete** own requests while **PENDING** on **Leave** (non-OT delete confirm: `leave.confirmDelete`). **OVERTIME** **PENDING** uses **Cancel** → `PATCH /leave/:id/cancel` (confirm: `overtime.confirmCancel`). No `CANCELLED` status for other non-OT types. Reject notifies requester; **no mandatory** reject reason field.
 
-After delete (**PENDING** or **APPROVED**), backend emits realtime `leave:approvals-changed` (`action: deleted`) to the actor and assigned approver so Leave Approvals lists refresh.
+After delete (**PENDING** or **APPROVED**), backend deletes linked in-app notifications (`leaveRequestId` in payload) and emits realtime `notifications:removed` plus `leave:approvals-changed` (`action: deleted`) to the actor and assigned approver.
 
 **Delete** on **Leave Approvals** for **APPROVED** rows: **admin** (`ADMIN` role), **assigned approver** / **direct manager** (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`), or users with `LEAVE_DELETE_APPROVED` (restores `PAID_LEAVE` balance; reverts attendance for `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` when safe). Permission errors: `LEAVE_DELETE_NOT_ALLOWED` (i18n).
 
@@ -812,7 +817,7 @@ After delete (**PENDING** or **APPROVED**), backend emits realtime `leave:approv
 |--------|--------|--------|
 | Personal `/time/attendance` dashboard | `ATTENDANCE_VIEW` | — |
 | **Attendance Tracking** grid | `EMPLOYEE_VIEW` + scope | **Excel .xlsx** (`ATTENDANCE_EXPORT`) |
-| Dashboard leave/OT widgets | Pending count, approved leave days; **OT hours** = sum of **approved** `OVERTIME` in month | — |
+| Dashboard leave/OT widgets | Pending count, approved leave days; **today late** = live evaluation (read-only, includes approved late/early leave); **OT hours** = sum of **approved** `OVERTIME` in month | — |
 | Dedicated leave PDF/CSV | **No** | — |
 
 ### 10.4 Month-end reconciliation (HR)
@@ -953,4 +958,4 @@ Check: they are in the participant list; correct **column** and **week/day**; th
 
 ---
 
-*Documentation version 2.2 — aligned with `tmv-hrm` / `tmv-hrm-be` codebase. Last updated: 2026-06-08 (WiFi attendance / branch configuration).*
+*Documentation version 2.3 — aligned with `tmv-hrm` / `tmv-hrm-be` codebase. Last updated: 2026-06-25 (late/early leave evaluation, admin manual time, recompute-attendance).*
