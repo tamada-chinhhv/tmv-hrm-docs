@@ -8,7 +8,7 @@
 
 # Web HRM User Guide
 
-> Version: 2.2  
+> Version: 2.3  
 > Audience: End users and HRM administrators  
 > Scope: FE `tmv-hrm`, BE `tmv-hrm-be`  
 > Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)  
@@ -23,7 +23,7 @@ If you are new to HRM, follow these five steps:
 1. **Open a browser** and go to [https://hrm.tamada.vn/login](https://hrm.tamada.vn/login).
 2. **Log in** with the username and password provided by HR (the default password is usually the same as the username).
 3. **Change your password** (recommended): user menu (top bar) → **Change password**.
-4. **Attendance**: menu **Attendance & Time** → **Attendance** → **Check in** / **Check out** (web: allow browser **Location/GPS**; mobile app: connect to **company WiFi** when the branch uses WiFi — see [Section 8.1](#81-how-it-works)).
+4. **Attendance**: menu **Time & Attendance** → **Attendance** → **Check in** / **Check out** (web: allow browser **Location/GPS**; mobile app: connect to **company WiFi** when the branch uses WiFi — see [Section 8.1](#81-how-it-works)).
 5. **Personal calendar**: menu **Calendar** → select your column → click an empty time slot to create a meeting (if needed).
 
 **Expected outcome:** You can log in, see menus matching your permissions, check in/out, and use the calendar basics.
@@ -40,7 +40,7 @@ If you are new to HRM, follow these five steps:
 6. [Roles & Permissions](#6-roles--permissions)
 7. [Module Guides](#7-module-guides)
 8. [Attendance](#8-attendance)
-9. [Leave Requests](#9-leave-requests)
+9. [Leave requests](#9-leave-requests)
 10. [Attendance & Leave Reports](#10-attendance--leave-reports)
 11. [Recommended Operations](#11-recommended-operations)
 12. [FAQ](#12-faq)
@@ -81,9 +81,9 @@ You use HRM to:
 | **Account** | Personal profile, appearance (color, font, light/dark) | `/account` (tabs **Information** / **Settings**) |
 | **Calendar** | Multi-employee meeting schedule | `/calendar` |
 | **Organization** | Employees, Departments, Positions, Documents | `/org/employees`, `/org/departments`, `/org/positions`, `/org/documents` |
-| **Attendance & Time** | Attendance, Attendance Tracking, Leave Requests, Leave Approvals | `/time/attendance`, `/time/attendance-tracking`, `/time/leave`, `/time/leave-approvals` |
+| **Time & Attendance** | Attendance, Attendance tracking, Leave requests, Leave request approvals | `/time/attendance`, `/time/attendance-tracking`, `/time/leave`, `/time/leave-approvals` |
 | **Payroll** | Payslips, tax settings | `/payroll` |
-| **System Settings** | Holidays, Locations, Work shift, Roles, Permission Assignment, Document expiry notifications | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/roles`, `/sysConfig/assign`, `/settings/document-notifications` |
+| **System configuration** | Holidays, Locations, Work shift, Roles, Permission Assignment, Document expiry notifications | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/roles`, `/sysConfig/assign`, `/settings/document-notifications` |
 
 Menus appear **based on permissions**. If a menu item is missing, your account may lack the required permission (see [Section 6](#6-roles--permissions)).
 
@@ -94,7 +94,7 @@ flowchart LR
   A[Login] --> B[Attendance]
   A --> C[Leave Request]
   C --> D[Approval]
-  B --> E[Attendance Tracking]
+  B --> E[Attendance tracking]
   D --> E
   E --> F[Close attendance data]
   F --> G[Payroll]
@@ -319,7 +319,7 @@ Production always has username **`admin`** with role **ADMIN** and **all permiss
 | **Employment status** | No | Default **ACTIVE**; also **INACTIVE** / **TERMINATED** |
 | **Username** | Yes (*) | Auto from full name; editable **before** save |
 | **Role** | No | e.g. `EMPLOYEE`, `HR_MANAGER` — **only `admin` may assign `ADMIN`** |
-| **Attendance not required** | No | Admin only — excludes employee from Attendance Tracking grid and Excel export |
+| **Exempt from attendance tracking** | No | Admin only — excludes employee from Attendance tracking grid and Excel export |
 | **Direct manager** | No | Active employees only |
 | **Avatar** | No | Upload image |
 
@@ -359,7 +359,7 @@ Production always has username **`admin`** with role **ADMIN** and **all permiss
 
 **Admin reset password:** Employee detail → **Reset password** → confirm → password = username. **Does not apply** to `admin`.
 
-**Attendance not required:** Admin enables the checkbox on the employee form — that employee is excluded from **Attendance Tracking** and attendance Excel export. Role `ADMIN` is always excluded from attendance tracking.
+**Exempt from attendance tracking:** Admin enables the checkbox on the employee form — that employee is excluded from **Attendance tracking** and attendance Excel export. Role `ADMIN` is always excluded from attendance tracking.
 
 ### 4.5 Offboarding
 
@@ -381,7 +381,7 @@ Prefer changing status over deleting:
 
 **Not the same as:**
 
-- Monthly attendance grid (**Attendance Tracking**).
+- Monthly attendance grid (**Attendance tracking**).
 - Company holiday setup (**Holiday Configuration**).
 
 **Event types on the schedule calendar:**
@@ -585,12 +585,12 @@ Each employee has **one** `roleId` at a time.
 | Multiple roles? | **No** — one role per employee |
 | Assign **ADMIN** role? | **Only** username `admin` |
 | Edit **ADMIN** role permissions? | **Only** username `admin` — system always grants full permissions to ADMIN |
-| Assign permissions? | **System Settings → Permission Assignment** (`/sysConfig/assign`) |
+| Assign permissions? | **System configuration → Permission Assignment** (`/sysConfig/assign`) |
 
 **Steps for role permissions:**
 
-1. **System Settings → Roles** — create/view roles (`ROLE_VIEW` / `ROLE_MANAGE`).
-2. **System Settings → Permission Assignment** — select role → tick permissions → Save.
+1. **System configuration → Roles** — create/view roles (`ROLE_VIEW` / `ROLE_MANAGE`).
+2. **System configuration → Permission Assignment** — select role → tick permissions → Save.
 3. Assign that **role** to each employee in the employee form.
 
 **Expected outcome:**
@@ -608,18 +608,18 @@ Each employee has **one** `roleId` at a time.
 | `EMPLOYEE_UPDATE` | Update employee, reset password |
 | `EMPLOYEE_DELETE` | Delete employee |
 | `ATTENDANCE_VIEW` | View / check-in attendance |
-| `ATTENDANCE_EXPORT` | Export working-time detail Excel (Attendance Tracking) |
+| `ATTENDANCE_EXPORT` | Export working-time detail Excel (Attendance tracking) |
 | `ATTENDANCE_MANUAL_UPDATE` | Manual time correction |
 | `LOCATION_VIEW` / `LOCATION_MANAGE` | View / manage office locations |
 | `LEAVE_VIEW` | View / create leave requests (including OT type) |
 | `LEAVE_APPROVE` | Approve leave |
 | `LEAVE_APPROVE_MANAGED` | Approve managed employees’ leave (child of `LEAVE_APPROVE` in assign UI) |
-| `LEAVE_DELETE_APPROVED` | Delete **approved** requests on **Leave Approvals** (default: ADMIN role); approvers with `LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED` may also delete **APPROVED** rows they can decide on |
+| `LEAVE_DELETE_APPROVED` | Delete **approved** requests on **Leave request approvals** (default: ADMIN role); approvers with `LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED` may also delete **APPROVED** rows they can decide on |
 | `CALENDAR_VIEW` | View calendar, create/edit own events |
 | `CALENDAR_MANAGE` | Company-wide calendar admin switch |
 | `CALENDAR_EDIT_ANY` | Edit/delete calendar events owned by other employees (default: ADMIN role) |
-| `DOCUMENT_VIEW` | View + self CRUD of own employee documents; HR can view all |
-| `DOCUMENT_MANAGE` | Full org document CRUD + configure expiry notification rules |
+| `DOCUMENT_VIEW` | View and create/edit/delete own employee documents; HR can view all |
+| `DOCUMENT_MANAGE` | Full org document create/edit/delete + configure expiry notification rules |
 | `PAYROLL_VIEW` | View payslips |
 | `PAYROLL_MANAGE` | Manage / calculate payroll, tax settings |
 | `PAYROLL_PERIOD_LOCK` | Lock / unlock payroll periods |
@@ -630,7 +630,7 @@ Each employee has **one** `roleId` at a time.
 | `APPEARANCE_VIEW` / `APPEARANCE_EDIT` | View / edit **system appearance** (`/sysConfig/settings`) |
 | `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` | View / edit default work shift (`/sysConfig/settings`) |
 
-> **System appearance** (company default): stored in `app_settings` — Admin configures at **System Settings → Settings**; API `GET/PATCH /settings/appearance` (`APPEARANCE_*`). **Login** and after **logout** always use system appearance (`GET /settings/public/appearance`).  
+> **System appearance** (company default): stored in `app_settings` — Admin configures at **System configuration → Settings**; API `GET/PATCH /settings/appearance` (`APPEARANCE_*`). **Login** and after **logout** always use system appearance (`GET /settings/public/appearance`).  
 > **Personal appearance:** any logged-in user — **Account** → tab **Settings**; `GET/PATCH /auth/me/appearance`. Overrides system only when the user has saved (`appearance_customized = true`).  
 > `OVERTIME_*` and `ATTENDANCE_MANAGE` are **removed** — do not re-assign.
 
@@ -669,14 +669,23 @@ Manage **employee** and **company** documents (PDF): with an expiry date (and au
 
 | Permission | Capabilities |
 |------------|--------------|
-| `DOCUMENT_VIEW` | View + self CRUD of own employee documents (`/account?tab=documents`); HR can view all |
-| `DOCUMENT_MANAGE` | Full org CRUD (any document), upload PDF, configure notification rules |
+| `DOCUMENT_VIEW` | View and create/edit/delete own employee documents (`/account?tab=documents`); HR can view all |
+| `DOCUMENT_MANAGE` | Full org create/edit/delete (any document), upload PDF, configure notification rules |
 
-**Create (HR):** Organization → Documents → Add → choose Employee or Company → upload PDF (system may auto-fill expiry and match employee by name + date of birth) → set remind-before days (1/3/7/30, default 30), **or** check **No expiry date** → Save.
+**Add document (HR):**
 
-**Employee self-service:** **Account → Documents** — create/edit/delete **own** employee documents (not company docs; notification rule uses the default).
+1. Menu **Organization** → **Documents** → **Add document**.
+2. Choose owner type: **Employee** or **Company** (Company → do not select an employee).
+3. Upload PDF — the system tries to read the **expiry date** and (for Employee) match **full name + date of birth** to the profile.
+4. With expiry: review/edit the date; choose remind-before **1 / 3 / 7 / 30** days (default 30). **No expiry date:** check the box → no expiry field, no reminders.
+5. **Add** to save.
 
-**Recipients:** Settings → Document notifications (`/settings/document-notifications`) — select the applicable departments and notification recipients. The document owner can still receive notifications when the corresponding option is enabled. Cron at 07:00 weekdays (VN time) sends reminders on the selected day; expired documents remind daily until updated/deleted. Documents with **no expiry** are skipped by the reminder cron.
+**Employee self-service:** tab **Account → Documents** — create/edit/delete **own** employee documents (not company docs; notification rule uses the default).
+
+**Recipients:** **Settings** → **Document notifications** (`/settings/document-notifications`) — select the applicable departments and notification recipients. The document owner can still receive notifications when the corresponding option is enabled.
+
+**Reminders:** Cron at 07:00 weekdays (VN time) sends reminders on the selected day; expired documents remind daily until updated/deleted. Documents with **no expiry** are skipped by the reminder cron.
+
 
 ### 7.3 Attendance, leave, reports
 
@@ -688,11 +697,11 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 - `PAYROLL_PERIOD_LOCK`: **lock/unlock payroll period** (or use `PAYROLL_MANAGE`, which includes period lock).
 - **Payroll period (`PayrollPeriod`):** default **Open**; HR clicks **Lock period** on **Payroll** (`PayrollPeriodControls`) → status **Locked**. When locked: cannot create/edit/import/copy payslips (API `PAYROLL_PERIOD_LOCKED`); view and Excel export still work. **Unlock** requires `PAYROLL_MANAGE` or `PAYROLL_PERIOD_LOCK` (note required on unlock). Period lock **only** blocks payroll actions—attendance and leave can still be edited (see [Section 10.4](#104-month-end-reconciliation-hr)).
 
-### 7.5 System Settings
+### 7.5 System configuration
 
 - **Holiday Configuration:** `HOLIDAY_CONFIG_VIEW` / `HOLIDAY_CONFIG_EDIT` — `/sysConfig/holidays`.
 - **Office Locations:** `LOCATION_VIEW` / `LOCATION_MANAGE` — `/sysConfig/locations`. Each **active** branch must have **GPS** or **at least one active WiFi network** (GPS only, WiFi only, or both). See [Section 7.5.1](#751-branch-configuration-gps--wifi).
-- **System appearance:** `APPEARANCE_VIEW` / `APPEARANCE_EDIT` — **System Settings → Settings** (`/sysConfig/settings`, **Appearance** accordion). Applies to users without personal customization and to the login screen.
+- **System appearance:** `APPEARANCE_VIEW` / `APPEARANCE_EDIT` — **System configuration → Settings** (`/sysConfig/settings`, **Appearance** accordion). Applies to users without personal customization and to the login screen.
 - **Work shift (system-wide):** `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — same page `/sysConfig/settings`, **Work shift** accordion.
 - **Roles / Permission Assignment:** `ROLE_VIEW` / `ROLE_MANAGE` — `/sysConfig/roles`, `/sysConfig/assign`.
 
@@ -734,7 +743,7 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 | Re-punch | Second check-in/out when time already stored returns existing record (idempotent). WiFi punch does not require GPS |
 | Post-deploy | Run `yarn recompute-attendance` in `tmv-hrm-be` to align stored `attendance.status` with new rules (`:dry-run` to preview) |
 | Timezone | **`Asia/Ho_Chi_Minh`** |
-| Who appears in Attendance Tracking? | Employees who require attendance — role `ADMIN` and employees with **Attendance not required** are excluded |
+| Who appears in Attendance tracking? | Employees who require attendance — role `ADMIN` and employees with **Exempt from attendance tracking** are excluded |
 | Work shifts | **System default** at `/sysConfig/settings` — no per-employee roster; see [8.7](#87-work-shifts-and-work-schedules-task-09) |
 
 > **Important:** **LATE_EARLY** is evaluated from the configured **work shift** (start/end, grace minutes, lunch break) and **expected working minutes** (`workUnitLabel`), not a fixed 9h/540-minute rule. With approved **late/early leave**, thresholds use the **approved** arrival/departure time; **credited minutes** = actual work + leave-covered minutes (no double-count at lunch). Example: shift 08:00–17:00, 60m lunch, approved late until 09:30, punch 09:30–17:00 → **WORK** (7.5h + 1.5h credited). Punch 10:00–17:00 → **LATE_EARLY** (30m late vs approval, not vs shift+grace).
@@ -762,7 +771,7 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 | **Minutes** | Database storage and status calculation | `checkOutTime − checkInTime`. |
 | **Work unit from shift** | WORK / LATE_EARLY classification | `expectedMinutes = (end − start) − lunchBreak`; enough minutes and no late/early violation gives **WORK**. |
 | **Days** | Dashboard leave aggregation | `expectedWorkingMinutes / 60` hours per day. |
-| **Shift settings** | System Settings | `work_shift_start_time`, `work_shift_end_time`, `grace_minutes`, `work_shift_lunch_break_minutes`. |
+| **Shift settings** | System configuration | `work_shift_start_time`, `work_shift_end_time`, `grace_minutes`, `work_shift_lunch_break_minutes`. |
 
 | Check-in | Check-out | Total minutes | Status | Day-mode grid |
 |----------|-----------|---------------|--------|---------------|
@@ -809,7 +818,7 @@ For a shift of 08:00–17:00 with 60-minute lunch and an 8-hour work unit: appro
 
 **Detailed steps:**
 
-1. Open **Attendance & Time** → **Attendance** (`/time/attendance`), or use the quick action in **Overview**.
+1. Open **Time & Attendance** → **Attendance** (`/time/attendance`), or use the quick action in **Overview**.
 2. Select the **current month**; attendance buttons are hidden for other months.
 3. Click **Check in**, confirm, and allow browser **Location**.
 4. On success, a green message appears and today’s cell shows the check-in time.
@@ -829,13 +838,13 @@ For a shift of 08:00–17:00 with 60-minute lunch and an 8-hour work unit: appro
 |------|-------|-------|
 | Employee | `/time/attendance` | Own month calendar |
 | Manager | `/time/attendance-tracking` | Report subtree (`EMPLOYEE_VIEW`) |
-| Admin | Same | All employees **who require attendance** (role `ADMIN` and **Attendance not required** excluded) |
+| Admin | Same | All employees **who require attendance** (role `ADMIN` and **Exempt from attendance tracking** excluded) |
 
 Grid symbols: `1`/`8h` worked, `W` weekend, `H` holiday, leave codes, `F` forgot punch, `A` absent (team view), `-` future.
 
 **Employee detail:** On `/time/attendance`, clicking a date opens check-in/out, location if present, leave/holiday suggestions, and a time-edit form if permitted.
 
-**Manager flow:** Open **Attendance Tracking** (`/attendance-tracking`), requiring `EMPLOYEE_VIEW` and direct/indirect reports. The scope is the recursive `managerId` subtree only. Filter by name, month, and one or more departments, then open `/attendance-tracking/{id}` for individual detail.
+**Manager flow:** Open **Attendance tracking** (`/attendance-tracking`), requiring `EMPLOYEE_VIEW` and direct/indirect reports. The scope is the recursive `managerId` subtree only. Filter by name, month, and one or more departments, then open `/attendance-tracking/{id}` for individual detail.
 
 | Symbol | Day mode | Hour mode | Meaning |
 |--------|----------|-----------|---------|
@@ -851,7 +860,7 @@ Classification uses Holiday Configuration first, then approved leave (except REM
 
 - **Manual time:** `ATTENDANCE_MANUAL_UPDATE` — self, Admin, or manager subtree. **No** approval workflow or audit log. **No** block when a leave request exists on that day. Admin UI: any day **≤ today**; optional coordinates; hints on paid-leave / late-early days.
 - **Leave approval:** `LATE_ARRIVAL` / `EARLY_DEPARTURE` → recompute **status** only (punch times unchanged). `ATTENDANCE_CORRECTION` / `REMOTE_WORK` → attendance effects per type.
-- **Export:** Excel `.xlsx` only from Attendance Tracking — no CSV/PDF.
+- **Export:** Excel `.xlsx` only from Attendance tracking — no CSV/PDF.
 
 **Manual-time API:** `PATCH /attendance/manual-time`; it requires `ATTENDANCE_MANUAL_UPDATE`. On employee detail (`/attendance-tracking/{id}`) or the personal calendar, click a date **on or before today**, enter **Check-in / Check-out** (coordinates optional), and save. Admins may edit actual punches even when paid leave or late/early requests exist.
 
@@ -868,11 +877,11 @@ Classification uses Holiday Configuration first, then approved leave (except REM
 
 | Feature | Available? | Details |
 |---------|:----------:|---------|
-| Filter by **month** | Yes | MonthSelector on Attendance and Attendance Tracking. |
-| Filter by employee **name** | Yes | Attendance Tracking. |
+| Filter by **month** | Yes | Month selector on Attendance and Attendance tracking. |
+| Filter by employee **name** | Yes | Attendance tracking. |
 | Filter by **department** | Yes | Multiple departments can be selected. |
 | Separate weekly filter | No | Attendance is filtered by month only. |
-| Export **Excel** (`.xlsx`) | Yes | Attendance Tracking: `GET /attendance/export-workingtime-detail`; requires `ATTENDANCE_EXPORT`. |
+| Export **Excel** (`.xlsx`) | Yes | Attendance tracking: `GET /attendance/export-workingtime-detail`; requires `ATTENDANCE_EXPORT`. |
 | Export **CSV / PDF** | **No** | — |
 
 The Excel file includes employee code, name, each day’s working minutes, absence/late/early codes, remaining leave days, and other attendance data. Export scope matches the grid: Admin can export the company; Managers can export their reporting subtree.
@@ -895,7 +904,7 @@ The Excel file includes employee code, name, each day’s working minutes, absen
 
 ### 8.7 Work shifts and work schedules (Task 09)
 
-> The system has a **default system-wide work shift**, not an employee-specific roster. Configure it under **System Settings → Work shift** (`/sysConfig/settings`).
+> The system has a **default system-wide work shift**, not an employee-specific roster. Configure it under **System configuration → Work shift** (`/sysConfig/settings`).
 
 | Feature | Status |
 |---------|--------|
@@ -916,7 +925,7 @@ An 08:00–17:00 shift with 60-minute lunch produces an **8-hour work unit**. La
 
 ---
 
-## 9. Leave Requests
+## 9. Leave requests
 
 ### 9.1 Leave types
 
@@ -938,13 +947,13 @@ No per-type annual caps, carryover, or attachments in system.
 
 ### 9.2 Create request
 
-**Leave Requests** (`/time/leave`) → form: type, date range, times (default 09:00–18:00 on form only), reason, **one Approver** (required). Submit → **PENDING**; approver gets in-app notification (no email).
+**Leave requests** (`/time/leave`) → form: type, date range, times (default 09:00–18:00 on form only), reason, **one Approver** (required). Submit → **PENDING**; approver gets in-app notification (no email).
 
 **Over balance:** blocked at **approve** time for `PAID_LEAVE`, not at submit.
 
 **Request form details:**
 
-1. Open **Attendance & Time** → **Leave Requests** (`/leave`), or create a quick request from Attendance.
+1. Open **Time & Attendance** → **Leave requests** (`/leave`), or create a quick request from Attendance.
 2. Click **Add** / create request.
 3. Select a required **Leave type**, date range (`YYYY-MM-DD`), and optional reason.
 4. Set start/end time. The form's 09:00–18:00 default is not the work-shift default.
@@ -984,7 +993,7 @@ There is no separate `CANCELLED` status. Employees may **edit** and **delete** t
 
 After delete (**PENDING** or **APPROVED**), backend deletes linked in-app notifications (`leaveRequestId` in payload) and emits realtime `notifications:removed` plus `leave:approvals-changed` (`action: deleted`) to the actor and assigned approver.
 
-**Delete** on **Leave Approvals** for **APPROVED** rows: **admin** (`ADMIN` role), **assigned approver** / **direct manager** (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`), or users with `LEAVE_DELETE_APPROVED` (restores `PAID_LEAVE` balance; reverts attendance for `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` when safe). Permission errors: `LEAVE_DELETE_NOT_ALLOWED` (i18n).
+**Delete** on **Leave request approvals** for **APPROVED** rows: **admin** (`ADMIN` role), **assigned approver** / **direct manager** (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`), or users with `LEAVE_DELETE_APPROVED` (restores `PAID_LEAVE` balance; reverts attendance for `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` when safe). Permission errors: `LEAVE_DELETE_NOT_ALLOWED` (i18n).
 
 Rejected requests notify the requester through `LEAVE_REQUEST_REJECTED`. The API does **not** require a separate rejection note; only the requester's original reason is visible when one was entered.
 
@@ -1000,7 +1009,7 @@ Rejected requests notify the requester through `LEAVE_REQUEST_REJECTED`. The API
 
 **Approval steps:**
 
-1. Open the `LEAVE_REQUEST_CREATED` notification or **Leave Approvals** (`/leave-approvals`).
+1. Open the `LEAVE_REQUEST_CREATED` notification or **Leave request approvals** (`/leave-approvals`).
 2. Select month/status, then open request detail. The approval screen does not separately show leave balance.
 3. **Approve:** requester is notified; `PAID_LEAVE` deducts `remainingLeaveDays`, while special types update attendance.
 4. **Reject:** requester is notified; a reason is not required.
@@ -1031,13 +1040,13 @@ Rejected requests notify the requester through `LEAVE_REQUEST_REJECTED`. The API
 | Report | Access | Export |
 |--------|--------|--------|
 | Personal `/time/attendance` dashboard | `ATTENDANCE_VIEW` | — |
-| **Attendance Tracking** grid | `EMPLOYEE_VIEW` + scope | **Excel .xlsx** (`ATTENDANCE_EXPORT`) |
+| **Attendance tracking** grid | `EMPLOYEE_VIEW` + scope | **Excel .xlsx** (`ATTENDANCE_EXPORT`) |
 | Dashboard leave/OT widgets | Pending count, approved leave days; **today late** = live evaluation (read-only, includes approved late/early leave); **OT hours** = sum of **approved** `OVERTIME` in month | — |
 | Dedicated leave PDF/CSV | **No** | — |
 
 ### 10.2 Viewing the monthly summary
 
-1. **Manager / HR:** Open **Attendance Tracking** and choose the **month/year**.
+1. **Manager / HR:** Open **Attendance tracking** and choose the **month/year**.
 2. Filter by **department** and/or **name**.
 3. Read daily grid values and the **total** columns at the end of the table.
 4. Switch between Day and Hour units: Day uses `1`, `F`, `A`, etc.; Hour shows a worked day as `8h`, for example.
@@ -1059,7 +1068,7 @@ Rejected requests notify the requester through `LEAVE_REQUEST_REJECTED`. The API
 | PDF | No |
 | CSV | No |
 
-1. Open **Attendance Tracking**.
+1. Open **Attendance tracking**.
 2. Choose the month and filter department/name if necessary.
 3. Click **Export** / Excel export.
 4. Download the `.xlsx` file.
@@ -1079,12 +1088,12 @@ HR should still **reconcile attendance** using the checklist below before lockin
 
 #### Month-end checklist (HR)
 
-- [ ] Open **Attendance Tracking** for the month to close
+- [ ] Open **Attendance tracking** for the month to close
 - [ ] Filter by **department** or export company **Excel**
 - [ ] Review **`F`** (forgot punch) → require make-up punch / ATTENDANCE_CORRECTION / manual-time
 - [ ] Review **`A`** (absent) → confirm unpaid absence vs missing leave request
 - [ ] Review **yellow / LATE_EARLY** → confirm under work-unit threshold or needs action
-- [ ] Check **PENDING** on **Leave Approvals** — approve or reject before payroll
+- [ ] Check **PENDING** on **Leave request approvals** — approve or reject before payroll
 - [ ] Align **`remainingLeaveDays`** with approved **`PAID_LEAVE`** in the month
 - [ ] Export **Excel** as reconciliation evidence (file timestamp on download)
 - [ ] Move to **Payroll** when attendance data is consistent
@@ -1191,7 +1200,7 @@ Check: they are in the participant list; correct **column** and **week/day**; th
 | **Insufficient remaining leave days** | Approving `PAID_LEAVE` exceeds balance | Reject it, or have HR update **Remaining leave days** on the employee profile. |
 | **LEAVE_APPROVE_BLOCKED_BY_OVERLAP** | An **APPROVED** request overlaps the same period | Delete or adjust the older approved request first (`LEAVE_DELETE_APPROVED`), then approve the new one. |
 | **LEAVE_DELETE_BLOCKED_BY_OVERLAP** | Another **APPROVED** request still overlaps | Delete the other approved overlapping request first, or adjust the date range. |
-| **LEAVE_DELETE_NOT_ALLOWED** | User is not admin, assigned approver, direct manager, and lacks `LEAVE_DELETE_APPROVED` | Only an authorized user may delete from Leave Approvals. |
+| **LEAVE_DELETE_NOT_ALLOWED** | User is not admin, assigned approver, direct manager, and lacks `LEAVE_DELETE_APPROVED` | Only an authorized user may delete from Leave request approvals. |
 | **GEO_LOCATION_OR_WIFI_REQUIRED** | Branch requires verification but the client sent neither GPS nor WiFi | Web: allow Location. Mobile: send `wifi.bssid` or enable GPS. |
 | **OUTSIDE_OFFICE_AREA** | GPS is outside the radius or BSSID does not match | Move within branch range, connect to company WiFi, or use approved **REMOTE_WORK**. |
 

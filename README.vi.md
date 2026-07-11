@@ -8,15 +8,15 @@
 
 # Tài liệu Hướng dẫn Sử dụng Hệ thống Web HRM
 
-> Phiên bản: 1.0.3  
+> Phiên bản: 2.3  
 > Đối tượng: Người dùng cuối và quản trị viên HRM  
 > Phạm vi: FE `tmv-hrm`, BE `tmv-hrm-be`  
-> Website: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)  
+> Trang web: [https://hrm.tamada.vn/](https://hrm.tamada.vn/)  
 > Báo lỗi khi cần: [https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new](https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new)
 
 ---
 
-## Bắt đầu nhanh (Quick Start)
+## Bắt đầu nhanh
 
 Nếu bạn lần đầu dùng HRM, làm lần lượt 5 bước sau:
 
@@ -81,7 +81,7 @@ Bạn dùng HRM để:
 | **Tài khoản** | Hồ sơ cá nhân, giao diện (màu, font, sáng/tối) | `/account` (tab **Thông tin** / **Cài đặt**) |
 | **Lịch** | Lịch họp nhiều nhân viên | `/calendar` |
 | **Tổ chức** | Nhân viên, Phòng ban, Chức vụ, Giấy tờ | `/org/employees`, `/org/departments`, `/org/positions`, `/org/documents` |
-| **Chấm công & Thời gian** | Chấm công, Theo dõi chấm công, Đơn xin phép, Duyệt đơn | `/time/attendance`, `/time/attendance-tracking`, `/time/leave`, `/time/leave-approvals` |
+| **Chấm công & Thời gian** | Chấm công, Theo dõi chấm công, Đơn xin phép, Duyệt đơn xin phép | `/time/attendance`, `/time/attendance-tracking`, `/time/leave`, `/time/leave-approvals` |
 | **Lương** | Phiếu lương, cấu hình thuế | `/payroll` |
 | **Cấu hình hệ thống** | Ngày nghỉ, Vị trí, Giao diện & Ca làm việc, Nhóm quyền, Phân quyền, Thông báo giấy tờ | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/roles`, `/sysConfig/assign`, `/settings/document-notifications` |
 
@@ -503,7 +503,7 @@ Thiết kế theo nguyên tắc: **ai tạo thì người đó quản lý**; **n
 | Sửa/xóa lịch của người khác | **Có** (cần `CALENDAR_EDIT_ANY`) | Role `ADMIN` có sẵn sau migrate; role khác cần Admin gán qua **Phân quyền** |
 | Bật “xem tất cả nhân viên” trên lịch | Có (tùy chọn) | Cần `CALENDAR_MANAGE` — switch trên trang **Calendar** |
 
-> **Tóm lại:** Admin/HR có `CALENDAR_EDIT_ANY` có thể sửa/xóa cuộc họp của nhân viên khác (hỗ trợ vận hành). User thường chỉ sửa sự kiện mình tạo (organizer).
+> **Tóm lại:** Admin/HR có `CALENDAR_EDIT_ANY` có thể sửa/xóa cuộc họp của nhân viên khác (hỗ trợ vận hành). Người dùng thường chỉ sửa sự kiện mình tạo (organizer).
 
 ### 5.6 Thông báo và nhắc nhở
 
@@ -642,18 +642,18 @@ Chú thích cột:
 | `EMPLOYEE_UPDATE` | Sửa nhân viên, reset mật khẩu |
 | `EMPLOYEE_DELETE` | Xóa nhân viên |
 | `ATTENDANCE_VIEW` | Xem/chấm công |
-| `ATTENDANCE_EXPORT` | Xuất Excel chi tiết công (Attendance Tracking) |
+| `ATTENDANCE_EXPORT` | Xuất Excel chi tiết công (Theo dõi chấm công) |
 | `ATTENDANCE_MANUAL_UPDATE` | Sửa giờ chấm công thủ công |
 | `LOCATION_VIEW` / `LOCATION_MANAGE` | Xem / quản lý vị trí chi nhánh |
 | `LEAVE_VIEW` | Xem/tạo đơn nghỉ (gồm loại OT) |
 | `LEAVE_APPROVE` | Duyệt đơn nghỉ |
 | `LEAVE_APPROVE_MANAGED` | Duyệt đơn nhân viên quản lý (phụ thuộc `LEAVE_APPROVE` trên UI phân quyền) |
-| `LEAVE_DELETE_APPROVED` | Xóa đơn đã **duyệt** trên **Leave Approvals** (mặc định ADMIN); người duyệt (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`) cũng xóa được đơn APPROVED trong phạm vi duyệt |
+| `LEAVE_DELETE_APPROVED` | Xóa đơn đã **duyệt** trên **Duyệt đơn xin phép** (mặc định ADMIN); người duyệt (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`) cũng xóa được đơn APPROVED trong phạm vi duyệt |
 | `CALENDAR_VIEW` | Xem lịch, tạo/sửa sự kiện (organizer trong service) |
 | `CALENDAR_MANAGE` | Bật chế độ xem lịch toàn công ty trên Calendar |
 | `CALENDAR_EDIT_ANY` | Sửa/xóa sự kiện lịch của nhân viên khác (mặc định role ADMIN) |
-| `DOCUMENT_VIEW` | Xem + tự CRUD giấy tờ nhân viên của mình; HR xem tất cả |
-| `DOCUMENT_MANAGE` | CRUD giấy tờ toàn tổ chức + cấu hình rule thông báo hết hạn |
+| `DOCUMENT_VIEW` | Xem + tự thêm/sửa/xóa giấy tờ nhân viên của mình; HR xem tất cả |
+| `DOCUMENT_MANAGE` | Thêm/sửa/xóa giấy tờ toàn tổ chức + cấu hình rule thông báo hết hạn |
 | `PAYROLL_VIEW` | Xem phiếu lương |
 | `PAYROLL_MANAGE` | Quản lý/tính lương, cấu hình thuế |
 | `PAYROLL_PERIOD_LOCK` | Khóa/mở khóa kỳ lương |
@@ -686,7 +686,7 @@ Mọi người đăng nhập đều truy cập được (sidebar **Tài khoản*
 - URL tab Giấy tờ: `/account?tab=documents`
 - Nút sáng/tối trên thanh header cũng lưu vào cấu hình cá nhân (đánh dấu đã tùy chỉnh)
 - Chưa tự lưu giao diện → app dùng **giao diện hệ thống**; sau khi Lưu hoặc đổi sáng/tối → ưu tiên cài đặt cá nhân
-- User **không** có `EMPLOYEE_VIEW` mở **Nhân viên** sẽ được chuyển sang **Tài khoản** thay vì tab Hồ sơ cũ
+- Người dùng **không** có `EMPLOYEE_VIEW` mở **Nhân viên** sẽ được chuyển sang **Tài khoản** thay vì tab Hồ sơ cũ
 
 ### 7.1 Tổng quan (`/dashboard`)
 
@@ -705,16 +705,16 @@ Quản lý giấy tờ **nhân viên** và **công ty** (PDF): có ngày hết h
 
 | Quyền | Việc làm được |
 |-------|----------------|
-| `DOCUMENT_VIEW` | Xem + tự CRUD giấy tờ nhân viên của mình (`/account?tab=documents`); HR xem tất cả |
-| `DOCUMENT_MANAGE` | CRUD toàn tổ chức (mọi giấy tờ), upload PDF, cấu hình rule thông báo |
+| `DOCUMENT_VIEW` | Xem + tự thêm/sửa/xóa giấy tờ nhân viên của mình (`/account?tab=documents`); HR xem tất cả |
+| `DOCUMENT_MANAGE` | Thêm/sửa/xóa toàn tổ chức (mọi giấy tờ), tải lên PDF, cấu hình rule thông báo |
 
-**Tạo giấy tờ (HR):**
+**Thêm giấy tờ (HR):**
 
-1. Menu **Tổ chức** → **Giấy tờ** → **Thêm**.
+1. Menu **Tổ chức** → **Giấy tờ** → **Thêm giấy tờ**.
 2. Chọn loại chủ sở hữu: **Nhân viên** hoặc **Công ty** (Công ty → không chọn nhân viên).
-3. Upload PDF — hệ thống cố gắng đọc **ngày hết hạn** và (nếu Nhân viên) khớp **họ tên + ngày sinh** với hồ sơ.
-4. Có ngày hết hạn: kiểm tra/sửa ngày; chọn nhắc trước **1 / 3 / 7 / 30** ngày (mặc định 30). **Vô thời hạn:** bật checkbox → không nhập ngày hết hạn, không gửi nhắc.
-5. Lưu.
+3. Tải lên PDF — hệ thống cố gắng đọc **ngày hết hạn** và (nếu Nhân viên) khớp **họ tên + ngày sinh** với hồ sơ.
+4. Có ngày hết hạn: kiểm tra/sửa ngày; chọn nhắc trước **1 / 3 / 7 / 30** ngày (mặc định 30). **Vô thời hạn (không hết hạn):** bật checkbox → không nhập ngày hết hạn, không gửi nhắc.
+5. Bấm **Thêm** để lưu.
 
 **Nhân viên tự quản lý:** tab **Tài khoản → Giấy tờ** — thêm/sửa/xóa giấy tờ **của mình** (không tạo giấy tờ công ty; rule thông báo dùng mặc định).
 
@@ -731,7 +731,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 - `PAYROLL_VIEW`: xem phiếu lương (cá nhân hoặc rộng hơn tùy cấu hình); xem trạng thái kỳ lương.
 - `PAYROLL_MANAGE`: tạo, tính lại, cấu hình thuế, quản lý phiếu lương.
 - `PAYROLL_PERIOD_LOCK`: **khóa/mở khóa kỳ lương** (hoặc dùng `PAYROLL_MANAGE` — quyền này bao gồm khóa kỳ).
-- **Kỳ lương (`PayrollPeriod`):** mặc định **Đang mở**; HR bấm **Khóa kỳ** trên trang **Payroll** (`PayrollPeriodControls`) → trạng thái **Đã khóa**. Khi đã khóa: không tạo/sửa/nhập/sao chép phiếu lương (API `PAYROLL_PERIOD_LOCKED`); vẫn xem và xuất Excel. **Mở khóa** cần `PAYROLL_MANAGE` hoặc `PAYROLL_PERIOD_LOCK` + ghi chú (bắt buộc khi mở khóa). Khóa kỳ **chỉ** chặn thao tác lương — chấm công và đơn phép vẫn sửa được (xem [mục 10.4](#104-đối-soát-cuối-tháng-hr)).
+- **Kỳ lương (`PayrollPeriod`):** mặc định **Đang mở**; HR bấm **Khóa kỳ** trên trang **Lương** (`PayrollPeriodControls`) → trạng thái **Đã khóa**. Khi đã khóa: không tạo/sửa/nhập/sao chép phiếu lương (API `PAYROLL_PERIOD_LOCKED`); vẫn xem và xuất Excel. **Mở khóa** cần `PAYROLL_MANAGE` hoặc `PAYROLL_PERIOD_LOCK` + ghi chú (bắt buộc khi mở khóa). Khóa kỳ **chỉ** chặn thao tác lương — chấm công và đơn phép vẫn sửa được (xem [mục 10.4](#104-đối-soát-cuối-tháng-hr)).
 
 ### 7.5 Cấu hình hệ thống
 
@@ -774,7 +774,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 
 | Phương thức | Có trong HRM? | Mô tả |
 |-------------|:-------------:|--------|
-| **Tự chấm trên web** (Check in / Check out + **GPS**) | **Có** | Trang **Chấm công** (`/time/attendance`). Client gửi `location` (lat/lng). |
+| **Tự chấm trên web** (Chấm công vào / Chấm công ra + **GPS**) | **Có** | Trang **Chấm công** (`/time/attendance`). Client gửi `location` (lat/lng). |
 | **Tự chấm qua app mobile + WiFi** | **API có** / **app tùy tích hợp** | `POST /attendance/check-in|check-out` nhận thêm `wifi: { ssid, bssid }`. Khớp BSSID với mạng đã cấu hình. Flutter chưa gửi `wifi` trong bản hiện tại. |
 | **Máy chấm công vật lý** (vân tay, thẻ, ZKTeco, …) | **Không** | Không có API/tích hợp thiết bị phần cứng trong codebase |
 | **Cả hai** | — | Web + mobile API; máy vật lý xử lý **ngoài** HRM hoặc qua sửa công / đơn **ATTENDANCE_CORRECTION** |
@@ -817,7 +817,7 @@ Khi ngày đó có đơn **`LATE_ARRIVAL`** hoặc **`EARLY_DEPARTURE`** đã **
 
 | Quy tắc | Chi tiết |
 |---------|----------|
-| **Giờ chấm thực tế** | Nhân viên vẫn **Check in / Check out bình thường**; hệ thống **không** tự điền giờ vào/ra từ đơn khi duyệt |
+| **Giờ chấm thực tế** | Nhân viên vẫn **Chấm công vào / Chấm công ra bình thường**; hệ thống **không** tự điền giờ vào/ra từ đơn khi duyệt |
 | **Ngưỡng muộn** | So với **giờ đến được duyệt** trên đơn (ca bắt đầu + số phút đơn), **không** dùng `startTime + grace` |
 | **Ngưỡng về sớm** | So với **giờ về được duyệt** trên đơn (ca kết thúc − số phút đơn), **không** dùng `endTime − grace` |
 | **Một chiều duyệt, chiều kia vi phạm** | Duyệt đến muộn nhưng về sớm hơn đơn (hoặc ngược lại) → vẫn **LATE_EARLY** cho vi phạm còn lại |
@@ -833,7 +833,7 @@ Khi ngày đó có đơn **`LATE_ARRIVAL`** hoặc **`EARLY_DEPARTURE`** đã **
 | Về sớm **16:00** | 08:00–16:00 | **WORK** | Đủ công khi cộng phút đơn bù |
 | Đến muộn **09:30** | 09:30–**16:00** | **LATE_EARLY** | Được phép đến muộn nhưng về sớm hơn đơn |
 
-**Chấm lại trong ngày:** Bấm Check in/out lần hai khi giờ đã lưu → API trả về bản ghi hiện có (idempotent). Chấm qua **WiFi** không bắt buộc GPS.
+**Chấm lại trong ngày:** Bấm Chấm công vào/ra lần hai khi giờ đã lưu → API trả về bản ghi hiện có (idempotent). Chấm qua **WiFi** không bắt buộc GPS.
 
 **Sau triển khai bản mới:** Chạy `yarn recompute-attendance` trong `tmv-hrm-be` (hoặc `:dry-run` để xem trước) để đồng bộ `attendance.status` trong DB với quy tắc trên.
 
@@ -856,20 +856,20 @@ Khi ngày đó có đơn **`LATE_ARRIVAL`** hoặc **`EARLY_DEPARTURE`** đã **
 **Truy cập:**
 
 1. Menu **Chấm công & Thời gian** → **Chấm công** (`/time/attendance`), hoặc
-2. **Overview** → tab nhân viên → nút Check in/out nhanh.
+2. **Tổng quan** → tab nhân viên → nút Chấm công vào/ra nhanh.
 
-**Chấm công vào (Check in):**
+**Chấm công vào (Chấm công vào):**
 
 1. Chọn **tháng hiện tại** trên bộ chọn tháng (nút chấm công **chỉ hiện khi đang xem tháng hiện tại**).
-2. Bấm **Check in** (Chấm công vào).
+2. Bấm **Chấm công vào** (Chấm công vào).
 3. Xác nhận trong hộp thoại.
 4. Trình duyệt hỏi **quyền vị trí** → chọn **Cho phép**.
 5. Hệ thống kiểm tra GPS có nằm trong **bán kính chi nhánh** đã cấu hình hay không (xem [8.1](#81-cơ-chế-chấm-công-của-hệ-thống) — WiFi chỉ trên app mobile khi tích hợp).
 6. Thành công → thông báo xanh; ô lịch hôm nay có **giờ vào**.
 
-**Chấm công ra (Check out):**
+**Chấm công ra (Chấm công ra):**
 
-1. Sau khi đã có giờ vào trong ngày, nút đổi thành **Check out**.
+1. Sau khi đã có giờ vào trong ngày, nút đổi thành **Chấm công ra**.
 2. Lặp lại bước xác nhận + GPS.
 3. Sau khi check-out xong, nút chấm công **ẩn** (đã đủ một lượt trong ngày).
 
@@ -913,14 +913,14 @@ Khi ngày đó có đơn **`LATE_ARRIVAL`** hoặc **`EARLY_DEPARTURE`** đã **
 
 | Thông tin | Ý nghĩa |
 |-----------|---------|
-| **Giờ vào** (`checkInTime`) | Thời điểm Check in (HH:mm, giờ VN) |
-| **Giờ ra** (`checkOutTime`) | Thời điểm Check out |
+| **Giờ vào** (`checkInTime`) | Thời điểm chấm công vào (HH:mm, giờ VN) |
+| **Giờ ra** (`checkOutTime`) | Thời điểm chấm công ra |
 | **Số giờ thực tế** | Suy ra từ vào–ra; so với **đơn vị công** (`workUnitLabel`) và grace ca làm việc |
 | **Màu / loại ngày** | WORK, LATE_EARLY, FORGOT_CLOCK_IN, nghỉ phép, lễ, cuối tuần, … |
 
 #### Manager — xem team
 
-1. Menu **Attendance & Time** → **Attendance Tracking** (`/attendance-tracking`).
+1. Menu **Chấm công & Thời gian** → **Theo dõi chấm công** (`/attendance-tracking`).
 2. **Quyền:** `EMPLOYEE_VIEW` + có nhân viên cấp dưới (`Quản lý trực tiếp`).
 3. **Phạm vi:** Chỉ cây cấp dưới (đệ quy theo `managerId`), không xem phòng ban khác.
 4. Lọc: **tên**, **tháng**, **phòng ban** (chọn nhiều).
@@ -928,11 +928,11 @@ Khi ngày đó có đơn **`LATE_ARRIVAL`** hoặc **`EARLY_DEPARTURE`** đã **
 
 #### HR / Admin — xem toàn công ty
 
-- Cùng trang **Attendance Tracking**.
+- Cùng trang **Theo dõi chấm công**.
 - Role **ADMIN** (`roleCode = ADMIN`): thấy **tất cả** nhân viên **cần chấm công** (role ADMIN và nhân viên bật **Không cần chấm công** bị loại khỏi lưới/xuất Excel).
 - HR có `EMPLOYEE_VIEW` + được gán đủ quyền: tùy cấu hình (thường gần như toàn công ty nếu là Admin hoặc có quyền rộng).
 
-#### Bảng ký hiệu trên lưới (Attendance Tracking)
+#### Bảng ký hiệu trên lưới (Theo dõi chấm công)
 
 | Ký hiệu | Chế độ ngày | Chế độ giờ | Ý nghĩa | Ví dụ phân loại |
 |--------|-------------|------------|---------|-----------------|
@@ -995,11 +995,11 @@ Khi ngày đó có đơn **`LATE_ARRIVAL`** hoặc **`EARLY_DEPARTURE`** đã **
 
 | Tính năng | Có? | Chi tiết |
 |-----------|:---:|----------|
-| Lọc theo **tháng** | Có | MonthSelector trên Attendance và Attendance Tracking |
-| Lọc theo **tên** nhân viên | Có | Attendance Tracking |
+| Lọc theo **tháng** | Có | bộ chọn tháng trên Chấm công và Theo dõi chấm công |
+| Lọc theo **tên** nhân viên | Có | Theo dõi chấm công |
 | Lọc theo **phòng ban** | Có | Chọn nhiều phòng ban |
 | Lọc theo **tuần** riêng | Không | Chỉ theo tháng |
-| Xuất **Excel** (.xlsx) | Có | Nút export trên Attendance Tracking — `GET /attendance/export-workingtime-detail` — cần `ATTENDANCE_EXPORT` |
+| Xuất **Excel** (.xlsx) | Có | Nút xuất trên Theo dõi chấm công — `GET /attendance/export-workingtime-detail` — cần `ATTENDANCE_EXPORT` |
 | Xuất **CSV / PDF** | **Không** | — |
 
 **File Excel gồm:** mã NV, tên, từng ngày trong tháng (phút làm việc), mã chú thích (vắng, muộn, sớm), cột ngày phép còn lại, v.v.
@@ -1012,9 +1012,9 @@ Khi ngày đó có đơn **`LATE_ARRIVAL`** hoặc **`EARLY_DEPARTURE`** đã **
 
 | Tính năng | Employee | Manager | HR / Admin |
 |-----------|:--------:|:-------:|:----------:|
-| Tự Check in/out (GPS) | Có* | Có* | Có* |
+| Tự Chấm công vào/ra (GPS) | Có* | Có* | Có* |
 | Xem lịch chấm công **của mình** | Có* | Có* | Có* |
-| Xem lưới **Attendance Tracking** | Không | Có** | Có |
+| Xem lưới **Theo dõi chấm công** | Không | Có** | Có |
 | Xem chi tiết từng NV trong team | Không | Có** | Có |
 | Xuất Excel tháng | Không | Có** (`ATTENDANCE_EXPORT`) | Có (`ATTENDANCE_EXPORT`) |
 | Sửa giờ manual-time | Không*** | Có**** | Có***** |
@@ -1103,7 +1103,7 @@ Loại phép nằm trong bảng **leave_types** (mã `code`). Có thể thêm lo
 
 **Quyền:** `LEAVE_VIEW`.
 
-1. Menu **Attendance & Time** → **Leave Requests** (`/leave`), hoặc từ trang **Attendance** → tạo đơn nhanh.
+1. Menu **Chấm công & Thời gian** → **Đơn xin phép** (`/leave`), hoặc từ trang **Chấm công** → tạo đơn nhanh.
 2. Bấm nút tạo đơn mới (Add / Tạo đơn).
 3. Trong form:
    - **Loại phép** — chọn từ danh sách (bắt buộc).
@@ -1177,7 +1177,7 @@ Loại phép nằm trong bảng **leave_types** (mã `code`). Có thể thêm lo
 - Chỉ được **sửa** và **xóa** đơn của mình khi trạng thái **PENDING** (trang **Leave** — nút **Xóa** cho đơn không phải OT; xác nhận qua `leave.confirmDelete`).
 - Đơn **OVERTIME** **PENDING**: nhân viên **Hủy** (`PATCH /leave/:id/cancel`; xác nhận `overtime.confirmCancel`) — không xóa cứng.
 - Sau khi duyệt/từ chối → nhân viên **không** xóa / hủy được (trừ hủy OT đang chờ như trên).
-- **Xóa đơn APPROVED** trên **Leave Approvals**: **admin** (role `ADMIN`), **người duyệt được gán** / **quản lý trực tiếp** (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`), hoặc HR có `LEAVE_DELETE_APPROVED` (hoàn phép `PAID_LEAVE`, revert công với `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` khi xóa an toàn). Lỗi quyền: `LEAVE_DELETE_NOT_ALLOWED` (i18n).
+- **Xóa đơn APPROVED** trên **Duyệt đơn xin phép**: **admin** (role `ADMIN`), **người duyệt được gán** / **quản lý trực tiếp** (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`), hoặc HR có `LEAVE_DELETE_APPROVED` (hoàn phép `PAID_LEAVE`, revert công với `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` khi xóa an toàn). Lỗi quyền: `LEAVE_DELETE_NOT_ALLOWED` (i18n).
 - Sau khi xóa (PENDING hoặc APPROVED), backend xóa thông báo in-app liên quan (`leaveRequestId` trong payload) và phát realtime `notifications:removed` + `leave:approvals-changed` (`action: deleted`) tới người thực hiện và người duyệt được gán.
 
 **Đơn bị từ chối:**
@@ -1185,7 +1185,7 @@ Loại phép nằm trong bảng **leave_types** (mã `code`). Có thể thêm lo
 - Người xin nhận **thông báo trong app** (`LEAVE_REQUEST_REJECTED`).
 - Lý do từ chối: API **không** bắt buộc ghi chú riêng khi reject — chỉ thấy **lý do trong đơn gốc** (nếu người xin đã điền). Người duyệt không có trường “lý do từ chối” bắt buộc trên UI.
 
-**Kết quả mong đợi:** Nhân viên theo dõi được trạng thái; sửa / xóa đơn PENDING (hoặc hủy OT đang chờ); xóa đơn đã duyệt do admin hoặc người duyệt trên Leave Approvals; người duyệt thấy danh sách cập nhật sau khi đơn bị xóa.
+**Kết quả mong đợi:** Nhân viên theo dõi được trạng thái; sửa / xóa đơn PENDING (hoặc hủy OT đang chờ); xóa đơn đã duyệt do admin hoặc người duyệt trên Duyệt đơn xin phép; người duyệt thấy danh sách cập nhật sau khi đơn bị xóa.
 
 ---
 
@@ -1221,12 +1221,12 @@ APPROVED  REJECTED
 
 **WHY thiết kế một người:** Đơn giản hóa MVP — tránh chờ nhiều cấp; trách nhiệm rõ trên một `approverId`.
 
-#### Hướng dẫn Manager / HR duyệt từng bước
+#### Hướng dẫn Quản lý / HR duyệt từng bước
 
 **Quyền:** `LEAVE_APPROVE` + phải là **đúng người** được gán trên đơn.
 
 1. **Thông báo:** Chuông app — `LEAVE_REQUEST_CREATED` (không email).
-2. Vào **Attendance & Time** → **Leave Approvals** (`/leave-approvals`).
+2. Vào **Chấm công & Thời gian** → **Duyệt đơn xin phép** (`/leave-approvals`).
 3. Chọn **tháng**, lọc trạng thái (**PENDING** / All / …).
 4. Bảng danh sách: người xin, loại phép, thời gian, **lý do**, trạng thái.
 5. Bấm xem chi tiết → thấy đủ thông tin đơn (số dư phép **không** hiện riêng trên màn duyệt — HR xem hồ sơ NV nếu cần).
@@ -1241,7 +1241,7 @@ APPROVED  REJECTED
 | Manager duyệt đơn của ai? | Chỉ đơn mà **mình được chọn** làm Người duyệt — **không** phải mọi đơn của team |
 | HR Admin duyệt tất cả? | Chỉ nếu được **chọn** trên từng đơn, hoặc tự tạo đơn hộ — **không** có quyền duyệt mọi đơn tự động |
 | Manager vắng, ai duyệt thay? | **Không có** ủy quyền — cần chọn người duyệt khác lúc tạo đơn hoặc HR xử lý thủ công |
-| HR xóa đơn đã duyệt? | **Leave Approvals** → Xóa khi là admin, người duyệt được gán, quản lý trực tiếp, hoặc có `LEAVE_DELETE_APPROVED`; có thể **hoàn lại** ngày phép PAID_LEAVE |
+| HR xóa đơn đã duyệt? | **Duyệt đơn xin phép** → Xóa khi là admin, người duyệt được gán, quản lý trực tiếp, hoặc có `LEAVE_DELETE_APPROVED`; có thể **hoàn lại** ngày phép PAID_LEAVE |
 | Đổi đơn đã duyệt (sửa thời gian)? | **Không** sửa trực tiếp — xóa đơn APPROVED cũ (nếu không bị chặn overlap) → tạo đơn mới → duyệt |
 
 #### Tình huống đặc biệt
@@ -1250,14 +1250,14 @@ APPROVED  REJECTED
 |------------|----------------|
 | Nhiều người cùng team xin phép một ngày | **Không** cảnh báo trùng / thiếu nhân sự |
 | Xin phép ngày lễ / cuối tuần | Vẫn tạo được; ngày **không tính** trừ phép nếu nằm trong **off dates** (holiday config) |
-| Đơn đã duyệt cần hủy / đổi | **Không** nút Cancel — admin/người duyệt xóa đơn APPROVED trên Leave Approvals rồi tạo lại; bị chặn nếu overlap với đơn APPROVED khác |
+| Đơn đã duyệt cần hủy / đổi | **Không** nút Hủy — admin/người duyệt xóa đơn APPROVED trên Duyệt đơn xin phép rồi tạo lại; bị chặn nếu overlap với đơn APPROVED khác |
 | Nhắc duyệt khi PENDING quá lâu | **Không** có deadline / reminder tự động |
 
 #### Bảng thông báo
 
 | Sự kiện | Ai nhận | Kênh | Nội dung (tóm tắt) |
 |---------|---------|------|---------------------|
-| Nhân viên gửi đơn | **Người duyệt** đã chọn | App (+ Web Push nếu bật) | Có đơn mới — mở Leave Approvals |
+| Nhân viên gửi đơn | **Người duyệt** đã chọn | App (+ Web Push nếu bật) | Có đơn mới — mở Duyệt đơn xin phép |
 | Duyệt đơn | **Người xin** | App (+ Push) | Đơn đã được duyệt |
 | Từ chối đơn | **Người xin** | App (+ Push) | Đơn bị từ chối |
 | Sửa đơn PENDING | — | **Không** gửi thông báo | — |
@@ -1276,10 +1276,10 @@ APPROVED  REJECTED
 
 | Báo cáo / màn hình | Mô tả | Ai xem được | Lọc |
 |--------------------|--------|-------------|-----|
-| **Attendance** (dashboard cá nhân) | Lịch tháng, tổng ngày làm, phép có/không lương, lễ | Nhân viên (`ATTENDANCE_VIEW`) | Tháng |
-| **Attendance Tracking** | Lưới cả tháng theo nhân viên | `EMPLOYEE_VIEW` + scope team/Admin | Tháng, tên, phòng ban |
+| **Chấm công** (dashboard cá nhân) | Lịch tháng, tổng ngày làm, phép có/không lương, lễ | Nhân viên (`ATTENDANCE_VIEW`) | Tháng |
+| **Theo dõi chấm công** | Lưới cả tháng theo nhân viên | `EMPLOYEE_VIEW` + scope team/Admin | Tháng, tên, phòng ban |
 | **Chi tiết 1 nhân viên** | `/attendance-tracking/{id}` | Self / team / Admin | Tháng |
-| **Overview — biểu đồ leave/OT** | Số đơn chờ, ngày phép đã duyệt; **giờ OT** = tổng đơn `OVERTIME` **APPROVED** trong tháng (không tự tính từ chấm công) | `LEAVE_VIEW` + dashboard | — |
+| **Tổng quan — biểu đồ nghỉ phép/OT** | Số đơn chờ, ngày phép đã duyệt; **giờ OT** = tổng đơn `OVERTIME` **APPROVED** trong tháng (không tự tính từ chấm công) | `LEAVE_VIEW` + dashboard | — |
 | **Today summary** | Tổng hợp chấm công hôm nay (muộn/vắng, …) | Nội bộ API | — |
 | **Export Working time detail** | File Excel chi tiết công tháng | `ATTENDANCE_EXPORT` + scope lưới (theo `EMPLOYEE_VIEW` / team) | Tháng (query) |
 | **Báo cáo nghỉ phép riêng PDF/CSV** | **Không có** | — | — |
@@ -1288,7 +1288,7 @@ APPROVED  REJECTED
 
 ### 10.2 Xem báo cáo tổng hợp tháng
 
-1. **Manager / HR:** **Attendance Tracking** → chọn **tháng/năm**.
+1. **Quản lý / HR:** **Theo dõi chấm công** → chọn **tháng/năm**.
 2. Lọc **phòng ban** và/hoặc **tên**.
 3. Đọc lưới từng ngày + cột **tổng** cuối bảng.
 4. Chuyển **Đơn vị** Day/Hour (ngày: `1`, `F`, `A`…; giờ: `8h` cho ngày làm).
@@ -1316,7 +1316,7 @@ APPROVED  REJECTED
 
 **Các bước xuất:**
 
-1. Vào **Attendance Tracking**.
+1. Vào **Theo dõi chấm công**.
 2. Chọn **tháng**, lọc phòng ban/tên (nếu cần).
 3. Bấm nút **Export** / xuất Excel.
 4. Tải file `.xlsx`.
@@ -1338,12 +1338,12 @@ HR vẫn nên **đối soát chấm công** theo checklist bên dưới trước
 
 #### Checklist đối soát cuối tháng (HR)
 
-- [ ] Mở **Attendance Tracking** đúng **tháng** cần chốt
+- [ ] Mở **Theo dõi chấm công** đúng **tháng** cần chốt
 - [ ] Lọc từng **phòng ban** hoặc xuất **Excel** toàn công ty
 - [ ] Rà **ô `F`** (quên chấm) → yêu cầu bổ sung chấm / đơn ATTENDANCE_CORRECTION / manual-time
 - [ ] Rà **ô `A`** (vắng) → xác nhận nghỉ không phép hay thiếu đơn
 - [ ] Rà **ô vàng / LATE_EARLY** → xác nhận đủ **đơn vị công** (`workUnitLabel`) hay cần xử lý
-- [ ] Kiểm tra đơn **PENDING** trên **Leave Approvals** — duyệt hoặc từ chối trước khi tính lương
+- [ ] Kiểm tra đơn **PENDING** trên **Duyệt đơn xin phép** — duyệt hoặc từ chối trước khi tính lương
 - [ ] Đối chiếu **remainingLeaveDays** với đơn **PAID_LEAVE** đã duyệt trong tháng
 - [ ] Xuất **Excel** lưu làm bằng chứng đối soát (file có timestamp tải về)
 - [ ] Chuyển sang module **Payroll** khi dữ liệu công đã nhất quán
@@ -1476,7 +1476,7 @@ Organizer nhận thông báo bạn đã rút lui. Bạn **không** cần (và kh
 | **Insufficient remaining leave days** | Duyệt PAID_LEAVE vượt số dư | Từ chối hoặc HR cập nhật **Ngày phép còn lại** trên hồ sơ |
 | **LEAVE_APPROVE_BLOCKED_BY_OVERLAP** | Duyệt đơn trùng thời gian với đơn APPROVED khác | Xóa/điều chỉnh đơn APPROVED cũ trước (`LEAVE_DELETE_APPROVED`), rồi duyệt đơn mới |
 | **LEAVE_DELETE_BLOCKED_BY_OVERLAP** | Xóa đơn APPROVED còn đơn APPROVED khác trùng thời gian | Xóa đơn APPROVED còn lại trước, hoặc điều chỉnh khoảng thời gian |
-| **LEAVE_DELETE_NOT_ALLOWED** | User không phải admin / người duyệt / `LEAVE_DELETE_APPROVED` | Chỉ admin hoặc người duyệt xóa trên Leave Approvals |
+| **LEAVE_DELETE_NOT_ALLOWED** | Người dùng không phải admin / người duyệt / `LEAVE_DELETE_APPROVED` | Chỉ admin hoặc người duyệt xóa trên Duyệt đơn xin phép |
 | **GEO_LOCATION_OR_WIFI_REQUIRED** khi chấm công | Chi nhánh yêu cầu xác thực nhưng client không gửi GPS/WiFi | Web: bật quyền vị trí; mobile: gửi `wifi.bssid` hoặc bật GPS |
 | **OUTSIDE_OFFICE_AREA** khi chấm công | GPS ngoài bán kính / BSSID không khớp | Vào phạm vi chi nhánh hoặc nối đúng WiFi công ty; hoặc đơn **REMOTE_WORK** đã duyệt |
 
