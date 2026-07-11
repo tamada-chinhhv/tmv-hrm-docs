@@ -83,7 +83,7 @@ Bạn dùng HRM để:
 | **Tổ chức** | Nhân viên, Phòng ban, Chức vụ, Giấy tờ | `/org/employees`, `/org/departments`, `/org/positions`, `/org/documents` |
 | **Chấm công & Thời gian** | Chấm công, Theo dõi chấm công, Đơn xin phép, Duyệt đơn | `/time/attendance`, `/time/attendance-tracking`, `/time/leave`, `/time/leave-approvals` |
 | **Lương** | Phiếu lương, cấu hình thuế | `/payroll` |
-| **Cấu hình hệ thống** | Ngày nghỉ, Vị trí, Giao diện & Ca làm việc, Nhóm quyền, Phân quyền | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/roles`, `/sysConfig/assign` |
+| **Cấu hình hệ thống** | Ngày nghỉ, Vị trí, Giao diện & Ca làm việc, Nhóm quyền, Phân quyền, Thông báo giấy tờ | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/roles`, `/sysConfig/assign`, `/settings/document-notifications` |
 
 Menu hiển thị **theo quyền** — nếu bạn không thấy mục nào, có thể tài khoản chưa được gán quyền tương ứng (xem [mục 6](#6-phân-quyền--vai-trò)).
 
@@ -652,8 +652,8 @@ Chú thích cột:
 | `CALENDAR_VIEW` | Xem lịch, tạo/sửa sự kiện (organizer trong service) |
 | `CALENDAR_MANAGE` | Bật chế độ xem lịch toàn công ty trên Calendar |
 | `CALENDAR_EDIT_ANY` | Sửa/xóa sự kiện lịch của nhân viên khác (mặc định role ADMIN) |
-| `DOCUMENT_VIEW` | Xem giấy tờ có hạn (nhân viên: chỉ của mình) |
-| `DOCUMENT_MANAGE` | Quản lý giấy tờ + cấu hình thông báo hết hạn |
+| `DOCUMENT_VIEW` | Xem + tự CRUD giấy tờ nhân viên của mình; HR xem tất cả |
+| `DOCUMENT_MANAGE` | CRUD giấy tờ toàn tổ chức + cấu hình rule thông báo hết hạn |
 | `PAYROLL_VIEW` | Xem phiếu lương |
 | `PAYROLL_MANAGE` | Quản lý/tính lương, cấu hình thuế |
 | `PAYROLL_PERIOD_LOCK` | Khóa/mở khóa kỳ lương |
@@ -680,8 +680,10 @@ Mọi người đăng nhập đều truy cập được (sidebar **Tài khoản*
 |-----|----------|
 | **Thông tin** | Hồ sơ của tôi — sửa họ tên, email, điện thoại, … (không đổi username, phòng ban, vai trò) |
 | **Cài đặt** | Giao diện: chế độ **Sáng/Tối** (lưu ngay), màu chủ đạo, phông chữ (bấm **Lưu** để đồng bộ server) |
+| **Giấy tờ** | Tự quản lý giấy tờ nhân viên của mình (cần `DOCUMENT_VIEW`) — chi tiết [mục 7.2.1](#721-giấy-tờ-orgdocuments) |
 
 - URL tab Cài đặt: `/account?tab=settings`
+- URL tab Giấy tờ: `/account?tab=documents`
 - Nút sáng/tối trên thanh header cũng lưu vào cấu hình cá nhân (đánh dấu đã tùy chỉnh)
 - Chưa tự lưu giao diện → app dùng **giao diện hệ thống**; sau khi Lưu hoặc đổi sáng/tối → ưu tiên cài đặt cá nhân
 - User **không** có `EMPLOYEE_VIEW` mở **Nhân viên** sẽ được chuyển sang **Tài khoản** thay vì tab Hồ sơ cũ
@@ -697,26 +699,28 @@ Mọi người đăng nhập đều truy cập được (sidebar **Tài khoản*
 - **Phòng ban:** cây cha/con; cần `DEPARTMENT_VIEW` / `DEPARTMENT_MANAGE`.
 - **Chức vụ:** theo phòng ban; `Level` **nhỏ hơn** = cấp **cao hơn** (ví dụ level `1` là cao nhất).
 
-### 7.2.1 Giấy tờ có hạn (`/org/documents`)
+### 7.2.1 Giấy tờ (`/org/documents`)
 
-Quản lý giấy tờ **nhân viên** và **công ty** có ngày hết hạn (PDF), kèm nhắc nhở tự động.
+Quản lý giấy tờ **nhân viên** và **công ty** (PDF): có ngày hết hạn (kèm nhắc tự động) hoặc **vô thời hạn**.
 
 | Quyền | Việc làm được |
 |-------|----------------|
-| `DOCUMENT_VIEW` | Xem giấy tờ (HR: tất cả; nhân viên: chỉ của mình trên `/account?tab=documents`) |
-| `DOCUMENT_MANAGE` | Tạo/sửa/xóa, upload PDF, cấu hình người nhận thông báo |
+| `DOCUMENT_VIEW` | Xem + tự CRUD giấy tờ nhân viên của mình (`/account?tab=documents`); HR xem tất cả |
+| `DOCUMENT_MANAGE` | CRUD toàn tổ chức (mọi giấy tờ), upload PDF, cấu hình rule thông báo |
 
 **Tạo giấy tờ (HR):**
 
 1. Menu **Tổ chức** → **Giấy tờ** → **Thêm**.
 2. Chọn loại chủ sở hữu: **Nhân viên** hoặc **Công ty** (Công ty → không chọn nhân viên).
 3. Upload PDF — hệ thống cố gắng đọc **ngày hết hạn** và (nếu Nhân viên) khớp **họ tên + ngày sinh** với hồ sơ.
-4. Kiểm tra/sửa ngày hết hạn; chọn nhắc trước **1 / 3 / 7 / 30** ngày (mặc định 30).
+4. Có ngày hết hạn: kiểm tra/sửa ngày; chọn nhắc trước **1 / 3 / 7 / 30** ngày (mặc định 30). **Vô thời hạn:** bật checkbox → không nhập ngày hết hạn, không gửi nhắc.
 5. Lưu.
+
+**Nhân viên tự quản lý:** tab **Tài khoản → Giấy tờ** — thêm/sửa/xóa giấy tờ **của mình** (không tạo giấy tờ công ty; rule thông báo dùng mặc định).
 
 **Cấu hình người nhận:** **Cài đặt** → **Thông báo giấy tờ** (`/settings/document-notifications`) — chọn phòng ban áp dụng và danh sách người nhận. Nhân viên sở hữu vẫn nhận nếu bật tùy chọn tương ứng.
 
-**Nhắc nhở:** cron 7:00 (T2–T6, giờ VN) gửi thông báo đúng mốc đã chọn; nếu đã hết hạn thì nhắc hàng ngày cho đến khi cập nhật/xóa giấy tờ.
+**Nhắc nhở:** cron 7:00 (T2–T6, giờ VN) gửi thông báo đúng mốc đã chọn; nếu đã hết hạn thì nhắc hàng ngày cho đến khi cập nhật/xóa giấy tờ. Giấy tờ **vô thời hạn** không vào cron nhắc.
 
 ### 7.3 Chấm công, đơn phép, báo cáo
 
