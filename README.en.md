@@ -80,7 +80,7 @@ You use HRM to:
 | **Overview** | Dashboard, quick metrics | `/dashboard` |
 | **Account** | Personal profile, appearance (color, font, light/dark) | `/account` (tabs **Information** / **Settings**) |
 | **Calendar** | Multi-employee meeting schedule | `/calendar` |
-| **Organization** | Employees, Departments, Positions | `/org/employees`, `/org/departments`, `/org/positions` |
+| **Organization** | Employees, Departments, Positions, Documents | `/org/employees`, `/org/departments`, `/org/positions`, `/org/documents` |
 | **Attendance & Time** | Attendance, Attendance Tracking, Leave Requests, Leave Approvals | `/time/attendance`, `/time/attendance-tracking`, `/time/leave`, `/time/leave-approvals` |
 | **Payroll** | Payslips, tax settings | `/payroll` |
 | **System Settings** | Holidays, Locations, Work shift, Roles, Permission Assignment | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/roles`, `/sysConfig/assign` |
@@ -658,6 +658,19 @@ Quick metrics for HR, attendance, and leave (some widgets need `EMPLOYEE_VIEW` /
 
 - **Departments:** parent/child tree; `DEPARTMENT_VIEW` / `DEPARTMENT_MANAGE`.
 - **Positions:** per department; lower **Level** number = higher rank (`1` is highest).
+
+### 7.2.1 Expiring documents (`/org/documents`)
+
+Manage **employee** and **company** documents with expiry dates (PDF) and automatic reminders.
+
+| Permission | Capabilities |
+|------------|--------------|
+| `DOCUMENT_VIEW` | View documents (HR: all; employees: own only at `/account?tab=documents`) |
+| `DOCUMENT_MANAGE` | Create/edit/delete, upload PDF, configure notification recipients |
+
+**Create (HR):** Organization → Documents → Add → choose Employee or Company → upload PDF (system may auto-fill expiry and match employee by name + date of birth) → set remind-before days (1/3/7/30, default 30) → Save.
+
+**Recipients:** Settings → Document notifications (`/settings/document-notifications`). Cron at 07:00 weekdays (VN time) sends reminders on the selected day; expired documents remind daily until updated/deleted.
 
 ### 7.3 Attendance, leave, reports
 
