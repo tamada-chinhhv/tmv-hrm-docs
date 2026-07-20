@@ -306,8 +306,8 @@ Production always has username **`admin`** with role **ADMIN** and **all permiss
 | **Email** | No | Valid email; must be unique if provided |
 | **Phone** | No | |
 | **Citizen ID** | No | |
-| **Department** | No | Select before position |
-| **Position** | No | Enabled after department is selected |
+| **Department** | Yes (*) | Required (except system account `admin`) |
+| **Position** | Yes (*) | **Company-wide** catalog (not per department); employee role comes from position |
 | **Date of birth** | No | DatePicker — stored as **YYYY-MM-DD** (e.g. 1990-05-15) |
 | **Gender** | No | Male / Female / Other |
 | **Address** | No | |
@@ -318,7 +318,7 @@ Production always has username **`admin`** with role **ADMIN** and **all permiss
 | **Contract type** | No | Full-time, Probation, etc. |
 | **Employment status** | No | Default **ACTIVE**; also **INACTIVE** / **TERMINATED** |
 | **Username** | Yes (*) | Auto from full name; editable **before** save |
-| **Role** | No | e.g. `EMPLOYEE`, `HR_MANAGER` — **only `admin` may assign `ADMIN`** |
+| **Role** | No* | Derived from selected position when `positionId` is set — **only `admin` may assign `ADMIN`** |
 | **Exempt from attendance tracking** | No | Admin only — excludes employee from Attendance tracking grid and Excel export |
 | **Direct manager** | No | Active employees only |
 | **Avatar** | No | Upload image |
@@ -343,9 +343,9 @@ Production always has username **`admin`** with role **ADMIN** and **all permiss
 | Error | Cause | Fix |
 |-------|-------|-----|
 | **Username already exists** | Duplicate username | Edit username (add suffix) and save again |
-| **Missing required fields** | Full name, hire date, or username empty | Fill all (*) fields |
+| **Missing required fields** | Full name, hire date, username, department, or position empty | Fill all (*) fields |
 | **Email already exists** | Duplicate email | Use another email or leave blank |
-| **Position must belong to department** | Position not in selected department | Re-select department/position |
+| **EMPLOYEE_DEPARTMENT_REQUIRED / EMPLOYEE_POSITION_REQUIRED** | Missing department or position | Select both department and position |
 | **Insufficient permissions** | Missing `EMPLOYEE_CREATE` | Ask Admin to assign permissions |
 
 ### 4.4 Edit after create
@@ -539,7 +539,7 @@ Each employee has **one** `roleId` at a time.
 
 - **Admin** = `ADMIN` role (full seed permissions).
 - **HR** = usually `HR_MANAGER` + permissions assigned by Admin.
-- **Manager** = has `EMPLOYEE_VIEW` + direct/indirect reports via `managerId`.
+- **Manager** = has `EMPLOYEE_VIEW` + direct/indirect reports via `managerId`. `EMPLOYEE_VIEW_ALL` → company-wide read scope (like Admin for list/findOne).
 - **Employee** = default `EMPLOYEE` role.
 
 | Feature | Admin | HR* | Manager | Employee |
@@ -572,9 +572,11 @@ Each employee has **one** `roleId` at a time.
 
 **Admin (`roleCode = ADMIN`):** Full employee list and management.
 
-**Manager (`EMPLOYEE_VIEW`, not Admin):** Only employees in their **reporting subtree** (direct and indirect reports via `managerId`).
+**Manager (`EMPLOYEE_VIEW`, not Admin / without `EMPLOYEE_VIEW_ALL`):** Only employees in their **reporting subtree** (direct and indirect reports via `managerId`).
 
-**Regular employee (no `EMPLOYEE_VIEW`):** Employee API returns **only self**. Calendar **directory** (`/employees/directory`) still lists active employees for meeting invites — not full HR records.
+**HR / user with `EMPLOYEE_VIEW_ALL`:** company-wide employee list (no `ADMIN` role required).
+
+**Regular employee (no `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL`):** Employee API returns **only self**. Calendar **directory** (`/employees/directory`) still lists active employees for meeting invites — not full HR records.
 
 ### 6.4 Assigning roles
 
@@ -603,7 +605,8 @@ Each employee has **one** `roleId` at a time.
 
 | Code | Meaning |
 |------|---------|
-| `EMPLOYEE_VIEW` | View employees (scoped) |
+| `EMPLOYEE_VIEW` | View employees (managed subtree) |
+| `EMPLOYEE_VIEW_ALL` | View all employees (company-wide list / detail / tracking) |
 | `EMPLOYEE_CREATE` | Create employee |
 | `EMPLOYEE_UPDATE` | Update employee, reset password |
 | `EMPLOYEE_DELETE` | Delete employee |
@@ -652,7 +655,7 @@ Available to every logged-in user (sidebar **Account** or user menu).
 - Documents tab URL: `/account?tab=documents`
 - The header light/dark toggle also saves personal preferences (marks appearance as customized)
 - Until the user saves, the app uses **system appearance**; after Save or toggling theme, personal settings take priority
-- Users **without** `EMPLOYEE_VIEW` who open **Employees** are redirected to **Account** (no legacy My Profile tab)
+- Users **without** `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` who open **Employees** are redirected to **Account** (no legacy My Profile tab)
 
 ### 7.1 Overview (`/dashboard`)
 
@@ -661,7 +664,7 @@ Quick metrics for HR, attendance, and leave (some widgets need `EMPLOYEE_VIEW` /
 ### 7.2 Departments & Positions
 
 - **Departments:** parent/child tree; `DEPARTMENT_VIEW` / `DEPARTMENT_MANAGE`.
-- **Positions:** per department; lower **Level** number = higher rank (`1` is highest).
+- **Positions:** company-wide catalog (unique `code`); each position **requires** a linked role (`roleId`); no `level` / department ownership. Employee role is derived from the position.
 
 ### 7.2.1 Documents (`/org/documents`)
 
@@ -1040,7 +1043,7 @@ Rejected requests notify the requester through `LEAVE_REQUEST_REJECTED`. The API
 | Report | Access | Export |
 |--------|--------|--------|
 | Personal `/time/attendance` dashboard | `ATTENDANCE_VIEW` | — |
-| **Attendance tracking** grid | `EMPLOYEE_VIEW` + scope | **Excel .xlsx** (`ATTENDANCE_EXPORT`) |
+| **Attendance tracking** grid | `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` + scope | **Excel .xlsx** (`ATTENDANCE_EXPORT`) |
 | Dashboard leave/OT widgets | Pending count, approved leave days; **today late** = live evaluation (read-only, includes approved late/early leave); **OT hours** = sum of **approved** `OVERTIME` in month | — |
 | Dedicated leave PDF/CSV | **No** | — |
 
