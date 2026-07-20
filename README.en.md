@@ -83,7 +83,7 @@ You use HRM to:
 | **Organization** | Employees, Departments, Positions, Documents | `/org/employees`, `/org/departments`, `/org/positions`, `/org/documents` |
 | **Time & Attendance** | Attendance, Attendance tracking, Leave requests, Leave request approvals | `/time/attendance`, `/time/attendance-tracking`, `/time/leave`, `/time/leave-approvals` |
 | **Payroll** | Payslips, tax settings | `/payroll` |
-| **System configuration** | Holidays, Locations, Work shift, Roles, Permission Assignment, Document expiry notifications | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/roles`, `/sysConfig/assign`, `/settings/document-notifications` |
+| **System configuration** | Holidays, Locations, Work shift, Assign permissions (tabs: Assign + Role groups), Document expiry notifications | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/assign` (tab `roles` for role groups; `/sysConfig/roles` redirects), `/settings/document-notifications` |
 
 Menus appear **based on permissions**. If a menu item is missing, your account may lack the required permission (see [Section 6](#6-roles--permissions)).
 
@@ -703,7 +703,7 @@ Full detail: [Section 8](#8-attendance), [Section 9](#9-leave-requests), [Sectio
 - **Office Locations:** `LOCATION_VIEW` / `LOCATION_MANAGE` — `/sysConfig/locations`. Each **active** branch must have **GPS** or **at least one active WiFi network** (GPS only, WiFi only, or both). See [Section 7.5.1](#751-branch-configuration-gps--wifi).
 - **System appearance:** `APPEARANCE_VIEW` / `APPEARANCE_EDIT` — **System configuration → Settings** (`/sysConfig/settings`, **Appearance** accordion). Applies to users without personal customization and to the login screen.
 - **Work shift (system-wide):** `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — same page `/sysConfig/settings`, **Work shift** accordion.
-- **Roles / Permission Assignment:** `ROLE_VIEW` / `ROLE_MANAGE` — `/sysConfig/roles`, `/sysConfig/assign`.
+- **Assign permissions (Assign + Role groups):** `ROLE_VIEW` / `ROLE_MANAGE` — `/sysConfig/assign` (tab `roles` for role groups; `/sysConfig/roles` redirects to `?tab=roles`).
 
 > **Personal** appearance is not configured here — see [Section 7.0](#70-account-account).
 

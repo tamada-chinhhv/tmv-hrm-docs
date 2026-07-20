@@ -83,7 +83,7 @@ Bạn dùng HRM để:
 | **Tổ chức** | Nhân viên, Phòng ban, Chức vụ, Giấy tờ | `/org/employees`, `/org/departments`, `/org/positions`, `/org/documents` |
 | **Chấm công & Thời gian** | Chấm công, Theo dõi chấm công, Đơn xin phép, Duyệt đơn xin phép | `/time/attendance`, `/time/attendance-tracking`, `/time/leave`, `/time/leave-approvals` |
 | **Lương** | Phiếu lương, cấu hình thuế | `/payroll` |
-| **Cấu hình hệ thống** | Ngày nghỉ, Vị trí, Giao diện & Ca làm việc, Nhóm quyền, Phân quyền, Thông báo giấy tờ | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/roles`, `/sysConfig/assign`, `/settings/document-notifications` |
+| **Cấu hình hệ thống** | Ngày nghỉ, Vị trí, Giao diện & Ca làm việc, Phân quyền (tab Gán quyền + Nhóm quyền), Thông báo giấy tờ | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/assign` (tab `roles` cho nhóm quyền; `/sysConfig/roles` redirect), `/settings/document-notifications` |
 
 Menu hiển thị **theo quyền** — nếu bạn không thấy mục nào, có thể tài khoản chưa được gán quyền tương ứng (xem [mục 6](#6-phân-quyền--vai-trò)).
 
@@ -739,7 +739,7 @@ Chi tiết đầy đủ: [mục 8](#8-chấm-công), [mục 9](#9-đơn-xin-phé
 - **Vị trí chi nhánh:** `LOCATION_VIEW` / `LOCATION_MANAGE` — `/sysConfig/locations`. Mỗi chi nhánh **active** phải có **GPS** hoặc **ít nhất một mạng WiFi active** (có thể chỉ GPS, chỉ WiFi, hoặc cả hai). Chi tiết cấu hình: [mục 7.5.1](#751-cấu-hình-chi-nhánh-gps--wifi).
 - **Giao diện hệ thống:** `APPEARANCE_VIEW` / `APPEARANCE_EDIT` — **Cấu hình hệ thống → Cài đặt** (`/sysConfig/settings`, accordion **Giao diện**). Áp dụng cho user chưa tùy chỉnh cá nhân và cho màn login.
 - **Ca làm việc (toàn hệ thống):** `WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT` — cùng trang `/sysConfig/settings`, accordion **Ca làm việc**.
-- **Nhóm quyền / Phân quyền:** `ROLE_VIEW` / `ROLE_MANAGE` — `/sysConfig/roles`, `/sysConfig/assign`.
+- **Phân quyền (Gán quyền + Nhóm quyền):** `ROLE_VIEW` / `ROLE_MANAGE` — `/sysConfig/assign` (tab `roles` cho nhóm quyền; `/sysConfig/roles` redirect → `?tab=roles`).
 
 > Giao diện **cá nhân** không cấu hình tại đây — xem [mục 7.0](#70-tài-khoản-account).
 
