@@ -193,15 +193,15 @@ When HR **creates a new employee**, the system suggests a username from **Full n
 
 #### Duplicate username
 
-The system **does not** auto-append numbers (`nguyenvanan1`, `nguyenvanan2`, …).
+On save (manual create or Excel import), if the username is taken the system **auto-appends a numeric suffix**: `nguyenvanan` → `nguyenvanan1` → `nguyenvanan2` → …
 
-- On save, a duplicate returns: **Username "…" already exists**.
-- HR must **manually edit** the Username field before saving (e.g. `nguyenvanan2`, `nguyenvananhr`).
+- Default password (when omitted) equals the **allocated** username (after any suffix).
+- The `admin` username remains reserved and is not used for normal accounts.
 
-| Situation | Action |
+| Situation | Result |
 |-----------|--------|
-| `nguyenvanan` already exists, adding another Nguyễn Văn An | Change username to `nguyenvanan2` or add a suffix |
-| Two names normalize to the same string | Must use different usernames manually |
+| `nguyenvanan` already exists, adding another Nguyễn Văn An | System stores `nguyenvanan1` (then `nguyenvanan2`, …) |
+| Two names normalize to the same string | Each gets a distinct username via the numeric suffix |
 
 #### Character limits
 
@@ -312,8 +312,8 @@ Production always has username **`admin`** with role **ADMIN** and **all permiss
 | **Gender** | No | Male / Female / Other |
 | **Address** | No | |
 | **Dependent count** | No | Integer 0–99 |
-| **Total leave days** | No | Number ≥ 0 |
-| **Remaining leave days** | No | Number ≥ 0 |
+| **Total leave days** | No | Number ≥ 0 (up to 2 decimal places) |
+| **Remaining leave days** | No | Number ≥ 0 (up to 2 decimal places) |
 | **Hire date** | Yes (*) | Default today; **YYYY-MM-DD** |
 | **Contract type** | No | Full-time, Probation, etc. |
 | **Employment status** | No | Default **ACTIVE**; also **INACTIVE** / **TERMINATED** |
@@ -342,7 +342,7 @@ Production always has username **`admin`** with role **ADMIN** and **all permiss
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| **Username already exists** | Duplicate username | Edit username (add suffix) and save again |
+| **Username already exists** / allocation failed | Rare — no free suffixed candidate left | Try another username or contact IT; see [Section 3.2](#32-automatic-username-rules) |
 | **Missing required fields** | Full name, hire date, username, department, or position empty | Fill all (*) fields |
 | **Email already exists** | Duplicate email | Use another email or leave blank |
 | **EMPLOYEE_DEPARTMENT_REQUIRED / EMPLOYEE_POSITION_REQUIRED** | Missing department or position | Select both department and position |
@@ -611,12 +611,17 @@ Each employee has **one** `roleId` at a time.
 | `EMPLOYEE_UPDATE` | Update employee, reset password |
 | `EMPLOYEE_DELETE` | Delete employee |
 | `ATTENDANCE_VIEW` | View / check-in attendance |
-| `ATTENDANCE_EXPORT` | Export working-time detail Excel (Attendance tracking) |
-| `ATTENDANCE_MANUAL_UPDATE` | Manual time correction |
+| `ATTENDANCE_VIEW_MANAGED` | View attendance tracking for **direct** reports only |
+| `ATTENDANCE_VIEW_MANAGED_SUBTREE` | View attendance tracking for full managed subtree |
+| `ATTENDANCE_EXPORT` | Export working-time detail Excel (Attendance tracking) — company-wide / with `EMPLOYEE_VIEW_ALL` |
+| `ATTENDANCE_EXPORT_MANAGED` | Export Excel for **direct** reports only |
+| `ATTENDANCE_EXPORT_MANAGED_SUBTREE` | Export Excel for full managed subtree |
+| `ATTENDANCE_MANUAL_UPDATE` | Manual time correction; delete attendance day; bulk day adjust |
 | `LOCATION_VIEW` / `LOCATION_MANAGE` | View / manage office locations |
 | `LEAVE_VIEW` | View / create leave requests (including OT type) |
-| `LEAVE_APPROVE` | Approve leave |
-| `LEAVE_APPROVE_MANAGED` | Approve managed employees’ leave (child of `LEAVE_APPROVE` in assign UI) |
+| `LEAVE_VIEW_MANAGED` | View managed-subtree leave in **Leave request approvals** (read-only; child of `LEAVE_VIEW` in assign UI) |
+| `LEAVE_APPROVE` | Approve leave (when selected as Approver on the request) |
+| `LEAVE_APPROVE_MANAGED` | Approve leave for employees in managed subtree (direct + indirect reports; child of `LEAVE_APPROVE` in assign UI) |
 | `LEAVE_DELETE_APPROVED` | Delete **approved** requests on **Leave request approvals** (default: ADMIN role); approvers with `LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED` may also delete **APPROVED** rows they can decide on |
 | `CALENDAR_VIEW` | View calendar, create/edit own events |
 | `CALENDAR_MANAGE` | Company-wide calendar admin switch |
@@ -840,14 +845,14 @@ For a shift of 08:00–17:00 with 60-minute lunch and an 8-hour work unit: appro
 | Role | Where | Scope |
 |------|-------|-------|
 | Employee | `/time/attendance` | Own month calendar |
-| Manager | `/time/attendance-tracking` | Report subtree (`EMPLOYEE_VIEW`) |
+| Manager | `/time/attendance-tracking` | Report subtree (`EMPLOYEE_VIEW` / `ATTENDANCE_VIEW_MANAGED_SUBTREE`) or direct reports (`ATTENDANCE_VIEW_MANAGED`) |
 | Admin | Same | All employees **who require attendance** (role `ADMIN` and **Exempt from attendance tracking** excluded) |
 
 Grid symbols: `1`/`8h` worked, `W` weekend, `H` holiday, leave codes, `F` forgot punch, `A` absent (team view), `-` future.
 
 **Employee detail:** On `/time/attendance`, clicking a date opens check-in/out, location if present, leave/holiday suggestions, and a time-edit form if permitted.
 
-**Manager flow:** Open **Attendance tracking** (`/attendance-tracking`), requiring `EMPLOYEE_VIEW` and direct/indirect reports. The scope is the recursive `managerId` subtree only. Filter by name, month, and one or more departments, then open `/attendance-tracking/{id}` for individual detail.
+**Manager flow:** Open **Attendance tracking** (`/attendance-tracking`), requiring `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` / `ATTENDANCE_VIEW_MANAGED` / `ATTENDANCE_VIEW_MANAGED_SUBTREE`. Scope: full company (`EMPLOYEE_VIEW_ALL`/admin), managed subtree (`EMPLOYEE_VIEW` or `ATTENDANCE_VIEW_MANAGED_SUBTREE`), or direct reports only (`ATTENDANCE_VIEW_MANAGED`). Filter by name, month, and one or more departments, then open `/attendance-tracking/{id}` for individual detail.
 
 | Symbol | Day mode | Hour mode | Meaning |
 |--------|----------|-----------|---------|
@@ -861,7 +866,8 @@ Classification uses Holiday Configuration first, then approved leave (except REM
 
 ### 8.4 Edits & export
 
-- **Manual time:** `ATTENDANCE_MANUAL_UPDATE` — self, Admin, or manager subtree. **No** approval workflow or audit log. **No** block when a leave request exists on that day. Admin UI: any day **≤ today**; optional coordinates; hints on paid-leave / late-early days.
+- **Manual time:** `ATTENDANCE_MANUAL_UPDATE` — self, Admin, or manager subtree. **No** approval workflow or audit log. **No** block when a leave request exists on that day. Admin UI: any day **≤ today**; optional coordinates; hints on paid-leave / late-early days. **Delete day:** hard-delete punch for `(employeeId, date)` from the day detail dialog (confirm required).
+- **Bulk manual time (Attendance tracking):** optional exclude list of employees; unknown IDs ignored.
 - **Leave approval:** `LATE_ARRIVAL` / `EARLY_DEPARTURE` → recompute **status** only (punch times unchanged). `ATTENDANCE_CORRECTION` / `REMOTE_WORK` → attendance effects per type.
 - **Export:** Excel `.xlsx` only from Attendance tracking — no CSV/PDF.
 
@@ -884,7 +890,7 @@ Classification uses Holiday Configuration first, then approved leave (except REM
 | Filter by employee **name** | Yes | Attendance tracking. |
 | Filter by **department** | Yes | Multiple departments can be selected. |
 | Separate weekly filter | No | Attendance is filtered by month only. |
-| Export **Excel** (`.xlsx`) | Yes | Attendance tracking: `GET /attendance/export-workingtime-detail`; requires `ATTENDANCE_EXPORT`. |
+| Export **Excel** (`.xlsx`) | Yes | Attendance tracking: `GET /attendance/export-workingtime-detail`; requires `ATTENDANCE_EXPORT` **or** `ATTENDANCE_EXPORT_MANAGED` **or** `ATTENDANCE_EXPORT_MANAGED_SUBTREE` (scope matches permission). |
 | Export **CSV / PDF** | **No** | — |
 
 The Excel file includes employee code, name, each day’s working minutes, absence/late/early codes, remaining leave days, and other attendance data. Export scope matches the grid: Admin can export the company; Managers can export their reporting subtree.
@@ -903,7 +909,7 @@ The Excel file includes employee code, name, each day’s working minutes, absen
 | Configure holidays | No | No | Yes (`HOLIDAY_CONFIG_*`) |
 | Configure work shift | No | No | Yes (`WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT`) |
 
-\* `ATTENDANCE_VIEW` — \** `EMPLOYEE_VIEW` + scope — \*** unless granted — \**** team + permission — \***** if granted.
+\* `ATTENDANCE_VIEW` — \** `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` / `ATTENDANCE_VIEW_MANAGED` / `ATTENDANCE_VIEW_MANAGED_SUBTREE` + matching `ATTENDANCE_EXPORT*` — \*** unless granted — \**** team + permission — \***** if granted.
 
 ### 8.7 Work shifts and work schedules (Task 09)
 
@@ -941,12 +947,16 @@ An 08:00–17:00 shift with 60-minute lunch produces an **8-hour work unit**. La
 | `HIEU_HI` | No | Paid flag but no balance UI |
 | `OVERTIME` | No | Overtime hours; monthly OT totals use **approved** `OVERTIME` requests only (no attendance-computed OT) |
 
-No per-type annual caps, carryover, or attachments in system.
+No per-type annual caps (beyond annual PAID_LEAVE accrual), carryover expiry/cap, or attachments in system.
 
-**Annual-leave balance is entered manually by HR:**
+**Annual-leave balance (automatic accrual):**
 
-- **Total leave days** (`totalLeaveDays`) is a reference value.
-- **Remaining leave days** (`remainingLeaveDays`) is deducted only when **`PAID_LEAVE`** is approved.
+- On the **1st of each month** (cron 05:00 `Asia/Ho_Chi_Minh`): add **+1** to both **Total leave days** (`totalLeaveDays`) and **Remaining leave days** (`remainingLeaveDays`).
+- On **1 Jan**: keep prior-year remaining (implicit carryover — no reset) + January **+1** + **seniority** `floor(completed anniversary years / 5)` (recurring each year; e.g. ≥5 → +1, ≥10 → +2, ≥15 → +3).
+- Mid-month hire: first +1 on the **1st of the following month** (`hireDate` < accrual date). No mid-month pro-rata.
+- Go-live: keep HR-entered balances; **no backfill** of past months; cron accrues from the deploy month onward.
+- Columns are **Decimal(8,2)** — cron always adds integers; HR may still manually enter fractional values.
+- Approving **`PAID_LEAVE`** still deducts whole chargeable days from `remainingLeaveDays` (no half-day 0.5).
 
 ### 9.2 Create request
 
@@ -971,9 +981,9 @@ On submit, the request becomes **PENDING** and the selected Approver receives `L
 
 | Metric | Source | Meaning |
 |--------|--------|---------|
-| **Total leave days** | HR employee profile | Reference only; it is not automatically deducted. |
+| **Total leave days** | Accrual cron (+ optional HR override) | Increased monthly (+ seniority on 1 Jan); not reduced on approve. |
 | **Used** | No separate database column | Manually inferred as Total − Remaining. |
-| **Remaining** | `remainingLeaveDays` | Deducted for approved `PAID_LEAVE`; restored if an authorized user deletes an approved PAID_LEAVE request. |
+| **Remaining** | Accrual cron (+ optional HR override) | Increased with accrual; deducted for approved `PAID_LEAVE`; restored if an authorized user deletes an approved PAID_LEAVE request. |
 | **Pending** | Not deducted in advance | Deducted only after **Approve**. |
 
 The balance appears on eligible paid-leave forms and in the employee profile for HR.
@@ -996,7 +1006,7 @@ There is no separate `CANCELLED` status. Employees may **edit** and **delete** t
 
 After delete (**PENDING** or **APPROVED**), backend deletes linked in-app notifications (`leaveRequestId` in payload) and emits realtime `notifications:removed` plus `leave:approvals-changed` (`action: deleted`) to the actor and assigned approver.
 
-**Delete** on **Leave request approvals** for **APPROVED** rows: **admin** (`ADMIN` role), **assigned approver** / **direct manager** (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`), or users with `LEAVE_DELETE_APPROVED` (restores `PAID_LEAVE` balance; reverts attendance for `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` when safe). Permission errors: `LEAVE_DELETE_NOT_ALLOWED` (i18n).
+**Delete** on **Leave request approvals** for **APPROVED** rows: **admin** (`ADMIN` role), **assigned approver** / **managed-subtree manager** (`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`), or users with `LEAVE_DELETE_APPROVED` (restores `PAID_LEAVE` balance; reverts attendance for `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` when safe). Permission errors: `LEAVE_DELETE_NOT_ALLOWED` (i18n).
 
 Rejected requests notify the requester through `LEAVE_REQUEST_REJECTED`. The API does **not** require a separate rejection note; only the requester's original reason is visible when one was entered.
 
@@ -1004,8 +1014,9 @@ Rejected requests notify the requester through `LEAVE_REQUEST_REJECTED`. The API
 
 - **One approver** per request — not Manager→HR chain, not parallel.
 - Requesters select the approver from `GET /leave/approvers`. Suggestions include the active direct manager, employees at a higher position in the department, and employees in parent departments.
-- Only assigned approver can decide (`LEAVE_APPROVE` + matching `approverId`).
-- **No** delegation when manager is away.
+- **Inbox (OR):** `LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED` / `LEAVE_VIEW_MANAGED`.
+- **Decide (Approve/Reject):** `LEAVE_APPROVE` when `approverId` matches the caller, **or** `LEAVE_APPROVE_MANAGED` when the requester is in the caller’s **managed subtree** (direct + indirect via `managerId`). `LEAVE_VIEW_MANAGED` alone is **read-only** (no decide).
+- **No** formal delegation when manager is away (a skip-level manager with `LEAVE_APPROVE_MANAGED` can still decide subtree requests).
 - **Approve** blocked with `LEAVE_APPROVE_BLOCKED_BY_OVERLAP` if another **APPROVED** request overlaps the same period.
 - **Delete approved** blocked with `LEAVE_DELETE_BLOCKED_BY_OVERLAP` while another **APPROVED** request still overlaps.
 - **Replace workflow:** delete old approved request → create new → approve new.
@@ -1020,9 +1031,9 @@ Rejected requests notify the requester through `LEAVE_REQUEST_REJECTED`. The API
 
 | Question | Answer |
 |----------|--------|
-| Can a Manager approve all team requests? | No. Only requests that selected them as **Approver**. |
-| Can HR/Admin approve every request? | No, unless selected on that request or creating it on behalf of an employee. |
-| Can an absent Manager delegate approval? | No delegation exists. Choose another approver when creating the request. |
+| Can a Manager approve all team requests? | With `LEAVE_APPROVE` only: requests that selected them as **Approver**. With `LEAVE_APPROVE_MANAGED`: any request whose requester is in their managed subtree (even if another person was selected as Approver). With `LEAVE_VIEW_MANAGED` only: can view the subtree inbox but cannot decide. |
+| Can HR/Admin approve every request? | Admin role follows admin scope. Others: only if selected on that request, within `LEAVE_APPROVE_MANAGED` scope, or creating on behalf of an employee. |
+| Can an absent Manager delegate approval? | No delegation feature. Choose another approver when creating, or rely on a skip-level manager with `LEAVE_APPROVE_MANAGED`. |
 | Can an approved request be changed? | No. Delete it if permitted and not blocked by overlap, then create and approve a replacement. |
 
 | Notification event | Recipient | Channel |
@@ -1043,7 +1054,7 @@ Rejected requests notify the requester through `LEAVE_REQUEST_REJECTED`. The API
 | Report | Access | Export |
 |--------|--------|--------|
 | Personal `/time/attendance` dashboard | `ATTENDANCE_VIEW` | — |
-| **Attendance tracking** grid | `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` + scope | **Excel .xlsx** (`ATTENDANCE_EXPORT`) |
+| **Attendance tracking** grid | `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` / `ATTENDANCE_VIEW_MANAGED` / `ATTENDANCE_VIEW_MANAGED_SUBTREE` + scope | **Excel .xlsx** (`ATTENDANCE_EXPORT` / managed export codes) |
 | Dashboard leave/OT widgets | Pending count, approved leave days; **today late** = live evaluation (read-only, includes approved late/early leave); **OT hours** = sum of **approved** `OVERTIME` in month | — |
 | Dedicated leave PDF/CSV | **No** | — |
 
@@ -1195,7 +1206,7 @@ Check: they are in the participant list; correct **column** and **week/day**; th
 
 | Error | Cause | Resolution |
 |-------|-------|------------|
-| **Username already exists** | Duplicate username | Change the username before saving, for example by adding a suffix; see [Section 4.3](#43-common-errors-when-creating). |
+| **Username already exists** | No free suffixed username left | Change the base username or contact IT; see [Section 3.2](#32-automatic-username-rules). |
 | **Insufficient permissions** | Account lacks the required permission | See [Section 6](#6-roles--permissions) and contact an Admin. |
 | **Invalid username or password** | Incorrect credentials | Check Caps Lock and ask HR to reset the password if necessary. |
 | **Page will not load** | Network, server, or incorrect URL | Check the network, try `https://hrm.tamada.vn/login`, clear cache, then contact IT. |
@@ -1203,7 +1214,7 @@ Check: they are in the participant list; correct **column** and **week/day**; th
 | **Insufficient remaining leave days** | Approving `PAID_LEAVE` exceeds balance | Reject it, or have HR update **Remaining leave days** on the employee profile. |
 | **LEAVE_APPROVE_BLOCKED_BY_OVERLAP** | An **APPROVED** request overlaps the same period | Delete or adjust the older approved request first (`LEAVE_DELETE_APPROVED`), then approve the new one. |
 | **LEAVE_DELETE_BLOCKED_BY_OVERLAP** | Another **APPROVED** request still overlaps | Delete the other approved overlapping request first, or adjust the date range. |
-| **LEAVE_DELETE_NOT_ALLOWED** | User is not admin, assigned approver, direct manager, and lacks `LEAVE_DELETE_APPROVED` | Only an authorized user may delete from Leave request approvals. |
+| **LEAVE_DELETE_NOT_ALLOWED** | User is not admin, assigned approver, managed-subtree manager, and lacks `LEAVE_DELETE_APPROVED` | Only an authorized user may delete from Leave request approvals. |
 | **GEO_LOCATION_OR_WIFI_REQUIRED** | Branch requires verification but the client sent neither GPS nor WiFi | Web: allow Location. Mobile: send `wifi.bssid` or enable GPS. |
 | **OUTSIDE_OFFICE_AREA** | GPS is outside the radius or BSSID does not match | Move within branch range, connect to company WiFi, or use approved **REMOTE_WORK**. |
 

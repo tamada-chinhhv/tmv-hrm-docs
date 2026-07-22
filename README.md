@@ -568,17 +568,23 @@ flowchart LR
 
 | コード | 意味 |
 |--------|------|
-| `EMPLOYEE_VIEW` | 従業員閲覧（スコープ付き） |
+| `EMPLOYEE_VIEW` | 従業員閲覧（管理 subtree） |
+| `EMPLOYEE_VIEW_ALL` | 全社の従業員閲覧（一覧 / 詳細 / 勤怠一覧） |
 | `EMPLOYEE_CREATE` | 従業員作成 |
 | `EMPLOYEE_UPDATE` | 従業員更新、パスワード reset |
 | `EMPLOYEE_DELETE` | 従業員削除 |
 | `ATTENDANCE_VIEW` | 勤怠閲覧 / 打刻 |
-| `ATTENDANCE_EXPORT` | 労働時間詳細 Excel 出力（勤怠一覧） |
-| `ATTENDANCE_MANUAL_UPDATE` | 手動時刻修正 |
+| `ATTENDANCE_VIEW_MANAGED` | **勤怠一覧** を直属部下のみ閲覧 |
+| `ATTENDANCE_VIEW_MANAGED_SUBTREE` | **勤怠一覧** を管理 subtree 全体（直属・間接）で閲覧 |
+| `ATTENDANCE_EXPORT` | 労働時間詳細 Excel 出力（勤怠一覧）— 全社 / `EMPLOYEE_VIEW_ALL` 併用 |
+| `ATTENDANCE_EXPORT_MANAGED` | 直属部下のみ Excel 出力 |
+| `ATTENDANCE_EXPORT_MANAGED_SUBTREE` | 管理 subtree 全体の Excel 出力 |
+| `ATTENDANCE_MANUAL_UPDATE` | 手動時刻修正; 勤怠日の削除; 一括日調整 |
 | `LOCATION_VIEW` / `LOCATION_MANAGE` | オフィス拠点の閲覧 / 管理 |
 | `LEAVE_VIEW` | 休暇申請の閲覧/作成（OT 種別含む） |
-| `LEAVE_APPROVE` | 休暇承認 |
-| `LEAVE_APPROVE_MANAGED` | 管理下従業員の休暇承認（割当 UI では `LEAVE_APPROVE` の子） |
+| `LEAVE_VIEW_MANAGED` | 管理 subtree の休暇申請を **休暇申請の承認** で閲覧（閲覧のみ；割当 UI では `LEAVE_VIEW` の子） |
+| `LEAVE_APPROVE` | 休暇承認（申請で Approver に選ばれた場合） |
+| `LEAVE_APPROVE_MANAGED` | 管理 subtree（直属・間接部下）の休暇承認（割当 UI では `LEAVE_APPROVE` の子） |
 | `LEAVE_DELETE_APPROVED` | **休暇申請の承認** 上の **承認済み**申請削除（既定: ADMIN）。`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED` の承認者も、決定可能な **APPROVED** 行を削除可 |
 | `CALENDAR_VIEW` | カレンダー閲覧、自分のイベント作成/編集 |
 | `CALENDAR_MANAGE` | 全社カレンダー管理スイッチ |
@@ -801,14 +807,14 @@ flowchart LR
 | ロール | 場所 | 範囲 |
 |--------|------|------|
 | 従業員 | `/time/attendance` | 自分の月次カレンダー |
-| マネージャー | `/time/attendance-tracking` | 報告ツリー（`EMPLOYEE_VIEW`） |
+| マネージャー | `/time/attendance-tracking` | 報告ツリー（`EMPLOYEE_VIEW` / `ATTENDANCE_VIEW_MANAGED_SUBTREE`）または直属のみ（`ATTENDANCE_VIEW_MANAGED`） |
 | Admin | 同上 | 勤怠必須の**全**従業員（ロール `ADMIN` と **勤怠管理の対象外** は除外） |
 
 グリッド記号: `1`/`8h` 出勤、`W` 週末、`H` 祝日、休暇コード、`F` 打刻忘れ、`A` 欠勤（チーム表示）、`-` 未来。
 
 **従業員詳細:** `/time/attendance` で日付をクリックすると、出勤/退勤、位置（あれば）、休暇/祝日の提案、権限があれば時刻編集フォームが開く。
 
-**マネージャー手順:** **勤怠一覧**（`/attendance-tracking`）を開く — `EMPLOYEE_VIEW` と直属/間接部下が必要。範囲は再帰的な `managerId` サブツリーのみ。氏名・月・1 つ以上の部署で絞り込み、`/attendance-tracking/{id}` で個人詳細を開く。
+**マネージャー手順:** **勤怠一覧**（`/attendance-tracking`）を開く — `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` / `ATTENDANCE_VIEW_MANAGED` / `ATTENDANCE_VIEW_MANAGED_SUBTREE` が必要。範囲: 全社（`EMPLOYEE_VIEW_ALL`/admin）、管理 subtree（`EMPLOYEE_VIEW` または `ATTENDANCE_VIEW_MANAGED_SUBTREE`）、直属のみ（`ATTENDANCE_VIEW_MANAGED`）。氏名・月・1 つ以上の部署で絞り込み、`/attendance-tracking/{id}` で個人詳細を開く。
 
 | 記号 | Day モード | Hour モード | 意味 |
 |------|------------|-------------|------|
@@ -822,7 +828,8 @@ flowchart LR
 
 ### 8.4 編集とエクスポート
 
-- **手動時刻:** `ATTENDANCE_MANUAL_UPDATE` — 本人、Admin、またはマネージャーのサブツリー。**承認フローも監査ログもなし**。その日に休暇申請があっても**ブロックしない**。Admin UI: **今日以前**の任意日。座標は任意。有給/遅刻早退日のヒントあり。
+- **手動時刻:** `ATTENDANCE_MANUAL_UPDATE` — 本人、Admin、またはマネージャーのサブツリー。**承認フローも監査ログもなし**。その日に休暇申請があっても**ブロックしない**。Admin UI: **今日以前**の任意日。座標は任意。有給/遅刻早退日のヒントあり。**日削除:** 日詳細ダイアログから `(employeeId, date)` の打刻をハード削除（確認必須）。
+- **一括手動時刻（勤怠一覧）:** 従業員の除外リスト任意; 不明 ID は無視。
 - **休暇承認:** `LATE_ARRIVAL` / `EARLY_DEPARTURE` → **status のみ**再計算（打刻時刻は不変）。`ATTENDANCE_CORRECTION` / `REMOTE_WORK` → 種別に応じた勤怠効果。
 - **エクスポート:** 勤怠一覧 からの Excel `.xlsx` のみ — CSV/PDF なし。
 
@@ -845,10 +852,10 @@ flowchart LR
 | 従業員**名**でフィルタ | あり | 勤怠一覧。 |
 | **部署**でフィルタ | あり | 複数部署を選択可。 |
 | 週次フィルタ単体 | なし | 勤怠は月単位のみ。 |
-| **Excel**（`.xlsx`）出力 | あり | 勤怠一覧: `GET /attendance/export-workingtime-detail`。`ATTENDANCE_EXPORT` 必須。 |
+| **Excel**（`.xlsx`）出力 | あり | 勤怠一覧: `GET /attendance/export-workingtime-detail`。`ATTENDANCE_EXPORT` **または** `ATTENDANCE_EXPORT_MANAGED` **または** `ATTENDANCE_EXPORT_MANAGED_SUBTREE`（範囲は権限に一致）。 |
 | **CSV / PDF** 出力 | **なし** | — |
 
-Excel には従業員コード、氏名、各日の労働分、欠勤/遅刻/早退コード、残休暇日数などが含まれます。出力範囲はグリッドと同じ: 管理者は全社、マネージャーは報告サブツリー。
+Excel には従業員コード、氏名、各日の労働分、欠勤/遅刻/早退コード、残休暇日数などが含まれます。出力範囲はグリッドと同じ: Admin / `ATTENDANCE_EXPORT` は全社; `ATTENDANCE_EXPORT_MANAGED_SUBTREE` は管理 subtree; `ATTENDANCE_EXPORT_MANAGED` は直属のみ。
 
 ### 8.6 権限マトリクス
 
@@ -864,7 +871,7 @@ Excel には従業員コード、氏名、各日の労働分、欠勤/遅刻/早
 | 休日設定 | なし | なし | あり（`HOLIDAY_CONFIG_*`） |
 | 勤務シフト設定 | なし | なし | あり（`WORK_SHIFT_VIEW` / `WORK_SHIFT_EDIT`） |
 
-\* `ATTENDANCE_VIEW` — \** `EMPLOYEE_VIEW` + スコープ — \*** 付与されない限り — \**** チーム + 権限 — \***** 付与されていれば。
+\* `ATTENDANCE_VIEW` — \** `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` / `ATTENDANCE_VIEW_MANAGED` / `ATTENDANCE_VIEW_MANAGED_SUBTREE` + 対応する `ATTENDANCE_EXPORT*` — \*** 付与されない限り — \**** チーム + 権限 — \***** 付与されていれば。
 
 ### 8.7 勤務シフトと勤務スケジュール（Task 09）
 
@@ -902,12 +909,16 @@ workUnitLabel          = expectedWorkingMinutes / 60（例: "8h", "8.25h"）
 | `HIEU_HI` | なし | 有給フラグはあるが残高 UI なし |
 | `OVERTIME` | なし | 残業時間。月次 OT 合計は **承認済み** `OVERTIME` のみ（勤怠からの自動 OT 計算なし） |
 
-種別ごとの年次上限、繰越、添付はシステムにありません。
+種別ごとの年次上限（年次有給の自動付与以外）、繰越の期限/上限、添付はシステムにありません。
 
-**年次休暇残高は HR が手動入力:**
+**年次休暇残高（自動付与）:**
 
-- **年間休暇日数**（`totalLeaveDays`）は参照値。
-- **残休暇日数**（`remainingLeaveDays`）は **`PAID_LEAVE`** 承認時のみ減算。
+- **毎月1日**（cron 05:00 `Asia/Ho_Chi_Minh`）: **年間休暇日数**（`totalLeaveDays`）と **残休暇日数**（`remainingLeaveDays`）の両方に **+1**。
+- **1/1**: 前年残を維持（暗黙の繰越 — リセットなし）+ 1月の **+1** + **勤続** `floor(満了年数 / 5)`（毎年付与; 例: ≥5 → +1、≥10 → +2、≥15 → +3）。
+- 月中入社: 初回 +1 は **翌月1日**（`hireDate` < accrual 日）。月中プロラタなし。
+- Go-live: HR 入力済み残高を維持; 過去月の **backfill なし**; deploy 月以降から cron 付与。
+- カラムは **Decimal(8,2)** — cron は常に整数加算; HR は必要なら小数を手動入力可。
+- **`PAID_LEAVE`** 承認時は従来どおり `remainingLeaveDays` から稼働日単位で減算（半日 0.5 なし）。
 
 ### 9.2 申請の作成
 
@@ -932,9 +943,9 @@ workUnitLabel          = expectedWorkingMinutes / 60（例: "8h", "8.25h"）
 
 | 指標 | ソース | 意味 |
 |------|--------|------|
-| **年間休暇日数** | HR の従業員プロフィール | 参照のみ。自動減算されない。 |
+| **年間休暇日数** | Accrual cron（+ HR 手動上書き可） | 毎月増加（1/1 に勤続加算）。承認では減らない。 |
 | **Used** | 別 DB カラムなし | Total − Remaining として手動推定。 |
-| **Remaining** | `remainingLeaveDays` | 承認済み `PAID_LEAVE` で減算。権限あるユーザーが承認済み PAID_LEAVE を削除すると復元。 |
+| **Remaining** | Accrual cron（+ HR 手動上書き可） | 付与で増加。承認済み `PAID_LEAVE` で減算。権限あるユーザーが承認済み PAID_LEAVE を削除すると復元。 |
 | **Pending** | 事前減算なし | **Approve** 後にのみ減算。 |
 
 残高は対象の有給フォームと、HR 向け従業員プロフィールに表示されます。
@@ -957,7 +968,7 @@ PENDING → APPROVED or REJECTED
 
 削除後（**PENDING** または **APPROVED**）: backend は関連アプリ内通知（payload の `leaveRequestId`）を削除し、realtime `notifications:removed` と `leave:approvals-changed`（`action: deleted`）を申請者と指定承認者へ送信。
 
-**休暇申請の承認** での **APPROVED** 行の **削除**: **admin**（`ADMIN` ロール）、**指定承認者** / **直属上司**（`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`）、または `LEAVE_DELETE_APPROVED` を持つユーザー（`PAID_LEAVE` 残高を復元。安全な場合は `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` の勤怠効果を戻す）。権限エラー: `LEAVE_DELETE_NOT_ALLOWED`（i18n）。
+**休暇申請の承認** での **APPROVED** 行の **削除**: **admin**（`ADMIN` ロール）、**指定承認者** / **管理 subtree の上司**（`LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED`）、または `LEAVE_DELETE_APPROVED` を持つユーザー（`PAID_LEAVE` 残高を復元。安全な場合は `LATE_ARRIVAL` / `EARLY_DEPARTURE` / `ATTENDANCE_CORRECTION` の勤怠効果を戻す）。権限エラー: `LEAVE_DELETE_NOT_ALLOWED`（i18n）。
 
 却下時は申請者に `LEAVE_REQUEST_REJECTED` で通知。API は別途の却下理由を**必須としない**。申請時に理由があればそれのみ表示。
 
@@ -965,8 +976,9 @@ PENDING → APPROVED or REJECTED
 
 - 申請あたり **承認者 1 名** — Manager→HR 連鎖や並列承認ではない。
 - 申請者は `GET /leave/approvers` から承認者を選ぶ。候補: 有効な直属上司、部署内の上位役職、親部署の従業員。
-- 決定できるのは指定承認者のみ（`LEAVE_APPROVE` + 一致する `approverId`）。
-- マネージャー不在時の**代理承認なし**。
+- **Inbox（OR）:** `LEAVE_APPROVE` / `LEAVE_APPROVE_MANAGED` / `LEAVE_VIEW_MANAGED`。
+- **決定（Approve/Reject）:** `LEAVE_APPROVE`（`approverId` 一致）**または** `LEAVE_APPROVE_MANAGED`（申請者が管理 subtree 内）。`LEAVE_VIEW_MANAGED` のみでは決定不可。
+- マネージャー不在時の**代理承認なし**（上位が `LEAVE_APPROVE_MANAGED` を持てば subtree 内を決定可）。
 - 同一期間に別の **APPROVED** 申請が重複すると **Approve** は `LEAVE_APPROVE_BLOCKED_BY_OVERLAP` でブロック。
 - 別の **APPROVED** が重複している間、**承認済み削除**は `LEAVE_DELETE_BLOCKED_BY_OVERLAP` でブロック。
 - **差し替え手順:** 旧承認済みを削除 → 新規作成 → 新規を承認。
@@ -981,9 +993,9 @@ PENDING → APPROVED or REJECTED
 
 | 質問 | 回答 |
 |------|------|
-| マネージャーはチーム全員の申請を承認できる？ | いいえ。**Approver** として選ばれた申請のみ。 |
-| HR/管理者はすべての申請を承認できる？ | いいえ。その申請で選ばれているか、従業員の代理作成でない限り不可。 |
-| 不在マネージャーは承認を委任できる？ | 委任機能なし。作成時に別の承認者を選ぶ。 |
+| マネージャーはチーム全員の申請を承認できる？ | `LEAVE_APPROVE` のみ: **Approver** に選ばれた申請のみ。`LEAVE_APPROVE_MANAGED`: 申請者が管理 subtree 内なら、別人が Approver でも決定可。`LEAVE_VIEW_MANAGED` のみ: subtree を閲覧のみ、決定不可。 |
+| HR/管理者はすべての申請を承認できる？ | Admin ロールは権限に従う。一般ユーザーは申請で選ばれているか、`LEAVE_APPROVE_MANAGED` の範囲内、または代理作成でない限り不可。 |
+| 不在マネージャーは承認を委任できる？ | 委任機能なし。作成時に別の承認者を選ぶか、上位の `LEAVE_APPROVE_MANAGED` で対応。 |
 | 承認済み申請を変更できる？ | いいえ。権限があり重複ブロックでなければ削除し、作り直して承認。 |
 
 | 通知イベント | 受信者 | チャネル |
@@ -1004,7 +1016,7 @@ PENDING → APPROVED or REJECTED
 | レポート | アクセス | 出力 |
 |----------|----------|------|
 | 個人 `/time/attendance` ダッシュボード | `ATTENDANCE_VIEW` | — |
-| **勤怠一覧** グリッド | `EMPLOYEE_VIEW` + スコープ | **Excel .xlsx**（`ATTENDANCE_EXPORT`） |
+| **勤怠一覧** グリッド | `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` / `ATTENDANCE_VIEW_MANAGED` / `ATTENDANCE_VIEW_MANAGED_SUBTREE` + スコープ | **Excel .xlsx**（`ATTENDANCE_EXPORT` / managed export コード） |
 | ダッシュボード休暇/OT ウィジェット | 承認待ち件数、承認済み休暇日数。**本日の遅刻** = ライブ評価（読み取り専用、承認済み遅刻/早退を含む）。**OT 時間** = 当月の **承認済み** `OVERTIME` 合計 | — |
 | 専用休暇 PDF/CSV | **なし** | — |
 
@@ -1164,7 +1176,7 @@ PENDING → APPROVED or REJECTED
 | **Insufficient remaining leave days** | `PAID_LEAVE` 承認が残高超過 | 却下するか、HR が従業員プロフィールの **残休暇日数** を更新。 |
 | **LEAVE_APPROVE_BLOCKED_BY_OVERLAP** | 同一期間に別の **APPROVED** 申請が重複 | 先に旧承認済みを削除（`LEAVE_DELETE_APPROVED`）してから新規を承認。 |
 | **LEAVE_DELETE_BLOCKED_BY_OVERLAP** | 別の **APPROVED** がまだ重複 | 先に他方の承認済みを削除するか、日付範囲を調整。 |
-| **LEAVE_DELETE_NOT_ALLOWED** | admin・指定承認者・直属上司ではなく、`LEAVE_DELETE_APPROVED` もない | 休暇申請の承認 からの削除は権限あるユーザーのみ。 |
+| **LEAVE_DELETE_NOT_ALLOWED** | admin・指定承認者・管理 subtree の上司ではなく、`LEAVE_DELETE_APPROVED` もない | 休暇申請の承認 からの削除は権限あるユーザーのみ。 |
 | **GEO_LOCATION_OR_WIFI_REQUIRED** | 拠点が検証必須なのにクライアントが GPS も WiFi も送っていない | Web: Location を許可。モバイル: `wifi.bssid` を送るか GPS を有効化。 |
 | **OUTSIDE_OFFICE_AREA** | GPS が半径外、または BSSID 不一致 | 拠点範囲内へ移動、会社 WiFi に接続、または承認済み **REMOTE_WORK** を使用。 |
 
