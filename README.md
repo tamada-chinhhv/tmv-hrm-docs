@@ -189,10 +189,15 @@ flowchart LR
 
 #### ユーザー名 が既に存在する場合
 
-**自動で末尾に数字は付きません**（`nguyenvanan1` 等は生成されない）。
+保存時（手動作成または Excel インポート）にユーザー名が使用済みの場合、システムは **数字の接尾辞を自動付与**します: `nguyenvanan` → `nguyenvanan1` → `nguyenvanan2` → …
 
-- 保存時に重複 → **ユーザー名 "…" already exists**
-- HR が手動で ユーザー名 を変更してから保存（例: `nguyenvanan2`）
+- 初期パスワード（省略時）は **割り当て後の** ユーザー名（接尾辞付き）と同じです。
+- ユーザー名 `admin` は予約済みで、通常アカウントには使いません。
+
+| 状況 | 結果 |
+|------|------|
+| `nguyenvanan` が既にあり、別の Nguyễn Văn An を追加 | システムは `nguyenvanan1`（次は `nguyenvanan2` …）を保存 |
+| 2 つの氏名が同じ文字列に正規化される | 数字接尾辞でそれぞれ一意のユーザー名になる |
 
 #### 制限
 
@@ -257,11 +262,23 @@ flowchart LR
 3. **従業員を追加** をクリック。
 4. フォームを入力する（下表）。
 5. **ユーザー名** を確認する（氏名から自動入力 — 保存前に編集可）。
-6. 必要なら **権限グループ** を選択する（未選択 = ロール未割当）。
+6. 必要なら **ロール** を選択する（未選択 = ロール未割当）。
 7. **保存** / **追加** をクリック。
-8. 従業員一覧に戻る。従業員コード（`EMP…`）は自動採番される。
+8. 従業員一覧に戻る。従業員コード（`EMP…`）は未指定時に自動採番される。
 
-**期待される結果:** 新従業員が一覧に表示され、ユーザー名 と初期パスワード（= ユーザー名）でログインできる。
+### 4.1.1 Excel インポート（社員コード upsert）
+
+`EMPLOYEE_CREATE` がある場合:
+
+1. **組織** → **従業員** → **Excel テンプレートをダウンロード**（`GET /employees/import-template`）— 列: **社員コード**, 氏名, 入社日, 部署, 役職。
+2. 行を埋めて **Excel をインポート**（`POST /employees/import`; 最大 5 MB / 1000 行）。
+3. **社員コード**（`employeeCode`）が identity key（大小無視）:
+   - 既存コード一致 → その従業員を **更新**（氏名では match しない）。
+   - 新規コード → そのコードで **作成**。
+   - コード空 → 自動採番で **作成**。
+4. 部分成功: 成功行とエラー行が混在し得る（`processed` = created + updated）。
+
+**期待される結果:** 新規/更新従業員が一覧に表示。ユーザー名/パスワード規則は手動作成と同じ（ユーザー名空 → 氏名から; パスワード空 → ユーザー名）。
 
 #### フォーム項目
 
@@ -271,19 +288,19 @@ flowchart LR
 | **メール** | — | 正しいメール形式。既存と重複不可 |
 | **電話番号** | — | |
 | **市民ID** | — | |
-| **部署** | — | 役職より先に選択 |
-| **役職** | — | 部署選択後に有効化 |
+| **部署** | ○ (*) | 必須（システムアカウント `admin` を除く） |
+| **役職** | ○ (*) | **全社共通**カタログ（部署ごとではない）; 従業員ロールは役職から導出 |
 | **生年月日** | — | DatePicker — 保存形式 **YYYY-MM-DD**（例: 1990-05-15） |
 | **性別** | — | 男性 / 女性 / その他 |
 | **住所** | — | |
 | **扶養人数** | — | 整数 0–99 |
-| **年間休暇日数** | — | 数値 ≥ 0 |
-| **残休暇日数** | — | 数値 ≥ 0 |
+| **年間休暇日数** | — | 数値 ≥ 0（小数点以下最大 2 桁） |
+| **残休暇日数** | — | 数値 ≥ 0（小数点以下最大 2 桁） |
 | **入社日** | ○ (*) | 既定は当日。**YYYY-MM-DD** |
 | **契約種別** | — | Full-time、Probation など |
 | **ステータス** | — | 既定 **ACTIVE**。ほか **INACTIVE** / **TERMINATED** |
 | **ユーザー名** | ○ (*) | 氏名から自動。**保存前**のみ編集可 |
-| **権限グループ** | — | 例: `EMPLOYEE`, `HR_MANAGER` — **`ADMIN` は `admin` のみ付与可** |
+| **ロール** | —* | `positionId` 選択時は役職から導出 — **`ADMIN` の付与は `admin` のみ** |
 | **勤怠管理の対象外** | — | 管理者のみ — 勤怠一覧 グリッドと Excel 出力から除外 |
 | **上司** | — | 有効な従業員のみ |
 | **アバター** | — | 画像アップロード |
@@ -296,7 +313,7 @@ flowchart LR
 
 | 項目 | システム動作 |
 |------|--------------|
-| **従業員コード** | 自動: `EMP001`, `EMP002`, … |
+| **従業員コード** | 自動: `EMP001`, `EMP002`, … — または Excel **社員コード** で指定（import） |
 | **ユーザー名** | 氏名から提案 — [セクション 3.2](#32-username-の自動生成ルール) |
 | **パスワード** | ユーザー名 と同じ（DB にハッシュ保存） |
 | **ウェルカムメール** | **送信しない** — HR が社内チャネルで認証情報を共有 |
@@ -307,10 +324,10 @@ flowchart LR
 
 | エラー | 原因 | 対処 |
 |--------|------|------|
-| **ユーザー名 already exists** | ユーザー名 重複 | ユーザー名 を編集（接尾辞追加）して再保存 |
-| **必須項目が未入力** | 氏名・入社日・ユーザー名 が空 | (*) 項目をすべて入力 |
+| **ユーザー名 already exists** / 割当失敗 | まれ — 接尾辞付き候補が尽きた | 別のユーザー名を試すか IT に連絡。[セクション 3.2](#32-username-の自動生成ルール) 参照 |
+| **必須項目が未入力** | 氏名・入社日・ユーザー名・部署・役職が空 | (*) 項目をすべて入力 |
 | **メールが既に存在します** | メール重複 | 別メールを使うか空欄にする |
-| **役職は部署に属している必要があります** | 選択部署に属さない役職 | 部署/役職を選び直す |
+| **EMPLOYEE_DEPARTMENT_REQUIRED / EMPLOYEE_POSITION_REQUIRED** | 部署または役職が未選択 | 部署と役職の両方を選択 |
 | **権限が不足しています** | `EMPLOYEE_CREATE` 不足 | 管理者に **権限割り当て** で権限付与を依頼 |
 
 ### 4.4 作成後の編集
@@ -504,7 +521,7 @@ flowchart LR
 
 - **Admin** = `ADMIN` ロール（seed の全権限）。
 - **HR** = 通常 `HR_MANAGER` + 管理者が付与した権限。
-- **Manager** = `EMPLOYEE_VIEW` + `managerId` 経由の直属/間接部下。
+- **Manager** = `EMPLOYEE_VIEW` + `managerId` 経由の直属/間接部下。`EMPLOYEE_VIEW_ALL` → 全社の閲覧スコープ（list/findOne は Admin 相当）。
 - **Employee** = 既定の `EMPLOYEE` ロール。
 
 | 機能 | Admin | HR* | Manager | Employee |
@@ -537,9 +554,11 @@ flowchart LR
 
 **Admin（`roleCode = ADMIN`）:** 全従業員の一覧と管理。
 
-**Manager（`EMPLOYEE_VIEW`、Admin 以外）:** **報告サブツリー**内の従業員のみ（`managerId` 経由の直属・間接部下）。
+**Manager（`EMPLOYEE_VIEW`、Admin 以外 / `EMPLOYEE_VIEW_ALL` なし）:** **報告サブツリー**内の従業員のみ（`managerId` 経由の直属・間接部下）。
 
-**一般従業員（`EMPLOYEE_VIEW` なし）:** 従業員 API は **自分のみ** を返す。カレンダー用 **directory**（`/employees/directory`）は会議招待のため有効従業員を一覧 — 完全な人事レコードではない。
+**HR / `EMPLOYEE_VIEW_ALL` 保有者:** 全社の従業員一覧（`ADMIN` ロールは不要）。
+
+**一般従業員（`EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` なし）:** 従業員 API は **自分のみ** を返す。カレンダー用 **directory**（`/employees/directory`）は会議招待のため有効従業員を一覧 — 完全な人事レコードではない。
 
 ### 6.4 ロール割当
 
@@ -623,7 +642,7 @@ flowchart LR
 - 書類: `/account?tab=documents`
 - ヘッダーのライト/ダーク切替も個人設定として保存（カスタム済みになる）
 - 未保存時は**システム外観**を使用。保存またはテーマ切替後は個人設定を優先
-- `EMPLOYEE_VIEW` のないユーザーが **従業員** を開くと **アカウント** へリダイレクト
+- `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` のないユーザーが **従業員** を開くと **アカウント** へリダイレクト
 
 ### 7.1 概要
 
@@ -631,7 +650,8 @@ flowchart LR
 
 ### 7.2 部署 / 役職
 
-部署は親子ツリー。役職は**全社共通**（`code` 一意）。役職は必須の `roleId` を持ち、`level` / 部署紐付けはない。従業員のロールは役職から導出。
+- **部署:** 親子ツリー; `DEPARTMENT_VIEW` / `DEPARTMENT_MANAGE`。
+- **役職:** **全社共通**カタログ（`code` 一意）。各役職は必須の `roleId` を持ち、`level` / 部署紐付けはない。従業員ロールは役職が既定で、従業員フォーム上で上書き可能。
 
 ### 7.2.1 書類 (`/org/documents`)
 
@@ -814,7 +834,7 @@ flowchart LR
 
 **従業員詳細:** `/time/attendance` で日付をクリックすると、出勤/退勤、位置（あれば）、休暇/祝日の提案、権限があれば時刻編集フォームが開く。
 
-**マネージャー手順:** **勤怠一覧**（`/attendance-tracking`）を開く — `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` / `ATTENDANCE_VIEW_MANAGED` / `ATTENDANCE_VIEW_MANAGED_SUBTREE` が必要。範囲: 全社（`EMPLOYEE_VIEW_ALL`/admin）、管理 subtree（`EMPLOYEE_VIEW` または `ATTENDANCE_VIEW_MANAGED_SUBTREE`）、直属のみ（`ATTENDANCE_VIEW_MANAGED`）。氏名・月・1 つ以上の部署で絞り込み、`/attendance-tracking/{id}` で個人詳細を開く。
+**マネージャー手順:** **勤怠一覧**（`/attendance-tracking`）を開く — `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` / `ATTENDANCE_VIEW_MANAGED` / `ATTENDANCE_VIEW_MANAGED_SUBTREE` が必要。範囲: 全社（`EMPLOYEE_VIEW_ALL`/admin）、管理 subtree（`EMPLOYEE_VIEW` または `ATTENDANCE_VIEW_MANAGED_SUBTREE`）、直属のみ（`ATTENDANCE_VIEW_MANAGED`）。氏名（server-side）、月・1 つ以上の部署で絞り込み、`/attendance-tracking/{id}` で個人詳細を開く。グリッドは **ページネーション**（50 人/ページ; フィルタ後件数超過時に表示）。
 
 | 記号 | Day モード | Hour モード | 意味 |
 |------|------------|-------------|------|
@@ -829,7 +849,7 @@ flowchart LR
 ### 8.4 編集とエクスポート
 
 - **手動時刻:** `ATTENDANCE_MANUAL_UPDATE` — 本人、Admin、またはマネージャーのサブツリー。**承認フローも監査ログもなし**。その日に休暇申請があっても**ブロックしない**。Admin UI: **今日以前**の任意日。座標は任意。有給/遅刻早退日のヒントあり。**日削除:** 日詳細ダイアログから `(employeeId, date)` の打刻をハード削除（確認必須）。
-- **一括手動時刻（勤怠一覧）:** 従業員の除外リスト任意; 不明 ID は無視。
+- **一括手動時刻（勤怠一覧）:** **適用する従業員**（`employeeIds` — inclusion リスト）; 既定は全選択; 選択した従業員のみに適用; ドロップダウン先頭で全選択; チップ折りたたみ（`limitTags`）; 不明 ID は無視。
 - **休暇承認:** `LATE_ARRIVAL` / `EARLY_DEPARTURE` → **status のみ**再計算（打刻時刻は不変）。`ATTENDANCE_CORRECTION` / `REMOTE_WORK` → 種別に応じた勤怠効果。
 - **エクスポート:** 勤怠一覧 からの Excel `.xlsx` のみ — CSV/PDF なし。
 
@@ -849,8 +869,9 @@ flowchart LR
 | 機能 | 利用可？ | 詳細 |
 |------|:--------:|------|
 | **月**でフィルタ | あり | 勤怠 / 勤怠一覧 の 月選択。 |
-| 従業員**名**でフィルタ | あり | 勤怠一覧。 |
+| 従業員**名**でフィルタ | あり | 勤怠一覧 — server-side 検索（ページネーション付き）。 |
 | **部署**でフィルタ | あり | 複数部署を選択可。 |
+| **ページネーション** | あり | 勤怠一覧: フィルタ後件数が page size 超のとき 50 人/ページ。 |
 | 週次フィルタ単体 | なし | 勤怠は月単位のみ。 |
 | **Excel**（`.xlsx`）出力 | あり | 勤怠一覧: `GET /attendance/export-workingtime-detail`。`ATTENDANCE_EXPORT` **または** `ATTENDANCE_EXPORT_MANAGED` **または** `ATTENDANCE_EXPORT_MANAGED_SUBTREE`（範囲は権限に一致）。 |
 | **CSV / PDF** 出力 | **なし** | — |
@@ -989,7 +1010,8 @@ PENDING → APPROVED or REJECTED
 2. 月/ステータスを選び、申請詳細を開く。承認画面は休暇残高を別表示しない。
 3. **Approve:** 申請者に通知。`PAID_LEAVE` は `remainingLeaveDays` を減算。特殊種別は勤怠を更新。
 4. **Reject:** 申請者に通知。理由は必須ではない。
-5. 権限あるユーザーは承認済み申請を削除し、該当する休暇/勤怠効果を戻せる。
+5. **一括 Approve / Reject:** 決定権限があるとき **PENDING** を複数選択 → ツールバー → 確認 → `POST /leave/approvals/bulk-decide`（item ごと best-effort; toast で成功/失敗数）。
+6. 権限あるユーザーは承認済み申請を削除し、該当する休暇/勤怠効果を戻せる。
 
 | 質問 | 回答 |
 |------|------|
@@ -1168,7 +1190,7 @@ PENDING → APPROVED or REJECTED
 
 | エラー | 原因 | 対処 |
 |--------|------|------|
-| **ユーザー名 already exists** | ユーザー名 重複 | 保存前に ユーザー名 を変更（接尾辞を付ける等）。[セクション 4.3](#43-よくあるエラー) 参照。 |
+| **ユーザー名 already exists** | 接尾辞付きユーザー名の候補が尽きた | ベースのユーザー名を変えるか IT に連絡。[セクション 3.2](#32-username-の自動生成ルール) 参照。 |
 | **権限が不足しています** | 必要な権限がない | [セクション 6](#6-ロールと権限) を確認し、管理者に連絡。 |
 | **Invalid username or password** | 認証情報が誤り | Caps Lock を確認。必要なら HR に reset を依頼。 |
 | **Page will not load** | ネットワーク、サーバー、URL 誤り | ネットワーク確認、`https://hrm.tamada.vn/login`、キャッシュ削除、IT に連絡。 |
@@ -1204,4 +1226,4 @@ PENDING → APPROVED or REJECTED
 
 ---
 
-*ドキュメント バージョン 2.3 — `tmv-hrm` / `tmv-hrm-be` コードベースと整合。最終更新: 2026-06-25（遅刻・早退申請の評価、Admin 手動時刻、recompute-attendance）。*
+*ドキュメント バージョン 2.4 — `tmv-hrm` / `tmv-hrm-be` コードベースと整合。最終更新: 2026-07-22（leave managed 権限、勤怠一覧ページネーション、社員コード upsert インポート、一括休暇決定、inclusion 一括手動時刻）。*

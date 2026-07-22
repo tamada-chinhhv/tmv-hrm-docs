@@ -294,9 +294,21 @@ Production always has username **`admin`** with role **ADMIN** and **all permiss
 5. Review **Username** (auto-filled from full name — editable before save).
 6. Select **Role** if needed (empty = no role assigned).
 7. Click **Save** / **Create**.
-8. You return to the employee list; employee code (`EMP…`) is created automatically.
+8. You return to the employee list; employee code (`EMP…`) is created automatically when not provided.
 
-**Expected outcome:** The new employee appears in the list and can log in with username and default password (= username).
+### 4.1.1 Excel import (Code upsert)
+
+With `EMPLOYEE_CREATE`:
+
+1. **Organization** → **Employees** → **Download Excel template** (`GET /employees/import-template`) — columns: **Code**, Full name, Hire date, Department, Position.
+2. Fill rows and **Import Excel** (`POST /employees/import`; max 5 MB / 1000 rows).
+3. **Code** (`employeeCode`) is the identity key (case-insensitive):
+   - Matching existing code → **update** that employee (never by full name).
+   - New / unknown code → **create** with that code.
+   - Empty Code cell → **create** with auto-allocated code.
+4. Partial success: some rows can succeed while others return per-row errors (`processed` = created + updated).
+
+**Expected outcome:** New and updated employees appear in the list; username/password rules match create (empty username → from full name; empty password → username).
 
 #### Form fields
 
@@ -331,7 +343,7 @@ Production always has username **`admin`** with role **ADMIN** and **all permiss
 
 | Item | System behavior |
 |------|-----------------|
-| **Employee code** | Auto: `EMP001`, `EMP002`, … |
+| **Employee code** | Auto: `EMP001`, `EMP002`, … — or set via Excel **Code** on import |
 | **Username** | Suggested from full name — see [Section 3.2](#32-automatic-username-rules) |
 | **Password** | Same as username (hashed in DB) |
 | **Welcome email** | **Not sent** — HR must share credentials internally |
@@ -669,7 +681,7 @@ Quick metrics for HR, attendance, and leave (some widgets need `EMPLOYEE_VIEW` /
 ### 7.2 Departments & Positions
 
 - **Departments:** parent/child tree; `DEPARTMENT_VIEW` / `DEPARTMENT_MANAGE`.
-- **Positions:** company-wide catalog (unique `code`); each position **requires** a linked role (`roleId`); no `level` / department ownership. Employee role is derived from the position.
+- **Positions:** company-wide catalog (unique `code`); each position **requires** a linked role (`roleId`); no `level` / department ownership. Employee role defaults from the position and can be overridden on the employee form.
 
 ### 7.2.1 Documents (`/org/documents`)
 
@@ -852,7 +864,7 @@ Grid symbols: `1`/`8h` worked, `W` weekend, `H` holiday, leave codes, `F` forgot
 
 **Employee detail:** On `/time/attendance`, clicking a date opens check-in/out, location if present, leave/holiday suggestions, and a time-edit form if permitted.
 
-**Manager flow:** Open **Attendance tracking** (`/attendance-tracking`), requiring `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` / `ATTENDANCE_VIEW_MANAGED` / `ATTENDANCE_VIEW_MANAGED_SUBTREE`. Scope: full company (`EMPLOYEE_VIEW_ALL`/admin), managed subtree (`EMPLOYEE_VIEW` or `ATTENDANCE_VIEW_MANAGED_SUBTREE`), or direct reports only (`ATTENDANCE_VIEW_MANAGED`). Filter by name, month, and one or more departments, then open `/attendance-tracking/{id}` for individual detail.
+**Manager flow:** Open **Attendance tracking** (`/attendance-tracking`), requiring `EMPLOYEE_VIEW` / `EMPLOYEE_VIEW_ALL` / `ATTENDANCE_VIEW_MANAGED` / `ATTENDANCE_VIEW_MANAGED_SUBTREE`. Scope: full company (`EMPLOYEE_VIEW_ALL`/admin), managed subtree (`EMPLOYEE_VIEW` or `ATTENDANCE_VIEW_MANAGED_SUBTREE`), or direct reports only (`ATTENDANCE_VIEW_MANAGED`). Filter by name (server-side), month, and one or more departments, then open `/attendance-tracking/{id}` for individual detail. The grid is **paginated** (50 employees per page); pagination appears when the filtered total exceeds the page size.
 
 | Symbol | Day mode | Hour mode | Meaning |
 |--------|----------|-----------|---------|
@@ -867,7 +879,7 @@ Classification uses Holiday Configuration first, then approved leave (except REM
 ### 8.4 Edits & export
 
 - **Manual time:** `ATTENDANCE_MANUAL_UPDATE` — self, Admin, or manager subtree. **No** approval workflow or audit log. **No** block when a leave request exists on that day. Admin UI: any day **≤ today**; optional coordinates; hints on paid-leave / late-early days. **Delete day:** hard-delete punch for `(employeeId, date)` from the day detail dialog (confirm required).
-- **Bulk manual time (Attendance tracking):** optional exclude list of employees; unknown IDs ignored.
+- **Bulk manual time (Attendance tracking):** **Employees to apply** (`employeeIds` — inclusion list); default all selected; applies only to selected employees; select-all in the dropdown; chip collapse (`limitTags`); unknown IDs ignored.
 - **Leave approval:** `LATE_ARRIVAL` / `EARLY_DEPARTURE` → recompute **status** only (punch times unchanged). `ATTENDANCE_CORRECTION` / `REMOTE_WORK` → attendance effects per type.
 - **Export:** Excel `.xlsx` only from Attendance tracking — no CSV/PDF.
 
@@ -887,8 +899,9 @@ Classification uses Holiday Configuration first, then approved leave (except REM
 | Feature | Available? | Details |
 |---------|:----------:|---------|
 | Filter by **month** | Yes | Month selector on Attendance and Attendance tracking. |
-| Filter by employee **name** | Yes | Attendance tracking. |
+| Filter by employee **name** | Yes | Attendance tracking — server-side search (paginated list). |
 | Filter by **department** | Yes | Multiple departments can be selected. |
+| **Pagination** | Yes | Attendance tracking grid: 50 employees per page when filtered total exceeds page size. |
 | Separate weekly filter | No | Attendance is filtered by month only. |
 | Export **Excel** (`.xlsx`) | Yes | Attendance tracking: `GET /attendance/export-workingtime-detail`; requires `ATTENDANCE_EXPORT` **or** `ATTENDANCE_EXPORT_MANAGED` **or** `ATTENDANCE_EXPORT_MANAGED_SUBTREE` (scope matches permission). |
 | Export **CSV / PDF** | **No** | — |
@@ -1027,7 +1040,8 @@ Rejected requests notify the requester through `LEAVE_REQUEST_REJECTED`. The API
 2. Select month/status, then open request detail. The approval screen does not separately show leave balance.
 3. **Approve:** requester is notified; `PAID_LEAVE` deducts `remainingLeaveDays`, while special types update attendance.
 4. **Reject:** requester is notified; a reason is not required.
-5. An authorized user may delete an approved request to restore applicable leave/attendance effects.
+5. **Bulk approve / reject:** when you can decide, select multiple **PENDING** rows → toolbar → confirm → `POST /leave/approvals/bulk-decide` (per-item best-effort; toast shows success/fail counts).
+6. An authorized user may delete an approved request to restore applicable leave/attendance effects.
 
 | Question | Answer |
 |----------|--------|
@@ -1242,4 +1256,4 @@ Check: they are in the participant list; correct **column** and **week/day**; th
 
 ---
 
-*Documentation version 2.3 — aligned with `tmv-hrm` / `tmv-hrm-be` codebase. Last updated: 2026-06-25 (late/early leave evaluation, admin manual time, recompute-attendance).*
+*Documentation version 2.4 — aligned with `tmv-hrm` / `tmv-hrm-be` codebase. Last updated: 2026-07-22 (leave managed permissions, attendance pagination, import Code upsert, bulk leave decide, inclusion bulk manual time).*
