@@ -31,6 +31,10 @@
   --ifm-hero-background-color: var(--ifm-color-primary);
 }
 
+.navbar__logo img {
+  height: 2rem;
+}
+
 .markdown table {
   display: table;
   width: 100%;

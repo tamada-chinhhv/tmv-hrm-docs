@@ -3,13 +3,13 @@ const sidebars = {
   docs: [
     {
       type: 'category',
-      label: 'sidebar.category.intro',
+      label: 'Introduction',
       collapsed: false,
       items: ['intro', 'quick-start', 'requirements'],
     },
     {
       type: 'category',
-      label: 'sidebar.category.userGuide',
+      label: 'User Guide',
       items: [
         'accounts',
         'employee-management',
@@ -17,7 +17,7 @@ const sidebars = {
         'roles-permissions',
         {
           type: 'category',
-          label: 'sidebar.category.moduleGuides',
+          label: 'Module Guides',
           items: [
             'module-guides/account',
             'module-guides/overview',
@@ -34,12 +34,12 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'sidebar.category.adminOps',
+      label: 'Admin & Operations',
       items: ['operations', 'handover-checklist'],
     },
     {
       type: 'category',
-      label: 'sidebar.category.support',
+      label: 'Support',
       items: ['faq'],
     },
   ],

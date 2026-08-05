@@ -1,5 +1,26 @@
 {
   "tagline": {
     "message": "Tài liệu hệ thống Quản lý Nhân sự TMV"
+  },
+  "link.title.Docs": {
+    "message": "Tài liệu"
+  },
+  "link.item.label.Introduction": {
+    "message": "Giới thiệu"
+  },
+  "link.item.label.Quick Start": {
+    "message": "Bắt đầu nhanh"
+  },
+  "link.title.Links": {
+    "message": "Liên kết"
+  },
+  "link.item.label.HRM Production": {
+    "message": "HRM Production"
+  },
+  "link.item.label.GitHub": {
+    "message": "GitHub"
+  },
+  "link.item.label.Report an issue": {
+    "message": "Báo cáo lỗi"
   }
 }

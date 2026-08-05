@@ -1,5 +1,26 @@
 {
   "tagline": {
     "message": "TMV 人事管理システム ドキュメント"
+  },
+  "link.title.Docs": {
+    "message": "ドキュメント"
+  },
+  "link.item.label.Introduction": {
+    "message": "概要"
+  },
+  "link.item.label.Quick Start": {
+    "message": "クイックスタート"
+  },
+  "link.title.Links": {
+    "message": "リンク"
+  },
+  "link.item.label.HRM Production": {
+    "message": "HRM 本番環境"
+  },
+  "link.item.label.GitHub": {
+    "message": "GitHub"
+  },
+  "link.item.label.Report an issue": {
+    "message": "問題を報告"
   }
 }

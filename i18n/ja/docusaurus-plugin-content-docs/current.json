@@ -1,17 +1,17 @@
 {
-  "sidebar.category.intro": {
+  "sidebar.docs.category.Introduction": {
     "message": "はじめに"
   },
-  "sidebar.category.userGuide": {
+  "sidebar.docs.category.User Guide": {
     "message": "利用ガイド"
   },
-  "sidebar.category.moduleGuides": {
+  "sidebar.docs.category.Module Guides": {
     "message": "機能別ガイド"
   },
-  "sidebar.category.adminOps": {
+  "sidebar.docs.category.Admin & Operations": {
     "message": "管理・運用"
   },
-  "sidebar.category.support": {
+  "sidebar.docs.category.Support": {
     "message": "サポート"
   }
 }

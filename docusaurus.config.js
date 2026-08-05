@@ -2,7 +2,7 @@
 const config = {
   title: 'TMV HRM Docs',
   tagline: 'Tài liệu hệ thống Quản lý Nhân sự TMV',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/logo.png',
 
   url: 'https://hrm.tamada.vn',
   baseUrl: '/',
@@ -55,18 +55,18 @@ const config = {
         title: 'HRM Docs',
         logo: {
           alt: 'TMV HRM',
-          src: 'img/logo.svg',
+          src: 'img/logo.png',
         },
         items: [
           {
             type: 'docSidebar',
             sidebarId: 'docs',
             position: 'left',
-            label: 'navbar.docs',
+            label: 'Documentation',
           },
           {
             href: 'https://hrm.tamada.vn',
-            label: 'navbar.hrmApp',
+            label: 'HRM App',
             position: 'left',
           },
           {
@@ -84,23 +84,23 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'footer.docs',
+            title: 'Docs',
             items: [
               {
-                label: 'footer.intro',
+                label: 'Introduction',
                 to: '/docs/intro',
               },
               {
-                label: 'footer.quickStart',
+                label: 'Quick Start',
                 to: '/docs/quick-start',
               },
             ],
           },
           {
-            title: 'footer.links',
+            title: 'Links',
             items: [
               {
-                label: 'footer.hrmProduction',
+                label: 'HRM Production',
                 href: 'https://hrm.tamada.vn',
               },
               {
@@ -108,7 +108,7 @@ const config = {
                 href: 'https://github.com/tamada-chinhhv/tmv-hrm-docs',
               },
               {
-                label: 'footer.reportIssue',
+                label: 'Report an issue',
                 href: 'https://github.com/tamada-chinhhv/tmv-hrm-docs/issues/new',
               },
             ],

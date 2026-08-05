@@ -1,0 +1,11 @@
+{
+  "item.label.Documentation": {
+    "message": "Documentation"
+  },
+  "item.label.HRM App": {
+    "message": "HRM App"
+  },
+  "link.item.label.GitHub": {
+    "message": "GitHub"
+  }
+}

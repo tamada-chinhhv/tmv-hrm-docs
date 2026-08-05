@@ -1,5 +1,26 @@
 {
   "tagline": {
     "message": "TMV Human Resource Management System Documentation"
+  },
+  "link.title.Docs": {
+    "message": "Docs"
+  },
+  "link.item.label.Introduction": {
+    "message": "Introduction"
+  },
+  "link.item.label.Quick Start": {
+    "message": "Quick Start"
+  },
+  "link.title.Links": {
+    "message": "Links"
+  },
+  "link.item.label.HRM Production": {
+    "message": "HRM Production"
+  },
+  "link.item.label.GitHub": {
+    "message": "GitHub"
+  },
+  "link.item.label.Report an issue": {
+    "message": "Report an issue"
   }
 }

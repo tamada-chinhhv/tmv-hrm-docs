@@ -1,0 +1,11 @@
+{
+  "item.label.Documentation": {
+    "message": "ドキュメント"
+  },
+  "item.label.HRM App": {
+    "message": "HRM アプリ"
+  },
+  "link.item.label.GitHub": {
+    "message": "GitHub"
+  }
+}
