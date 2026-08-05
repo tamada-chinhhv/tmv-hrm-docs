@@ -1,0 +1,66 @@
+{
+  "theme.ErrorPageContent.title": {
+    "message": "Trang này bị lỗi.",
+    "description": "The title of the fallback page when the page failed to load"
+  },
+  "theme.NotFound.title": {
+    "message": "Không tìm thấy trang",
+    "description": "The title of the 404 page"
+  },
+  "theme.NotFound.p1": {
+    "message": "Chúng tôi không tìm thấy trang bạn yêu cầu.",
+    "description": "The first paragraph of the 404 page"
+  },
+  "theme.NotFound.p2": {
+    "message": "Vui lòng liên hệ chủ sở hữu trang web đã cung cấp liên kết ban đầu.",
+    "description": "The 2nd paragraph of the 404 page"
+  },
+  "navbar.docs": {
+    "message": "Tài liệu"
+  },
+  "navbar.hrmApp": {
+    "message": "Ứng dụng HRM"
+  },
+  "footer.docs": {
+    "message": "Tài liệu"
+  },
+  "footer.intro": {
+    "message": "Giới thiệu"
+  },
+  "footer.quickStart": {
+    "message": "Bắt đầu nhanh"
+  },
+  "footer.links": {
+    "message": "Liên kết"
+  },
+  "footer.hrmProduction": {
+    "message": "HRM Production"
+  },
+  "footer.reportIssue": {
+    "message": "Báo cáo lỗi"
+  },
+  "homepage.cta.docs": {
+    "message": "Xem tài liệu"
+  },
+  "homepage.cta.login": {
+    "message": "Đăng nhập HRM"
+  },
+  "homepage.feature.attendance.title": {
+    "message": "Chấm công"
+  },
+  "homepage.feature.attendance.description": {
+    "message": "Check-in/out qua GPS hoặc WiFi công ty, theo dõi chấm công theo tháng."
+  },
+  "homepage.feature.leave.title": {
+    "message": "Nghỉ phép"
+  },
+  "homepage.feature.leave.description": {
+    "message": "Tạo đơn xin nghỉ, duyệt theo cấp quản lý, tích hợp báo cáo."
+  },
+  "homepage.feature.payroll.title": {
+    "message": "Bảng lương"
+  },
+  "homepage.feature.payroll.description": {
+    "message": "Xem phiếu lương, khóa kỳ lương, cấu hình thuế và ca làm."
+  }
+}

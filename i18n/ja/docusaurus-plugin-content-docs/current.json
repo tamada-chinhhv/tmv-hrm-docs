@@ -1,0 +1,17 @@
+{
+  "sidebar.category.intro": {
+    "message": "はじめに"
+  },
+  "sidebar.category.userGuide": {
+    "message": "利用ガイド"
+  },
+  "sidebar.category.moduleGuides": {
+    "message": "機能別ガイド"
+  },
+  "sidebar.category.adminOps": {
+    "message": "管理・運用"
+  },
+  "sidebar.category.support": {
+    "message": "サポート"
+  }
+}

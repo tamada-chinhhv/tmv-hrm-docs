@@ -1,0 +1,17 @@
+{
+  "sidebar.category.intro": {
+    "message": "Introduction"
+  },
+  "sidebar.category.userGuide": {
+    "message": "User Guide"
+  },
+  "sidebar.category.moduleGuides": {
+    "message": "Module Guides"
+  },
+  "sidebar.category.adminOps": {
+    "message": "Admin & Operations"
+  },
+  "sidebar.category.support": {
+    "message": "Support"
+  }
+}

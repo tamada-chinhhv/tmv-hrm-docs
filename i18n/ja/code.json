@@ -1,0 +1,66 @@
+{
+  "theme.ErrorPageContent.title": {
+    "message": "このページでエラーが発生しました。",
+    "description": "The title of the fallback page when the page failed to load"
+  },
+  "theme.NotFound.title": {
+    "message": "ページが見つかりません",
+    "description": "The title of the 404 page"
+  },
+  "theme.NotFound.p1": {
+    "message": "お探しのページが見つかりませんでした。",
+    "description": "The first paragraph of the 404 page"
+  },
+  "theme.NotFound.p2": {
+    "message": "元の URL へのリンクを提供したサイトの所有者に連絡し、リンクが壊れていることを知らせてください。",
+    "description": "The 2nd paragraph of the 404 page"
+  },
+  "navbar.docs": {
+    "message": "ドキュメント"
+  },
+  "navbar.hrmApp": {
+    "message": "HRM アプリ"
+  },
+  "footer.docs": {
+    "message": "ドキュメント"
+  },
+  "footer.intro": {
+    "message": "概要"
+  },
+  "footer.quickStart": {
+    "message": "クイックスタート"
+  },
+  "footer.links": {
+    "message": "リンク"
+  },
+  "footer.hrmProduction": {
+    "message": "HRM 本番環境"
+  },
+  "footer.reportIssue": {
+    "message": "問題を報告"
+  },
+  "homepage.cta.docs": {
+    "message": "ドキュメントを見る"
+  },
+  "homepage.cta.login": {
+    "message": "HRM にログイン"
+  },
+  "homepage.feature.attendance.title": {
+    "message": "勤怠"
+  },
+  "homepage.feature.attendance.description": {
+    "message": "GPS または会社 WiFi での出退勤打刻、月次勤怠の追跡。"
+  },
+  "homepage.feature.leave.title": {
+    "message": "休暇申請"
+  },
+  "homepage.feature.leave.description": {
+    "message": "休暇申請の作成・承認、管理者ワークフローとレポート。"
+  },
+  "homepage.feature.payroll.title": {
+    "message": "給与"
+  },
+  "homepage.feature.payroll.description": {
+    "message": "給与明細の閲覧、給与期間のロック、税・勤務シフトの設定。"
+  }
+}

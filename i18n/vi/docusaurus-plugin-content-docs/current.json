@@ -1,0 +1,17 @@
+{
+  "sidebar.category.intro": {
+    "message": "Giới thiệu"
+  },
+  "sidebar.category.userGuide": {
+    "message": "Hướng dẫn sử dụng"
+  },
+  "sidebar.category.moduleGuides": {
+    "message": "Hướng dẫn module"
+  },
+  "sidebar.category.adminOps": {
+    "message": "Quản trị & Vận hành"
+  },
+  "sidebar.category.support": {
+    "message": "Hỗ trợ"
+  }
+}

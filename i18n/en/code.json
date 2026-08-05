@@ -1,0 +1,66 @@
+{
+  "theme.ErrorPageContent.title": {
+    "message": "This page crashed.",
+    "description": "The title of the fallback page when the page failed to load"
+  },
+  "theme.NotFound.title": {
+    "message": "Page Not Found",
+    "description": "The title of the 404 page"
+  },
+  "theme.NotFound.p1": {
+    "message": "We could not find what you were looking for.",
+    "description": "The first paragraph of the 404 page"
+  },
+  "theme.NotFound.p2": {
+    "message": "Please contact the owner of the site that linked you to the original URL and let them know their link is broken.",
+    "description": "The 2nd paragraph of the 404 page"
+  },
+  "navbar.docs": {
+    "message": "Documentation"
+  },
+  "navbar.hrmApp": {
+    "message": "HRM App"
+  },
+  "footer.docs": {
+    "message": "Docs"
+  },
+  "footer.intro": {
+    "message": "Introduction"
+  },
+  "footer.quickStart": {
+    "message": "Quick Start"
+  },
+  "footer.links": {
+    "message": "Links"
+  },
+  "footer.hrmProduction": {
+    "message": "HRM Production"
+  },
+  "footer.reportIssue": {
+    "message": "Report an issue"
+  },
+  "homepage.cta.docs": {
+    "message": "Browse docs"
+  },
+  "homepage.cta.login": {
+    "message": "Log in to HRM"
+  },
+  "homepage.feature.attendance.title": {
+    "message": "Attendance"
+  },
+  "homepage.feature.attendance.description": {
+    "message": "Check in/out via GPS or office WiFi, with monthly attendance tracking."
+  },
+  "homepage.feature.leave.title": {
+    "message": "Leave requests"
+  },
+  "homepage.feature.leave.description": {
+    "message": "Submit and approve leave requests with manager workflow and reporting."
+  },
+  "homepage.feature.payroll.title": {
+    "message": "Payroll"
+  },
+  "homepage.feature.payroll.description": {
+    "message": "View payslips, lock payroll periods, and configure tax and work shifts."
+  }
+}
