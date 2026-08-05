@@ -4,7 +4,7 @@ const config = {
   tagline: 'TMV HRM Documentation',
   favicon: 'img/logo.png',
 
-  url: 'https://hrm.tamada.vn',
+  url: 'https://docs.tamada.vn',
   baseUrl: '/',
 
   organizationName: 'tamada-chinhhv',
