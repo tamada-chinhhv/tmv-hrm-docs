@@ -2,16 +2,19 @@
   "sidebar.docs.category.Introduction": {
     "message": "Giới thiệu"
   },
-  "sidebar.docs.category.User Guide": {
-    "message": "Hướng dẫn sử dụng"
+  "sidebar.docs.category.For employees": {
+    "message": "Dành cho nhân viên"
   },
-  "sidebar.docs.category.Module Guides": {
-    "message": "Hướng dẫn module"
+  "sidebar.docs.category.For managers": {
+    "message": "Dành cho quản lý"
   },
-  "sidebar.docs.category.Admin & Operations": {
-    "message": "Quản trị & Vận hành"
+  "sidebar.docs.category.For HR / Admin": {
+    "message": "Dành cho HR / Admin"
   },
   "sidebar.docs.category.Support": {
     "message": "Hỗ trợ"
+  },
+  "sidebar.docs.category.Appendix": {
+    "message": "Phụ lục"
   }
 }

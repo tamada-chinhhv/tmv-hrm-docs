@@ -2,60 +2,41 @@
 sidebar_position: 1
 ---
 
-# Giới thiệu hệ thống HRM
+# Giới thiệu
 
-#### 1.1 HRM là gì?
+#### 1.1 HRM làm được gì?
 
-**HRM** (Human Resource Management — Quản lý nhân sự) là hệ thống web giúp công ty quản lý nhân sự và các công việc liên quan trên một nền tảng thống nhất: hồ sơ nhân viên, chấm công, nghỉ phép, lương, lịch họp và cấu hình hệ thống.
+**HRM** giúp công ty quản lý nhân sự trên một hệ thống:
 
-Bạn dùng HRM để:
+- Chấm công vào / ra
+- Xin nghỉ và duyệt nghỉ
+- Tạo và duyệt đơn tăng ca
+- Xem lịch họp, phiếu lương
+- Quản lý nhân viên, giấy tờ, cấu hình ngày nghỉ / chi nhánh / ca làm việc (HR)
 
-- Ghi nhận giờ làm việc (chấm công vào/ra).
-- Tạo và duyệt đơn xin nghỉ phép.
-- Xem và quản lý thông tin nhân viên, phòng ban, chức vụ.
-- Lên lịch cuộc họp, mời đồng nghiệp tham gia.
-- Tính và xem phiếu lương (theo quyền).
-- Cấu hình ngày nghỉ, vị trí chấm công, nhóm quyền (dành cho quản trị).
+#### 1.2 Ai dùng hệ thống?
 
-#### 1.2 Ai sẽ dùng hệ thống?
+| Bạn là… | Việc thường làm |
+|---------|-----------------|
+| **Nhân viên** | Chấm công, xin nghỉ, xem lương, lịch họp, tổng quan cá nhân |
+| **Quản lý** | Theo dõi chấm công nhóm, duyệt nghỉ, tạo / duyệt đơn tăng ca |
+| **HR / Admin** | Tạo nhân viên, phân quyền, cấu hình hệ thống, lương, giấy tờ |
 
-| Đối tượng | Vai trò trong hệ thống | Việc thường làm |
-|-----------|------------------------|-----------------|
-| **Quản trị / HR** | Vai trò `ADMIN` hoặc được gán đủ quyền quản trị | Tạo nhân viên, phân quyền, cấu hình ngày nghỉ, vị trí chấm công, quản lý lương |
-| **Quản lý (Manager)** | Nhân viên có quyền `EMPLOYEE_VIEW` và có cấp dưới (`manager`) | Xem chấm công team, duyệt đơn nghỉ (nếu có `LEAVE_APPROVE`), theo dõi nhân viên trong team |
-| **Nhân viên** | Vai trò `EMPLOYEE` (mặc định khi gán) | Chấm công, tạo đơn nghỉ, xem lương cá nhân, tham gia lịch họp |
+Menu hiện theo quyền. Không thấy một mục nào → hỏi HR xem tài khoản đã được cấp quyền chưa.
 
-:::note
-Trong hệ thống, mỗi nhân viên có **một vai trò (role)** gắn với tài khoản. Quyền chi tiết (xem menu, tạo/sửa dữ liệu) phụ thuộc vào **phân quyền (permission)** của vai trò đó.
-:::
-
-#### 1.3 Các module chính
-
-| Nhóm menu | Chức năng | Đường dẫn (URL) |
-|-----------|-----------|-----------------|
-| **Tổng quan** | Bảng điều khiển, chỉ số nhanh | `/dashboard` |
-| **Tài khoản** | Hồ sơ cá nhân, giao diện (màu, font, sáng/tối) | `/account` (tab **Thông tin** / **Cài đặt**) |
-| **Lịch** | Lịch họp nhiều nhân viên | `/calendar` |
-| **Tổ chức** | Nhân viên, Phòng ban, Chức vụ, Giấy tờ | `/org/employees`, `/org/departments`, `/org/positions`, `/org/documents` |
-| **Chấm công & Thời gian** | Chấm công, Theo dõi chấm công, Đơn xin phép, Duyệt đơn xin phép | `/time/attendance`, `/time/attendance-tracking`, `/time/leave`, `/time/leave-approvals` |
-| **Lương** | Phiếu lương, cấu hình thuế | `/payroll` |
-| **Cấu hình hệ thống** | Ngày nghỉ, Vị trí, Giao diện & Ca làm việc, Phân quyền (tab Gán quyền + Nhóm quyền), Thông báo giấy tờ | `/sysConfig/holidays`, `/sysConfig/locations`, `/sysConfig/settings`, `/sysConfig/assign` (tab `roles` cho nhóm quyền; `/sysConfig/roles` redirect), `/settings/document-notifications` |
-
-Menu hiển thị **theo quyền** — nếu bạn không thấy mục nào, có thể tài khoản chưa được gán quyền tương ứng (xem [mục 6](/docs/roles-permissions)).
-
-#### 1.4 Sơ đồ luồng nghiệp vụ chính
+#### 1.3 Luồng công việc chính
 
 ```mermaid
 flowchart LR
   A[Đăng nhập] --> B[Chấm công]
-  A --> C[Đơn xin phép]
-  C --> D[Duyệt đơn]
-  B --> E[Theo dõi chấm công]
-  D --> E
-  E --> F[Chốt dữ liệu công]
-  F --> G[Tính lương]
-  G --> H[Xem phiếu lương]
-  A --> I[Lịch họp]
+  A --> C[Xin nghỉ]
+  C --> D[Duyệt nghỉ]
+  A --> E[Tạo đơn tăng ca]
+  E --> F[Duyệt OT]
+  B --> G[Cuối tháng]
+  D --> G
+  F --> G
+  G --> H[Tính lương]
 ```
 
 ---

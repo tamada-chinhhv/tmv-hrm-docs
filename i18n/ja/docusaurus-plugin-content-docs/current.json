@@ -2,16 +2,19 @@
   "sidebar.docs.category.Introduction": {
     "message": "はじめに"
   },
-  "sidebar.docs.category.User Guide": {
-    "message": "利用ガイド"
+  "sidebar.docs.category.For employees": {
+    "message": "従業員向け"
   },
-  "sidebar.docs.category.Module Guides": {
-    "message": "機能別ガイド"
+  "sidebar.docs.category.For managers": {
+    "message": "マネージャー向け"
   },
-  "sidebar.docs.category.Admin & Operations": {
-    "message": "管理・運用"
+  "sidebar.docs.category.For HR / Admin": {
+    "message": "HR / 管理者向け"
   },
   "sidebar.docs.category.Support": {
     "message": "サポート"
+  },
+  "sidebar.docs.category.Appendix": {
+    "message": "付録"
   }
 }

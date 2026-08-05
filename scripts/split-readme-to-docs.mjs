@@ -1,5 +1,5 @@
 /**
- * Split README markdown files into Docusaurus doc pages for vi (default), en, ja.
+ * Split role-based README markdown into Docusaurus docs (vi / en / ja).
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,52 +22,66 @@ const LOCALES = [
   },
 ];
 
-/** Map section heading patterns to doc file paths (without .md). */
-const SECTION_MAP = [
+const SKIP_SECTIONS = [/^table of contents|^mục lục|^目次/i];
+
+/** Top-level ## sections */
+const TOP_MAP = [
   { match: /^quick\s*start|^bắt\s*đầu|^クイック/i, file: 'quick-start', position: 2 },
   { match: /^1\./, file: 'intro', position: 1 },
-  { match: /^2\./, file: 'requirements', position: 3 },
-  { match: /^3\./, file: 'accounts', position: 4 },
-  { match: /^4\./, file: 'employee-management', position: 5 },
-  { match: /^5\./, file: 'calendar', position: 6 },
-  { match: /^6\./, file: 'roles-permissions', position: 7 },
-  { match: /^7\./, file: 'module-guides/_section7', position: 8, isModuleSection: true },
-  { match: /^8\./, file: 'attendance', position: 9 },
-  { match: /^9\./, file: 'leave-requests', position: 10 },
-  { match: /^10\./, file: 'reports', position: 11 },
-  { match: /^11\./, file: 'operations', position: 12 },
-  { match: /^12\./, file: 'faq', position: 13 },
-  { match: /^13\./, file: 'handover-checklist', position: 14 },
+  { match: /^2\./, splitSubs: true, subPrefix: '2', position: 10 },
+  { match: /^3\./, splitSubs: true, subPrefix: '3', position: 20 },
+  { match: /^4\./, splitSubs: true, subPrefix: '4', position: 30 },
+  { match: /^5\./, file: 'faq', position: 40 },
+  { match: /^6\./, file: 'appendix/technical-reference', position: 50 },
 ];
 
-const MODULE_SUB_MAP = [
-  { match: /^7\.0/, file: 'module-guides/account' },
-  { match: /^7\.1/, file: 'module-guides/overview' },
-  { match: /^7\.2\.1/, file: 'module-guides/documents' },
-  { match: /^7\.2(?!\.)/, file: 'module-guides/departments' },
-  { match: /^7\.4/, file: 'module-guides/payroll' },
-  { match: /^7\.5\.1/, file: 'module-guides/system-config' },
-  { match: /^7\.5(?!\.)/, file: 'module-guides/system-config' },
-];
-
-const SKIP_SECTIONS = [
-  /^table of contents|^mục lục|^目次/i,
-];
+/** ### subsections under ## 2 / 3 / 4 */
+const SUB_MAP = {
+  '2': [
+    { match: /^2\.1/, file: 'for-employees/login-and-account' },
+    { match: /^2\.2/, file: 'for-employees/overview' },
+    { match: /^2\.3/, file: 'for-employees/check-in-out' },
+    { match: /^2\.4/, file: 'for-employees/leave' },
+    { match: /^2\.5/, file: 'for-employees/calendar' },
+    { match: /^2\.6/, file: 'for-employees/payslip' },
+  ],
+  '3': [
+    { match: /^3\.1/, file: 'for-managers/team-attendance' },
+    { match: /^3\.2/, file: 'for-managers/approve-leave' },
+    { match: /^3\.3/, file: 'for-managers/create-overtime-batch' },
+    { match: /^3\.4/, file: 'for-managers/approve-overtime' },
+  ],
+  '4': [
+    { match: /^4\.1/, file: 'for-hr-admin/employees' },
+    { match: /^4\.2/, file: 'for-hr-admin/documents' },
+    { match: /^4\.3/, file: 'for-hr-admin/payroll' },
+    { match: /^4\.4/, file: 'for-hr-admin/system-settings' },
+    { match: /^4\.5/, file: 'for-hr-admin/overtime-setup' },
+    { match: /^4\.6/, file: 'for-hr-admin/hieu-hi' },
+    { match: /^4\.7/, file: 'for-hr-admin/permissions-overview' },
+    { match: /^4\.8/, file: 'for-hr-admin/month-end' },
+  ],
+};
 
 const DOC_LINKS = {
-  '8-attendance': 'attendance',
-  '8-attendance--leave-reports': 'reports',
-  '9-leave-requests': 'leave-requests',
-  '10-attendance--leave-reports': 'reports',
-  '6-roles--permissions': 'roles-permissions',
-  '721-documents-orgdocuments': 'module-guides/documents',
-  '70-account-account': 'module-guides/account',
-  '751-branch-configuration-gps--wifi': 'module-guides/system-config',
-  '104-month-end-reconciliation-hr': 'reports',
-  '81-how-it-works': 'attendance',
-  '812-web-attendance-gps': 'attendance',
-  '81-cơ-chế-chấm-công-của-hệ-thống': 'attendance',
-  '81-仕組み': 'attendance',
+  '6-phụ-lục-kỹ-thuật': 'appendix/technical-reference',
+  '6-technical-appendix': 'appendix/technical-reference',
+  '6-技術付録': 'appendix/technical-reference',
+  '1-giới-thiệu': 'intro',
+  '1-introduction': 'intro',
+  '1-はじめに': 'intro',
+  '2-dành-cho-nhân-viên': 'for-employees/login-and-account',
+  '2-for-employees': 'for-employees/login-and-account',
+  '2-従業員向け': 'for-employees/login-and-account',
+  '3-dành-cho-quản-lý': 'for-managers/team-attendance',
+  '3-for-managers': 'for-managers/team-attendance',
+  '3-マネージャー向け': 'for-managers/team-attendance',
+  '4-dành-cho-hr--admin': 'for-hr-admin/employees',
+  '4-for-hr--admin': 'for-hr-admin/employees',
+  '4-hr--管理者向け': 'for-hr-admin/employees',
+  '5-câu-hỏi-thường-gặp': 'faq',
+  '5-faq': 'faq',
+  '5-よくある質問': 'faq',
 };
 
 function stripPreamble(content) {
@@ -82,12 +96,11 @@ function stripPreamble(content) {
   return lines.slice(start).join('\n');
 }
 
-function normalizeTitle(line) {
-  return line.replace(/^##\s+/, '').replace(/^\d+\.\s*/, '').trim();
+function cleanTitle(text) {
+  return text.replace(/^\d+(?:\.\d+)*\.?\s*/, '').trim();
 }
 
 function demoteHeadings(content, levels = 1) {
-  const prefix = '#'.repeat(levels);
   return content
     .split('\n')
     .map((line) => {
@@ -110,26 +123,34 @@ function fixLinks(content) {
     result = result.replace(re, `](${toDocLink(docPath)})`);
   }
   result = result.replace(/\]\(#(\d+)[^)]*\)/g, (_, num) => {
-    const section = SECTION_MAP.find((s) => s.match.test(`${num}.`));
-    return section
-      ? `](${toDocLink(section.file.replace('module-guides/_section7', 'module-guides/overview'))})`
-      : '](#)';
+    const map = {
+      1: 'intro',
+      2: 'for-employees/login-and-account',
+      3: 'for-managers/team-attendance',
+      4: 'for-hr-admin/employees',
+      5: 'faq',
+      6: 'appendix/technical-reference',
+    };
+    return map[num] ? `](${toDocLink(map[num])})` : '](#)';
   });
   result = result.replace(/\]\(\.\/README[^)]*\)/g, `](${toDocLink('intro')})`);
   return result;
 }
 
 function convertAdmonitions(content) {
-  return content.replace(/^>\s+\*\*(Note|Lưu ý|注意|Warning|Cảnh báo|警告|Important|Quan trọng|重要):\*\*\s*(.*)$/gm, (_, type, body) => {
-    const lower = type.toLowerCase();
-    let kind = 'note';
-    if (/warn|cảnh|警告/.test(lower)) kind = 'warning';
-    if (/important|quan|重要/.test(lower)) kind = 'info';
-    return `:::${kind}\n${body.trim()}\n:::`;
-  });
+  return content.replace(
+    /^>\s+\*\*(Note|Lưu ý|注意|Warning|Cảnh báo|警告|Important|Quan trọng|重要):\*\*\s*(.*)$/gm,
+    (_, type, body) => {
+      const lower = type.toLowerCase();
+      let kind = 'note';
+      if (/warn|cảnh|警告/.test(lower)) kind = 'warning';
+      if (/important|quan|重要/.test(lower)) kind = 'info';
+      return `:::${kind}\n${body.trim()}\n:::`;
+    },
+  );
 }
 
-function parseSections(content) {
+function parseH2Sections(content) {
   const sections = [];
   const lines = content.split('\n');
   let current = null;
@@ -141,7 +162,7 @@ function parseSections(content) {
         current = null;
         continue;
       }
-      current = { rawHeading, title: normalizeTitle(line), lines: [] };
+      current = { rawHeading, lines: [] };
       sections.push(current);
     } else if (current) {
       current.lines.push(line);
@@ -150,47 +171,21 @@ function parseSections(content) {
   return sections;
 }
 
-function resolveSectionFile(rawHeading) {
-  for (const entry of SECTION_MAP) {
-    if (entry.match.test(rawHeading)) return entry;
-  }
-  return null;
-}
-
-function splitModuleSection(section) {
-  const body = section.lines.join('\n').trim();
+function splitH3(body, subPrefix) {
+  const map = SUB_MAP[subPrefix] || [];
   const parts = [];
   const chunks = body.split(/\n(?=### )/);
   for (const chunk of chunks) {
     const firstLine = chunk.split('\n')[0] || '';
+    if (!firstLine.startsWith('### ')) continue;
     const subTitle = firstLine.replace(/^###\s+/, '').trim();
-    let file = null;
-    for (const entry of MODULE_SUB_MAP) {
-      if (entry.match.test(subTitle)) {
-        file = entry.file;
-        break;
-      }
-    }
-    if (!file) continue;
-    if (file === 'module-guides/system-config') {
-      const existing = parts.find((p) => p.file === file);
-      const chunkBody = chunk.replace(/^###[^\n]*\n?/, '').trim();
-      if (existing) {
-        existing.content += `\n\n## ${subTitle.replace(/^\d+(\.\d+)*\s*/, '')}\n\n${chunkBody}`;
-      } else {
-        parts.push({
-          file,
-          title: subTitle.replace(/^\d+(\.\d+)*\s*/, ''),
-          content: chunkBody,
-        });
-      }
-    } else {
-      parts.push({
-        file,
-        title: subTitle.replace(/^\d+(\.\d+)*\s*/, ''),
-        content: chunk.replace(/^###[^\n]*\n?/, '').trim(),
-      });
-    }
+    const entry = map.find((m) => m.match.test(subTitle));
+    if (!entry) continue;
+    parts.push({
+      file: entry.file,
+      title: cleanTitle(subTitle),
+      content: chunk.replace(/^###[^\n]*\n?/, '').trim(),
+    });
   }
   return parts;
 }
@@ -200,8 +195,23 @@ function writeDoc(outRoot, relPath, title, body, position) {
   fs.mkdirSync(path.dirname(fullPath), { recursive: true });
   const processed = fixLinks(convertAdmonitions(demoteHeadings(body)));
   const frontmatter = `---\nsidebar_position: ${position}\n---\n\n`;
-  const heading = `# ${title.replace(/^\d+(\.\d+)*\s*/, '')}\n\n`;
+  const heading = `# ${cleanTitle(title)}\n\n`;
   fs.writeFileSync(fullPath, frontmatter + heading + processed + '\n', 'utf8');
+}
+
+function clearGeneratedMarkdown(outRoot) {
+  if (!fs.existsSync(outRoot)) {
+    fs.mkdirSync(outRoot, { recursive: true });
+    return;
+  }
+  for (const entry of fs.readdirSync(outRoot, { withFileTypes: true })) {
+    const full = path.join(outRoot, entry.name);
+    if (entry.isDirectory()) {
+      fs.rmSync(full, { recursive: true, force: true });
+    } else if (entry.name.endsWith('.md')) {
+      fs.unlinkSync(full);
+    }
+  }
 }
 
 function processLocale({ locale, readme, outDir }) {
@@ -212,33 +222,33 @@ function processLocale({ locale, readme, outDir }) {
   }
 
   const outRoot = path.join(ROOT, outDir);
-  if (fs.existsSync(outRoot)) {
-    fs.rmSync(outRoot, { recursive: true, force: true });
-  }
-  fs.mkdirSync(outRoot, { recursive: true });
+  clearGeneratedMarkdown(outRoot);
 
   const raw = fs.readFileSync(readmePath, 'utf8');
-  const sections = parseSections(stripPreamble(raw));
+  const sections = parseH2Sections(stripPreamble(raw));
+  let written = 0;
 
   for (const section of sections) {
-    const mapping = resolveSectionFile(section.rawHeading);
+    const mapping = TOP_MAP.find((e) => e.match.test(section.rawHeading));
     if (!mapping) continue;
 
     const body = section.lines.join('\n').trim();
 
-    if (mapping.isModuleSection) {
-      const moduleParts = splitModuleSection(section);
+    if (mapping.splitSubs) {
+      const parts = splitH3(body, mapping.subPrefix);
       let pos = mapping.position;
-      for (const part of moduleParts) {
+      for (const part of parts) {
         writeDoc(outRoot, part.file, part.title, part.content, pos++);
+        written += 1;
       }
       continue;
     }
 
-    writeDoc(outRoot, mapping.file, section.title, body, mapping.position);
+    writeDoc(outRoot, mapping.file, section.rawHeading, body, mapping.position);
+    written += 1;
   }
 
-  console.log(`✓ ${locale}: wrote docs to ${outDir}`);
+  console.log(`✓ ${locale}: wrote ${written} pages → ${outDir}`);
 }
 
 for (const locale of LOCALES) {
