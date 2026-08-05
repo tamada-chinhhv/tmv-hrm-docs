@@ -3,7 +3,7 @@ import Link from '@docusaurus/Link';
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
-import Translate from '@docusaurus/Translate';
+import Translate, {translate} from '@docusaurus/Translate';
 
 import styles from './index.module.css';
 
@@ -42,7 +42,11 @@ function HomepageHeader() {
         <Heading as="h1" className="hero__title">
           {siteConfig.title}
         </Heading>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <p className="hero__subtitle">
+          <Translate id="homepage.tagline">
+            Tài liệu hệ thống Quản lý Nhân sự TMV
+          </Translate>
+        </p>
         <div className={styles.buttons}>
           <Link className="button button--secondary button--lg" to="/docs/intro">
             <Translate id="homepage.cta.docs">Xem tài liệu</Translate>
@@ -72,9 +76,14 @@ function Feature({ title, description }) {
 
 export default function Home() {
   const { siteConfig } = useDocusaurusContext();
+  const tagline = translate({
+    id: 'homepage.tagline',
+    message: 'Tài liệu hệ thống Quản lý Nhân sự TMV',
+    description: 'Homepage tagline',
+  });
 
   return (
-    <Layout title={siteConfig.title} description={siteConfig.tagline}>
+    <Layout title={siteConfig.title} description={tagline}>
       <HomepageHeader />
       <main>
         <section className={styles.features}>

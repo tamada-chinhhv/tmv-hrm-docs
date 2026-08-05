@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "docusaurus": "docusaurus",
-    "start": "docusaurus start --locale vi",
+    "start": "docusaurus build && docusaurus serve --port 3000",
+    "start:dev": "docusaurus start --locale vi",
     "start:en": "docusaurus start --locale en",
     "start:ja": "docusaurus start --locale ja",
     "preview": "docusaurus build && docusaurus serve",

@@ -1,17 +1,26 @@
 {
   "sidebar.docs.category.Introduction": {
-    "message": "Introduction"
+    "message": "Introduction",
+    "description": "The label for category 'Introduction' in sidebar 'docs'"
   },
   "sidebar.docs.category.User Guide": {
-    "message": "User Guide"
+    "message": "User Guide",
+    "description": "The label for category 'User Guide' in sidebar 'docs'"
   },
   "sidebar.docs.category.Module Guides": {
-    "message": "Module Guides"
+    "message": "Module Guides",
+    "description": "The label for category 'Module Guides' in sidebar 'docs'"
   },
   "sidebar.docs.category.Admin & Operations": {
-    "message": "Admin & Operations"
+    "message": "Admin & Operations",
+    "description": "The label for category 'Admin & Operations' in sidebar 'docs'"
   },
   "sidebar.docs.category.Support": {
-    "message": "Support"
+    "message": "Support",
+    "description": "The label for category 'Support' in sidebar 'docs'"
+  },
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
   }
 }

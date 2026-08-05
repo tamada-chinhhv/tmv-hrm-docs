@@ -39,6 +39,10 @@
   "footer.reportIssue": {
     "message": "Báo cáo lỗi"
   },
+  "homepage.tagline": {
+    "message": "Tài liệu hệ thống Quản lý Nhân sự TMV",
+    "description": "Homepage tagline"
+  },
   "homepage.cta.docs": {
     "message": "Xem tài liệu"
   },

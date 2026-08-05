@@ -1,11 +1,25 @@
 {
   "item.label.Documentation": {
-    "message": "Documentation"
+    "message": "Documentation",
+    "description": "Navbar item with label Documentation"
   },
   "item.label.HRM App": {
-    "message": "HRM App"
+    "message": "HRM App",
+    "description": "Navbar item with label HRM App"
   },
   "link.item.label.GitHub": {
     "message": "GitHub"
+  },
+  "title": {
+    "message": "HRM Docs",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "TMV HRM",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.GitHub": {
+    "message": "GitHub",
+    "description": "Navbar item with label GitHub"
   }
 }

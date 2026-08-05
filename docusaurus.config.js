@@ -1,7 +1,7 @@
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'TMV HRM Docs',
-  tagline: 'Tài liệu hệ thống Quản lý Nhân sự TMV',
+  tagline: 'TMV HRM Documentation',
   favicon: 'img/logo.png',
 
   url: 'https://hrm.tamada.vn',

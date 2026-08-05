@@ -39,6 +39,10 @@
   "footer.reportIssue": {
     "message": "問題を報告"
   },
+  "homepage.tagline": {
+    "message": "TMV 人事管理システム ドキュメント",
+    "description": "Homepage tagline"
+  },
   "homepage.cta.docs": {
     "message": "ドキュメントを見る"
   },
