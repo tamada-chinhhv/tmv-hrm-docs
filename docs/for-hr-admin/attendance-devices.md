@@ -25,6 +25,31 @@ Máy tự gửi dữ liệu **không bắt buộc** nhập thông tin đăng nh�
 
 ---
 
+## Khi máy chấm công nằm trong mạng nội bộ
+
+Máy chấm công có thể có IP nội bộ (ví dụ `192.168.110.117`). Đây chỉ là địa chỉ **trong văn phòng**, không phải địa chỉ HRM nhận dữ liệu.
+
+Nếu máy chủ HRM chạy **ngoài** mạng văn phòng (cloud/VPS), máy chủ **không thể** tự kết nối ISAPI tới IP LAN đó. Trong trường hợp này, chọn **Máy tự gửi dữ liệu**:
+
+```text
+Máy chấm công (LAN)
+       │ HTTPS outbound
+       ▼
+https://hrm.tamada.vn/api/d/e/<token>
+       ▼
+HRM nhận sự kiện chấm công
+```
+
+- **Không cần** mở cổng từ Internet vào máy chấm công.
+- **Không cần** cho máy chủ HRM truy cập trực tiếp IP LAN của máy.
+- **Cần** mạng văn phòng cho phép máy ra HTTPS tới domain công khai của HRM.
+
+Sau khi tạo máy, copy **Cấu hình nhận dữ liệu** (hostname `hrm.tamada.vn`, URL `/api/d/e/<token>`, cổng `443`, HTTPS) vào mục **HTTP Listening** trên máy Hikvision. **Lưu token ngay** — chỉ hiện một lần.
+
+**Kết nối trực tiếp** chỉ dùng khi máy chủ HRM **truy cập được** IP máy (cùng LAN, VPN site-to-site, hoặc NAT có kiểm soát).
+
+---
+
 ## Lịch đồng bộ tự động
 
 Ở đầu trang **Máy chấm công** → **Lịch đồng bộ tự động**:

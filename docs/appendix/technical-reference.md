@@ -27,13 +27,24 @@ Phần này dành cho IT / Admin cần tra cứu nhanh. Người dùng thường
 
 | Biến / cấu hình | Ý nghĩa |
 |-----------------|--------|
-| `PUBLIC_SITE_ORIGIN` | URL công khai mà máy Push gửi tới (IP LAN + cổng **backend**, ví dụ `http://192.168.x.x:3001`). Sau khi đổi phải **xoay token** trên HRM. |
+| `CORS_ORIGIN` | Domain công khai FE (production: `https://hrm.tamada.vn`). BE dùng để sinh URL HTTP Listening khi không set `PUBLIC_SITE_ORIGIN`. |
+| `PUBLIC_SITE_ORIGIN` | **Chỉ dev/LAN:** override origin ingest (ví dụ `http://192.168.x.x:3001`). Production Docker/VPS: **không cần** — dùng `CORS_ORIGIN`. |
 | `ATTENDANCE_DEVICE_SYNC_ENABLED` | Bật/tắt job đồng bộ tự động (mặc định bật). Chu kỳ chi tiết cấu hình trên FE: **Máy chấm công** → **Lịch đồng bộ**. |
 | `ATTENDANCE_DEVICE_SHADOW_MODE` | `true`: xử lý sự kiện ở trạng thái SHADOW, **chưa** ghi `attendances`. |
 | `ATTENDANCE_DEVICE_WRITE_TO_ATTENDANCE` | `true` (và shadow tắt): ghi giờ vào/ra thật vào `attendances`. |
 | `DEVICE_CREDENTIAL_ENCRYPTION_KEY` | Bắt buộc production để lưu mật khẩu ISAPI mã hóa. |
 
 **Ingest endpoint (Push):** `POST /api/d/e/:token` — máy Hikvision gửi payload sự kiện; token hash lưu DB, plaintext chỉ trả khi create/rotate.
+
+**Reverse proxy (production):** route `POST /api/d/e/*` tới BE (Nest `DeviceIngestController`), không qua FE auth. Nginx mẫu: `location /api/ { proxy_pass http://tmv-hrm-be:3001/api/; }`. Giữ body POST, HTTPS, timeout ≥ 30s.
+
+**Topology LAN → production:**
+
+```text
+Device (192.168.x.x) --HTTPS outbound--> hrm.tamada.vn --proxy--> BE /api/d/e/:token
+```
+
+ISAPI pull (server → device) cần VPN/NAT; PUSH không cần kết nối ngược.
 
 **Sự kiện attendance-eligible (Hikvision ACS major 5):**
 
