@@ -55,6 +55,15 @@ Nếu thấy dấu (-) ở ngày bạn **có đi làm** → báo HR kiểm tra l
 - Quên chấm một đầu → nhờ quản lý / HR điều chỉnh, hoặc tạo đơn sửa công theo quy định và ghi rõ giờ đến / về thực tế.
 - Chấm rồi nhưng chưa hiển thị → chờ một lát rồi tải lại trang; thử đăng xuất / đăng nhập lại; vẫn lỗi thì liên hệ IT.
 
+## Chấm bằng máy tại văn phòng
+
+Nếu công ty có máy chấm công:
+
+- Chấm trên máy (khuôn mặt / thẻ / vân tay) **cũng được ghi** như chấm app.
+- Giờ vào / ra **gộp** với app: sớm nhất = vào, muộn nhất = ra.
+- **Không cần** bật GPS / WiFi như chấm trên điện thoại.
+- Có thể **chậm vài phút** mới hiện trên HRM — tải lại trang nếu cần.
+
 **Mẹo:** Chấm vào ngay khi đến, chấm ra trước khi về; bật quyền vị trí cho ứng dụng; báo sự cố chấm công sớm, đừng để dồn cuối tháng.
 
 ---

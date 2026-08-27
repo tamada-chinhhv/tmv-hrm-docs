@@ -8,7 +8,7 @@ sidebar_position: 35
 
 ## Báo cáo hiển thị gì?
 
-Mỗi phòng ban có một thẻ tóm tắt, cập nhật **theo thời gian thực** khi nhân viên chấm công:
+Mỗi phòng ban có một thẻ tóm tắt cho **ngày hôm nay**:
 
 | Thông tin | Ý nghĩa |
 |---|---|
@@ -22,6 +22,18 @@ Mỗi phòng ban có một thẻ tóm tắt, cập nhật **theo thời gian th�
 Màu sắc: **xanh lá** = có mặt đúng giờ; **vàng / cam** = đi muộn; **xanh dương** = nghỉ phép đã duyệt; **đỏ** = vắng; **xám** = chưa gán ca (nhân viên mới…).
 
 **Cách tính tỷ lệ:** (Đi làm + Nghỉ phép) / Tổng số × 100. Ví dụ: phòng 20 người, 18 đi làm, 1 nghỉ phép đã duyệt, 1 vắng → tỷ lệ = (18 + 1) / 20 = **95%**.
+
+## Dữ liệu cập nhật khi nào?
+
+Báo cáo **không tự làm mới liên tục** trên màn hình. Tùy cách nhân viên chấm:
+
+| Cách chấm | Thường thấy trên báo cáo sau |
+|-----------|------------------------------|
+| **App (web / mobile)** | Vài giây — **tải lại trang** nếu chưa thấy |
+| **Máy tự gửi dữ liệu** | Vài giây đến vài chục giây |
+| **Máy kết nối trực tiếp** | Theo lịch đồng bộ (thường 1–5 phút) — có thể bấm **Đồng bộ ngay** trên máy chấm công |
+
+Biểu đồ **Chấm công theo phòng ban** trên Tổng quan dùng cùng dữ liệu, cùng quy tắc trên.
 
 ## Các bước
 
@@ -45,6 +57,7 @@ Màu sắc: **xanh lá** = có mặt đúng giờ; **vàng / cam** = đi muộn;
 - Tỷ lệ chấm công thấp dù có người nghỉ phép → người nghỉ có phép vẫn được tính vào tỷ lệ; nếu tỷ lệ vẫn thấp nghĩa là có người **vắng không phép** — kiểm tra số màu đỏ.
 - Muốn xem dữ liệu ngày trước → báo cáo này hiển thị hôm nay; để xem lịch sử, dùng **Theo dõi chấm công** và lọc theo khoảng ngày.
 - Nhân viên làm từ xa bị đánh vắng → kiểm tra đơn làm việc từ xa đã được duyệt chưa; nếu cần, điều chỉnh chấm công thủ công theo quy định.
-- Số liệu chưa cập nhật → báo cáo cập nhật trong vài giây sau khi nhân viên chấm công; tải lại trang nếu cần.
+- Nhân viên chấm máy nhưng báo cáo chưa đổi → chờ lịch đồng bộ hoặc nhờ admin **Đồng bộ ngay**; tải lại trang.
+- Chấm app nhưng chưa thấy → tải lại trang; thử đăng xuất / đăng nhập lại.
 
 ---

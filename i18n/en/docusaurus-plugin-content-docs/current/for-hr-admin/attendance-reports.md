@@ -19,7 +19,19 @@ The Department Attendance Report shows you at a glance:
 - **Absent** — who didn't check in and didn't submit leave
 - **Attendance rate** — percentage of employees who were present or on approved leave
 
-Think of it as a "roll call" for each department, updated in real-time.
+Think of it as a "roll call" for each department for **today's date**.
+
+## When does data update?
+
+The report does **not** refresh continuously on its own:
+
+| How employees punch | Usually visible on the report |
+|----------------------|------------------------------|
+| **App (web / mobile)** | Within seconds — **reload the page** if needed |
+| **Device sends data** | Seconds to tens of seconds |
+| **Direct connection** | Follows sync schedule (often 1–5 minutes) — admin can use **Sync now** |
+
+The dashboard **Attendance by department** chart uses the same data and timing.
 
 ## Where to find the report
 
@@ -147,7 +159,7 @@ A: If your company uses GPS or WiFi check-in, the system tracks them. If an empl
 
 **Q: How often does the report update?**
 
-A: The report updates in real-time as employees check in. New check-ins appear within a few seconds.
+A: It depends how people punch in. App punches usually appear after you reload the page. Devices that send data update within seconds to tens of seconds. Direct-connection devices follow the sync schedule (about 1–5 minutes). An admin can run **Sync now** on the attendance device if needed.
 
 ## Tips for using this effectively
 

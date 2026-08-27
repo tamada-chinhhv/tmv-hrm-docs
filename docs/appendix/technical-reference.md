@@ -29,9 +29,43 @@ Phần này dành cho IT / Admin cần tra cứu nhanh. Người dùng thường
 |-----------------|--------|
 | `PUBLIC_SITE_ORIGIN` | URL công khai mà máy Push gửi tới (IP LAN + cổng **backend**, ví dụ `http://192.168.x.x:3001`). Sau khi đổi phải **xoay token** trên HRM. |
 | `ATTENDANCE_DEVICE_SYNC_ENABLED` | Bật/tắt job đồng bộ tự động (mặc định bật). Chu kỳ chi tiết cấu hình trên FE: **Máy chấm công** → **Lịch đồng bộ**. |
-| `ATTENDANCE_DEVICE_SHADOW_MODE` | `true`: chỉ ghi log sự kiện, chưa cập nhật bảng chấm công. |
+| `ATTENDANCE_DEVICE_SHADOW_MODE` | `true`: xử lý sự kiện ở trạng thái SHADOW, **chưa** ghi `attendances`. |
 | `ATTENDANCE_DEVICE_WRITE_TO_ATTENDANCE` | `true` (và shadow tắt): ghi giờ vào/ra thật vào `attendances`. |
 | `DEVICE_CREDENTIAL_ENCRYPTION_KEY` | Bắt buộc production để lưu mật khẩu ISAPI mã hóa. |
+
+**Ingest endpoint (Push):** `POST /api/d/e/:token` — máy Hikvision gửi payload sự kiện; token hash lưu DB, plaintext chỉ trả khi create/rotate.
+
+**Sự kiện attendance-eligible (Hikvision ACS major 5):**
+
+| minor | Loại |
+|-------|------|
+| 38 | Card auth success |
+| 75 | Face auth success |
+| 113 | Fingerprint auth success |
+
+ISAPI pull query `major=5` (không filter minor server-side); lọc 38/75/113 client-side khi parse.
+
+**Trạng thái `attendance_device_events.processing_status`:**
+
+| Status | Ý nghĩa |
+|--------|---------|
+| PENDING | Chờ xử lý / retry |
+| SHADOW | Logic chạy, chưa ghi attendance |
+| PROCESSED | Đã ghi attendance |
+| FAILED | Lỗi xử lý |
+| IGNORED | Không phải sự kiện chấm công |
+
+Dedup: unique `(device_id, source_event_id)` — import idempotent.
+
+**API diagnostic vs mutation:**
+
+| Endpoint | Read-only? |
+|----------|------------|
+| `POST .../push-check` | Có — không import/reprocess |
+| `POST .../sync-events` | Không — pull + import + process |
+| `POST .../health-check` (Direct) | Có — chỉ cập nhật status kết nối |
+
+**Device delete:** API `DELETE .../attendance-devices/:id` soft-delete (`isActive=false`), vô hiệu token; **không** xóa `attendance_device_events`.
 
 Hướng dẫn người dùng: [Máy chấm công](../for-hr-admin/attendance-devices.md).
 
