@@ -11,6 +11,7 @@ sidebar_position: 33
 | Holidays | **System configuration** → **Holiday configuration** |
 | Branches (GPS / WiFi for attendance) | **System configuration** → **Branch locations** |
 | Shift hours, lunch, late/early grace | **System configuration** → **Work shift** |
+| Hikvision attendance terminals (Direct / Push) | **System configuration** → **Attendance devices** |
 | System default appearance | **System configuration** → **System appearance** |
 | Permissions / role groups | **System configuration** → **Assign permissions** |
 

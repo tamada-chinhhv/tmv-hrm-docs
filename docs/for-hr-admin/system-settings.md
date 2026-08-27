@@ -11,6 +11,7 @@ sidebar_position: 33
 | Ngày nghỉ / lễ | **Cấu hình hệ thống** → **Cấu hình ngày nghỉ** |
 | Chi nhánh (GPS / WiFi chấm công) | **Cấu hình hệ thống** → **Vị trí chi nhánh** |
 | Giờ ca, nghỉ trưa, ân hạn muộn/sớm | **Cấu hình hệ thống** → **Ca làm việc** |
+| Máy chấm công Hikvision (Direct / Push) | **Cấu hình hệ thống** → **Máy chấm công** |
 | Giao diện mặc định hệ thống | **Cấu hình hệ thống** → **Giao diện hệ thống** |
 | Phân quyền / nhóm quyền | **Cấu hình hệ thống** → **Phân quyền** |
 

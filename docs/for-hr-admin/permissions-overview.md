@@ -13,6 +13,7 @@ Quyền quyết định menu. Gợi ý:
 | Tạo / duyệt đơn tăng ca | Người được cấp quyền OT |
 | Nhân viên, phòng ban, giấy tờ, lương quản lý | HR |
 | Cấu hình hệ thống | Admin / HR được phân quyền |
+| Máy chấm công Hikvision | HR / IT có `ATTENDANCE_DEVICE_*` |
 
 Cần thêm quyền: **Cấu hình hệ thống** → **Phân quyền** (gán nhóm quyền cho vai trò / người dùng).
 

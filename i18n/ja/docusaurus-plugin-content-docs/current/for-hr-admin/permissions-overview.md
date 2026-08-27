@@ -13,6 +13,7 @@ sidebar_position: 36
 | 残業バッチの作成 / 承認 | OT 権限がある人 |
 | 従業員・部署・書類・給与管理 | HR |
 | システム設定 | 管理者 / 権限のある HR |
+| Hikvision 勤怠端末 | `ATTENDANCE_DEVICE_*` 権限の HR / IT |
 
 追加権限: **システム設定** → **権限割当**。
 

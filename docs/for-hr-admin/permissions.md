@@ -43,6 +43,15 @@ Quyền giống như chìa khóa của từng "cánh cửa" chức năng. Các q
 | **ATTENDANCE_MANAGE** | Điều chỉnh bản ghi chấm công | HR admin |
 | **ATTENDANCE_MARK** | Chấm công hộ nhân viên (khi hệ thống lỗi) | Admin |
 
+### Máy chấm công
+
+| Quyền | Cho phép | Thường gán cho |
+|---|---|---|
+| **ATTENDANCE_DEVICE_VIEW** | Xem máy chấm công, sự kiện, lịch đồng bộ | HR, IT |
+| **ATTENDANCE_DEVICE_MANAGE** | Thêm / cấu hình máy, mapping, kiểm tra Push | HR admin, IT |
+
+Chi tiết luồng Direct / Push: [Máy chấm công](./attendance-devices.md).
+
 ### Cấu hình
 
 | Quyền | Cho phép | Thường gán cho |

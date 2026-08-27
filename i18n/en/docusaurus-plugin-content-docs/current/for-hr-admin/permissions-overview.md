@@ -13,6 +13,7 @@ Permissions control menus. Rough guide:
 | Create / approve OT batches | Users granted OT rights |
 | Employees, departments, documents, payroll manage | HR |
 | System configuration | Admin / authorized HR |
+| Hikvision attendance terminals | HR / IT with `ATTENDANCE_DEVICE_*` |
 
 To grant more access: **System configuration** → **Assign permissions**.
 

@@ -43,6 +43,15 @@ sidebar_position: 37
 | **ATTENDANCE_MANAGE** | 勤怠記録の調整 | HR管理者 |
 | **ATTENDANCE_MARK** | 従業員の代理打刻（システム障害時） | 管理者 |
 
+### 勤怠端末
+
+| 権限 | できること | 主な対象 |
+|---|---|---|
+| **ATTENDANCE_DEVICE_VIEW** | 端末・イベント・同期スケジュールの閲覧 | HR、IT |
+| **ATTENDANCE_DEVICE_MANAGE** | 端末設定、マッピング、Push 確認 | HR管理者、IT |
+
+詳細: [勤怠端末](./attendance-devices.md)。
+
 ### 設定
 
 | 権限 | できること | 主な対象 |

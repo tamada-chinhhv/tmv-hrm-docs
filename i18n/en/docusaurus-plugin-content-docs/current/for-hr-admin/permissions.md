@@ -63,6 +63,15 @@ When a user tries to do something (create leave, edit overtime), the system chec
 | **ATTENDANCE_MANAGE** | Adjust attendance records | HR admin |
 | **ATTENDANCE_MARK** | Manually check in/out employees | Admin (for system errors) |
 
+### Attendance devices
+
+| Permission | What it allows | When to use |
+|-----------|----------------|-------------|
+| **ATTENDANCE_DEVICE_VIEW** | View terminals, events, sync schedule | HR, IT |
+| **ATTENDANCE_DEVICE_MANAGE** | Add/configure devices, mappings, Push check | HR admin, IT |
+
+See [Attendance terminals](./attendance-devices.md) for Direct vs Push setup.
+
 ### Settings permissions
 
 | Permission | What it allows | When to use |

@@ -10,6 +10,9 @@ Your account lacks that permission. Contact HR.
 **Check-in says outside the office?**  
 Move into the branch range or join company WiFi. For remote work, use an approved remote request that day.
 
+**Hikvision terminal not sending data?**  
+See [Attendance terminals](./for-hr-admin/attendance-devices.md): Push/Direct setup, HTTP Listening, employee mapping.
+
 **I forgot check-in or check-out?**  
 Add the missing punch if still allowed; or ask a manager / HR; or submit a correction request per policy.
 

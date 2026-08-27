@@ -38,6 +38,7 @@ const sidebars = {
         'for-hr-admin/documents',
         'for-hr-admin/payroll',
         'for-hr-admin/system-settings',
+        'for-hr-admin/attendance-devices',
         'for-hr-admin/overtime-setup',
         'for-hr-admin/overtime-management',
         'for-hr-admin/attendance-reports',

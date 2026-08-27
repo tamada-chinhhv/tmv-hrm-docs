@@ -23,7 +23,19 @@ For IT / Admin. Most users can skip this.
 | Payroll period locked | Unlock (if permitted) before editing payslips |
 | OT overlap / over limit | Adjust times or employees on the batch |
 
-#### 6.3 Architecture notes (for developers)
+#### 6.4 Attendance terminals (Hikvision) — IT notes
+
+| Setting | Meaning |
+|---------|---------|
+| `PUBLIC_SITE_ORIGIN` | Public URL Push devices post to (LAN IP + **backend** port, e.g. `http://192.168.x.x:3001`). Rotate ingest token on HRM after changes. |
+| `ATTENDANCE_DEVICE_SYNC_ENABLED` | Enable/disable automatic sync job. Intervals are configured in FE: **Attendance devices** → sync schedule panel. |
+| `ATTENDANCE_DEVICE_SHADOW_MODE` | `true`: log events only, no attendance writes. |
+| `ATTENDANCE_DEVICE_WRITE_TO_ATTENDANCE` | `true` (with shadow off): write real check-in/out to `attendances`. |
+| `DEVICE_CREDENTIAL_ENCRYPTION_KEY` | Required in production to encrypt stored ISAPI passwords. |
+
+User guide: [Attendance terminals](../for-hr-admin/attendance-devices.md).
+
+#### 6.5 Architecture notes (for developers)
 
 - FE: `tmv-hrm` · BE: `tmv-hrm-be`
 - Overtime batches: `/time/overtime-batches` with dept-head / director approval (legacy single OT menu is not on the main sidebar)

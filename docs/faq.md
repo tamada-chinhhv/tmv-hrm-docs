@@ -10,6 +10,9 @@ Tài khoản chưa được cấp quyền. Liên hệ HR.
 **Chấm công báo ngoài khu vực?**  
 Vào đúng chi nhánh hoặc nối WiFi công ty. Nếu làm remote, cần đơn remote đã được duyệt trong ngày.
 
+**Máy chấm công Hikvision không đẩy dữ liệu?**  
+Xem [Máy chấm công](./for-hr-admin/attendance-devices.md): kiểm tra chế độ Push/Direct, cấu hình Nghe HTTP, mapping nhân viên.
+
 **Quên chấm vào hoặc ra?**  
 Bổ sung trong ngày nếu còn cho phép; hoặc nhờ quản lý / HR; hoặc tạo đơn chỉnh sửa theo quy định.
 
