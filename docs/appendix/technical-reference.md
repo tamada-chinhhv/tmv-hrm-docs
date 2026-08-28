@@ -27,8 +27,8 @@ Phần này dành cho IT / Admin cần tra cứu nhanh. Người dùng thường
 
 | Biến / cấu hình | Ý nghĩa |
 |-----------------|--------|
-| `CORS_ORIGIN` | Domain công khai FE (production: `https://hrm.tamada.vn`). BE dùng để sinh URL HTTP Listening khi không set `PUBLIC_SITE_ORIGIN`. |
-| `PUBLIC_SITE_ORIGIN` | **Chỉ dev/LAN:** override origin ingest (ví dụ `http://192.168.x.x:3001`). Production Docker/VPS: **không cần** — dùng `CORS_ORIGIN`. |
+| `CORS_ORIGIN` | Domain công khai FE (production: `https://hrm.tamada.vn`). |
+| `PUBLIC_SITE_ORIGIN` | **Bắt buộc production:** origin HTTPS công khai để sinh URL HTTP Listening (ví dụ `https://hrm.tamada.vn`). **Dev/LAN:** có thể override (ví dụ `http://192.168.x.x:3001`); nếu không set, BE suy ra từ `CORS_ORIGIN` hoặc `http://localhost:<PORT>`. |
 | `ATTENDANCE_DEVICE_SYNC_ENABLED` | Bật/tắt job đồng bộ tự động (mặc định bật). Chu kỳ chi tiết cấu hình trên FE: **Máy chấm công** → **Lịch đồng bộ**. |
 | `ATTENDANCE_DEVICE_SHADOW_MODE` | `true`: xử lý sự kiện ở trạng thái SHADOW, **chưa** ghi `attendances`. |
 | `ATTENDANCE_DEVICE_WRITE_TO_ATTENDANCE` | `true` (và shadow tắt): ghi giờ vào/ra thật vào `attendances`. |

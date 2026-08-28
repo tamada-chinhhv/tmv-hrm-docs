@@ -27,8 +27,8 @@ For IT / Admin. Most users can skip this.
 
 | Setting | Meaning |
 |---------|---------|
-| `CORS_ORIGIN` | Public FE domain (production: `https://hrm.tamada.vn`). BE uses this for HTTP Listening URL when `PUBLIC_SITE_ORIGIN` is unset. |
-| `PUBLIC_SITE_ORIGIN` | **Dev/LAN only:** override ingest origin (e.g. `http://192.168.x.x:3001`). Production Docker/VPS: **not required** — use `CORS_ORIGIN`. |
+| `CORS_ORIGIN` | Public FE domain (production: `https://hrm.tamada.vn`). |
+| `PUBLIC_SITE_ORIGIN` | **Required in production:** public HTTPS origin for HTTP Listening URL generation (e.g. `https://hrm.tamada.vn`). **Dev/LAN:** optional override (e.g. `http://192.168.x.x:3001`); when unset, BE derives from `CORS_ORIGIN` or `http://localhost:<PORT>`. |
 | `ATTENDANCE_DEVICE_SYNC_ENABLED` | Enable/disable automatic sync job (default on). Intervals configured in FE: **Attendance devices** → sync schedule panel. |
 | `ATTENDANCE_DEVICE_SHADOW_MODE` | `true`: process events as SHADOW, **do not** write `attendances`. |
 | `ATTENDANCE_DEVICE_WRITE_TO_ATTENDANCE` | `true` (with shadow off): write real check-in/out to `attendances`. |

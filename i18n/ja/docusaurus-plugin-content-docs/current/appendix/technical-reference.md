@@ -27,8 +27,8 @@ IT / 管理者向け。一般利用者は読み飛ばして構いません。
 
 | 設定 | 意味 |
 |------|------|
-| `CORS_ORIGIN` | 公開 FE ドメイン（本番: `https://hrm.tamada.vn`）。`PUBLIC_SITE_ORIGIN` 未設定時、BE が HTTP Listening URL 生成に使用。 |
-| `PUBLIC_SITE_ORIGIN` | **開発/LAN のみ:** ingest origin の上書き（例: `http://192.168.x.x:3001`）。本番 Docker/VPS では **不要** — `CORS_ORIGIN` を使用。 |
+| `CORS_ORIGIN` | 公開 FE ドメイン（本番: `https://hrm.tamada.vn`）。 |
+| `PUBLIC_SITE_ORIGIN` | **本番必須:** HTTP Listening URL 生成用の公開 HTTPS origin（例: `https://hrm.tamada.vn`）。**開発/LAN:** 上書き可（例: `http://192.168.x.x:3001`）。未設定時は `CORS_ORIGIN` または `http://localhost:<PORT>` から導出。 |
 | `ATTENDANCE_DEVICE_SYNC_ENABLED` | 自動同期ジョブの ON/OFF（既定 ON）。間隔は FE **勤怠端末** → 同期スケジュールで設定。 |
 | `ATTENDANCE_DEVICE_SHADOW_MODE` | `true`: SHADOW で処理、**`attendances` には未書き込み**。 |
 | `ATTENDANCE_DEVICE_WRITE_TO_ATTENDANCE` | `true`（shadow オフ）: 勤怠表へ本番の出退勤を書き込み。 |
