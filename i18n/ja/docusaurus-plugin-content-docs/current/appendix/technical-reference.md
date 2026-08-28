@@ -34,7 +34,7 @@ IT / 管理者向け。一般利用者は読み飛ばして構いません。
 | `ATTENDANCE_DEVICE_WRITE_TO_ATTENDANCE` | `true`（shadow オフ）: 勤怠表へ本番の出退勤を書き込み。 |
 | `DEVICE_CREDENTIAL_ENCRYPTION_KEY` | 本番で ISAPI パスワード暗号化に必須。 |
 
-**Ingest エンドポイント（Push）:** `POST /api/d/e/:token` — Hikvision 端末がイベント payload を POST。トークン hash は DB 保存、平文は作成/再生成時のみ返却。
+**Ingest エンドポイント（Push）:** `POST /api/d/e/:token` — Hikvision 端末がイベント payload を POST。トークン hash は DB 保存、平文は作成/再生成時のみ返却。access log（nginx は `/api/d/e/<redacted>`）およびアプリログに平文トークンを出さない。hash 比較は timing-safe。
 
 **リバースプロキシ（本番）:** `POST /api/d/e/*` を BE（Nest `DeviceIngestController`）へ。FE 認証は通さない。Nginx 例: `location /api/ { proxy_pass http://tmv-hrm-be:3001/api/; }`。POST body 保持、HTTPS、timeout ≥ 30s。
 

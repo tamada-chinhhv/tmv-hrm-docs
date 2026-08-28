@@ -34,7 +34,7 @@ For IT / Admin. Most users can skip this.
 | `ATTENDANCE_DEVICE_WRITE_TO_ATTENDANCE` | `true` (with shadow off): write real check-in/out to `attendances`. |
 | `DEVICE_CREDENTIAL_ENCRYPTION_KEY` | Required in production to encrypt stored ISAPI passwords. |
 
-**Ingest endpoint (Push):** `POST /api/d/e/:token` — Hikvision device posts event payload; token hash stored in DB, plaintext returned only on create/rotate.
+**Ingest endpoint (Push):** `POST /api/d/e/:token` — Hikvision device posts event payload; token hash stored in DB, plaintext returned only on create/rotate. Do not log plaintext tokens in access logs (nginx redacts to `/api/d/e/<redacted>`) or application logs; hash comparison is timing-safe.
 
 **Reverse proxy (production):** route `POST /api/d/e/*` to BE (Nest `DeviceIngestController`), not FE auth. Example Nginx: `location /api/ { proxy_pass http://tmv-hrm-be:3001/api/; }`. Preserve POST body, HTTPS, timeout ≥ 30s.
 

@@ -34,7 +34,7 @@ Phần này dành cho IT / Admin cần tra cứu nhanh. Người dùng thường
 | `ATTENDANCE_DEVICE_WRITE_TO_ATTENDANCE` | `true` (và shadow tắt): ghi giờ vào/ra thật vào `attendances`. |
 | `DEVICE_CREDENTIAL_ENCRYPTION_KEY` | Bắt buộc production để lưu mật khẩu ISAPI mã hóa. |
 
-**Ingest endpoint (Push):** `POST /api/d/e/:token` — máy Hikvision gửi payload sự kiện; token hash lưu DB, plaintext chỉ trả khi create/rotate.
+**Ingest endpoint (Push):** `POST /api/d/e/:token` — máy Hikvision gửi payload sự kiện; token hash lưu DB, plaintext chỉ trả khi create/rotate. Không ghi plaintext token vào access log (nginx redact `/api/d/e/<redacted>`) hay application log; so sánh hash dùng timing-safe.
 
 **Reverse proxy (production):** route `POST /api/d/e/*` tới BE (Nest `DeviceIngestController`), không qua FE auth. Nginx mẫu: `location /api/ { proxy_pass http://tmv-hrm-be:3001/api/; }`. Giữ body POST, HTTPS, timeout ≥ 30s.
 
