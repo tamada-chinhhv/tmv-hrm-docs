@@ -116,6 +116,7 @@ Chưa liên kết → sự kiện vẫn lưu ở tab **Sự kiện chấm công*
 - **Gộp với chấm app:** sớm nhất = vào, muộn nhất = ra.
 - Hỗ trợ chấm **khuôn mặt, thẻ, vân tay** (tùy cấu hình máy).
 - Chi nhánh gắn với máy được dùng làm văn phòng chấm công — **không cần** GPS / WiFi như app.
+- Nhiều lần chấm trong **cùng một phút lịch Việt Nam** (cùng user, cùng máy) được gom thành **một** sự kiện hiển thị/xử lý. Chi tiết: [Phụ lục kỹ thuật](../appendix/technical-reference.md).
 
 ### Trạng thái trên tab Sự kiện chấm công
 

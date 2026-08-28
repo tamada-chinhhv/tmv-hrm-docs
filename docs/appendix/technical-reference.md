@@ -66,7 +66,23 @@ ISAPI pull query `major=5` (không filter minor server-side); lọc 38/75/113 cl
 | FAILED | Lỗi xử lý |
 | IGNORED | Không phải sự kiện chấm công |
 
-Dedup: unique `(device_id, source_event_id)` — import idempotent.
+**Dedup (hai lớp, tách biệt):**
+
+| Lớp | Identity | Mục đích |
+|-----|----------|----------|
+| Idempotency kỹ thuật | `(device_id, source_event_id)` | Retry/provider gửi lại cùng sự kiện |
+| Gom nghiệp vụ | `(device_id, device_user_id, phút lịch VN)` | UI/attendance: một user + một device + một phút → một event giữ lại |
+
+Representative trong cùng phút: `earliest occurredAt` (tie: `id` thấp nhất). DB enforce bằng partial unique index `attendance_device_events_device_user_vn_minute_key`.
+
+**Ghi vào `attendances` (khi `ATTENDANCE_DEVICE_WRITE_TO_ATTENDANCE=true` và shadow tắt):**
+
+1. Lấy toàn bộ event eligible trong **ngày lịch Việt Nam** (`Asia/Ho_Chi_Minh`) của punch.
+2. **Giờ vào** = punch **đầu tiên** (theo `occurred_at`); **giờ ra** = punch **cuối** (chỉ khi có ≥ 2 event trong ngày).
+3. Một punch duy nhất → `checkIn` được set, `checkOut = null`.
+4. **Gộp với app:** `checkIn = min(app, device)`, `checkOut = max(app, device)` — không gọi geofence GPS/WiFi.
+5. Chi nhánh gắn máy (`officeLocationId`) được ghi vào `checkInOfficeLocationId` (và tọa độ chi nhánh nếu có).
+6. Mỗi event pending được xử lý bằng cách **recompute cả ngày** từ DB (deterministic dù event đến out-of-order).
 
 **API diagnostic vs mutation:**
 

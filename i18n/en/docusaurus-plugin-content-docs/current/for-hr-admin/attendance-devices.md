@@ -91,6 +91,7 @@ Without mapping, events appear under **Attendance events** but **not** in the at
 - **Merged with app:** earliest check-in, latest check-out.
 - Supports **face, card, fingerprint** (depending on device setup).
 - Device branch is used as the attendance office — **no** app GPS/WiFi required.
+- Multiple punches within the **same Vietnam calendar minute** (same user, same device) are aggregated into **one** retained event for UI/attendance. See [Technical appendix](../appendix/technical-reference.md).
 
 ### Event status (Attendance events tab)
 
